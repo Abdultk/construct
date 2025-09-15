@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type TeamMember = {
     email: string;
@@ -259,7 +260,65 @@ export default function ProjectSetupPage() {
                 </div>
               </div>
             )}
-             {step > 2 && (
+             {step === 3 && (
+                 <div className="space-y-6">
+                    <Tabs defaultValue="boq" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="boq">
+                                <List className="mr-2 h-4 w-4" />
+                                Import BOQ
+                            </TabsTrigger>
+                            <TabsTrigger value="wbs">
+                                <GanttChartSquare className="mr-2 h-4 w-4" />
+                                Import WBS
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="boq">
+                             <Card className="border-dashed">
+                                <CardHeader className="items-center text-center">
+                                    <CardTitle>Import Bill of Quantities</CardTitle>
+                                    <CardDescription>Upload your BOQ file (e.g., Excel, CSV) to get started.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center justify-center w-full">
+                                        <Label htmlFor="boq-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p className="text-xs text-muted-foreground">XLSX, CSV (MAX. 10MB)</p>
+                                            </div>
+                                            <Input id="boq-file" type="file" className="hidden" />
+                                        </Label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will automatically validate your BOQ for inconsistencies and potential cost-saving opportunities.</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                         <TabsContent value="wbs">
+                             <Card className="border-dashed">
+                                <CardHeader className="items-center text-center">
+                                    <CardTitle>Import Work Breakdown Structure</CardTitle>
+                                    <CardDescription>Upload your WBS file (e.g., MS Project, Primavera) to build your schedule.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center justify-center w-full">
+                                        <Label htmlFor="wbs-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p className="text-xs text-muted-foreground">MPP, XER, XML (MAX. 5MB)</p>
+                                            </div>
+                                            <Input id="wbs-file" type="file" className="hidden" />
+                                        </Label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will analyze your schedule to predict potential delays and suggest optimizations.</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            )}
+            {step === 4 && (
                 <div className="flex items-center justify-center h-60 bg-muted rounded-md">
                     <p className="text-muted-foreground">Step {step} content coming soon...</p>
                 </div>
