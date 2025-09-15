@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck, FilePlus, Eye, Shield, ClipboardCheck, Siren, Orbit, Signal, LineChart, Library, Wrench, RefreshCw, Bot } from "lucide-react"
+import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck, FilePlus, Eye, Shield, ClipboardCheck, Siren, Orbit, Signal, LineChart, Library, Wrench, RefreshCw, Bot, Briefcase } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "./ui/badge";
@@ -12,6 +12,7 @@ export function DashboardNav() {
   const pathname = usePathname();
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/daily-review", label: "Daily Review", icon: Briefcase },
     { href: "/projects", label: "Projects", icon: GanttChartSquare, badge: '5' },
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/wbs", label: "WBS", icon: Network },

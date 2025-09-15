@@ -29,7 +29,8 @@ import {
   Library,
   Wrench,
   RefreshCw,
-  Bot
+  Bot,
+  Briefcase
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -64,6 +65,13 @@ export function Header() {
             >
               <Home className="h-5 w-5" />
               Dashboard
+            </Link>
+            <Link
+              href="/daily-review"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Briefcase className="h-5 w-5" />
+              Daily Review
             </Link>
             <Link
               href="/projects"
