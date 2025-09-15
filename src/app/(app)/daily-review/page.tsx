@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function DailyReviewPage() {
   const [date, setDate] = useState('');
@@ -171,18 +172,22 @@ export default function DailyReviewPage() {
                 <p className="text-sm text-muted-foreground">
                   Items requiring administrative review and approval.
                 </p>
-                <div className="rounded-lg border p-4">
-                  <div className="flex justify-between">
-                    <p className="font-semibold">Pending Invoices</p>
-                    <p className="font-bold">3</p>
-                  </div>
-                </div>
-                <div className="rounded-lg border p-4">
+                <Link href="/payment-certificate">
+                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
                     <div className="flex justify-between">
-                        <p className="font-semibold">Change Orders to Review</p>
-                        <p className="font-bold">1</p>
+                      <p className="font-semibold">Pending Invoices</p>
+                      <p className="font-bold">3</p>
                     </div>
-                </div>
+                  </div>
+                </Link>
+                <Link href="/change-orders">
+                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between">
+                          <p className="font-semibold">Change Orders to Review</p>
+                          <p className="font-bold">1</p>
+                      </div>
+                  </div>
+                </Link>
               </CardContent>
             </Card>
           </div>
