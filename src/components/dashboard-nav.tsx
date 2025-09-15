@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck, FilePlus, Eye, Shield, ClipboardCheck, Siren, Orbit, Signal, LineChart, Library, Wrench, RefreshCw, Bot, Briefcase } from "lucide-react"
+import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck, FilePlus, Eye, Shield, ClipboardCheck, Siren, Orbit, Signal, LineChart, Library, Wrench, RefreshCw, Bot, Briefcase, Folder } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "./ui/badge";
@@ -39,6 +39,11 @@ export function DashboardNav() {
     { href: "/settings", label: "Settings", icon: Settings },
   ]
 
+  // A sub-item that won't be displayed in the main nav, but will be used for active state
+  const subNavItems = [
+      { href: "/projects/[id]/documents", label: "Documents", icon: Folder, parent: "/projects" },
+  ]
+
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       {navItems.map(({ href, label, icon: Icon, badge }) => (
@@ -47,7 +52,10 @@ export function DashboardNav() {
           href={href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            (pathname === href || (href !== '/dashboard' && pathname.startsWith(href))) && "bg-muted text-primary"
+            (pathname === href || 
+             (href !== '/dashboard' && pathname.startsWith(href)) ||
+             (subNavItems.find(sub => pathname.startsWith(sub.href.split('/[')[0]))?.parent === href)
+            ) && "bg-muted text-primary"
           )}
         >
           <Icon className="h-4 w-4" />

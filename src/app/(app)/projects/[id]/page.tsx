@@ -225,12 +225,16 @@ export default function ProjectDetailsPage({
                 </CardHeader>
                 <CardContent className='space-y-3'>
                      {documents.map(doc => (
-                        <Button key={doc.name} variant="outline" className='w-full justify-start text-sm'>
-                            <Paperclip className="mr-2 h-4 w-4" />
-                            <span className="truncate">{doc.name}</span>
+                        <Button key={doc.name} variant="outline" className='w-full justify-start text-sm' asChild>
+                            <Link href={`/projects/${id}/documents`} target="_blank">
+                                <Paperclip className="mr-2 h-4 w-4" />
+                                <span className="truncate">{doc.name}</span>
+                            </Link>
                         </Button>
                     ))}
-                     <Button variant="secondary" size="sm" className="w-full">View All</Button>
+                     <Button variant="secondary" size="sm" className="w-full" asChild>
+                        <Link href={`/projects/${id}/documents`}>View All</Link>
+                    </Button>
                 </CardContent>
             </Card>
              <Card className="lg:hidden">
@@ -419,5 +423,3 @@ export default function ProjectDetailsPage({
     </div>
   );
 }
-
-    

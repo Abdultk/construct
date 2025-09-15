@@ -292,10 +292,10 @@ export function Header() {
         <DropdownMenuContent className="w-80" align="end">
             <DropdownMenuLabel className="flex justify-between items-center">
                 <span>Notifications</span>
-                <Badge variant="secondary">{notificationCount} New</Badge>
+                {notificationCount > 0 && <Badge variant="secondary">{notificationCount} New</Badge>}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {notifications.map((notification, index) => (
+            {notifications.slice(0, notificationCount).map((notification, index) => (
                 <DropdownMenuItem key={index} className="flex-col items-start gap-1">
                      <div className="w-full flex justify-between text-xs text-muted-foreground">
                         <p className="font-semibold text-foreground">{notification.title}</p>
@@ -304,11 +304,18 @@ export function Header() {
                     <p className="text-sm text-muted-foreground w-full">{notification.description}</p>
                 </DropdownMenuItem>
             ))}
+            {notificationCount === 0 && (
+                <div className="text-center text-sm text-muted-foreground p-4">
+                    No new notifications
+                </div>
+            )}
              <DropdownMenuSeparator />
-             <DropdownMenuItem className="justify-center" onClick={() => setNotificationCount(0)}>
-                <Check className="mr-2 h-4 w-4" />
-                Mark all as read
-            </DropdownMenuItem>
+             <DropdownMenuFooter>
+                <Button variant="ghost" className="w-full" onClick={() => setNotificationCount(0)} disabled={notificationCount === 0}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Mark all as read
+                </Button>
+             </DropdownMenuFooter>
         </DropdownMenuContent>
        </DropdownMenu>
       <UserNav />
