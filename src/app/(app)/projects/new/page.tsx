@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -83,14 +84,23 @@ export default function ProjectSetupPage() {
                         <div className="relative">
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input id="contract-value" type="number" placeholder="e.g., 1000000" className="pl-8" />
-                            <Select defaultValue="USD">
+                            <Select defaultValue="NGN">
                                 <SelectTrigger className="absolute right-1 top-1/2 -translate-y-1/2 w-24 h-8">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="NGN">NGN</SelectItem>
                                     <SelectItem value="USD">USD</SelectItem>
                                     <SelectItem value="EUR">EUR</SelectItem>
                                     <SelectItem value="GBP">GBP</SelectItem>
+                                    <SelectItem value="JPY">JPY</SelectItem>
+                                    <SelectItem value="CAD">CAD</SelectItem>
+                                    <SelectItem value="AUD">AUD</SelectItem>
+                                    <SelectItem value="CHF">CHF</SelectItem>
+                                    <SelectItem value="CNY">CNY</SelectItem>
+                                    <SelectItem value="INR">INR</SelectItem>
+                                    <SelectItem value="BRL">BRL</SelectItem>
+                                    <SelectItem value="ZAR">ZAR</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
