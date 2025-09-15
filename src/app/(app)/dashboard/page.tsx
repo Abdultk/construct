@@ -8,6 +8,7 @@ import {
   TrendingUp,
   CheckCircle,
   AlertTriangle,
+  PieChart as PieChartIcon
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -35,11 +36,13 @@ import {
   BarChart as RechartsBarChart,
   XAxis,
   YAxis,
+  Cell
 } from "recharts"
 
 import { kpiData, projects, portfolioPerformance, projectStatusDistribution } from "@/lib/data"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
 import { Separator } from "@/components/ui/separator"
+import * as React from "react"
 
 export default function Dashboard() {
   const formatCurrency = (value: number) =>
@@ -61,6 +64,28 @@ export default function Dashboard() {
     { level: 'Medium', description: 'Potential for 1-week delay on HVAC permits due to city backlog.', color: 'text-yellow-500' },
     { level: 'Low', description: 'Upcoming forecast shows minimal rain, low impact on schedule.', color: 'text-green-500' },
   ];
+
+  const chartConfig = {
+    count: {
+      label: "Projects",
+    },
+    "On Track": {
+      label: "On Track",
+      color: "hsl(var(--chart-2))",
+    },
+    "At Risk": {
+      label: "At Risk",
+      color: "hsl(var(--chart-4))",
+    },
+    "Delayed": {
+      label: "Delayed",
+      color: "hsl(var(--chart-1))",
+    },
+     "Completed": {
+      label: "Completed",
+      color: "hsl(var(--muted))",
+    },
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -141,23 +166,34 @@ export default function Dashboard() {
         <div className="grid gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Project Status</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                    <PieChartIcon className="h-5 w-5" />
+                    Project Status
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ChartContainer config={{}} className="min-h-[150px] w-full">
+              <CardContent className="flex items-center justify-center">
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-w-[250px]">
                   <PieChart>
                     <ChartTooltip
                       cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
+                      content={<ChartTooltipContent hideLabel nameKey="status" />}
                     />
                     <Pie
                       data={projectStatusDistribution}
                       dataKey="count"
                       nameKey="status"
-                      innerRadius={40}
+                      innerRadius={50}
                       strokeWidth={5}
+                      activeIndex={0}
                     >
+                        {projectStatusDistribution.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={chartConfig[entry.status as keyof typeof chartConfig]?.color}
+                          />
+                        ))}
                     </Pie>
+                     <ChartLegend content={<ChartLegendContent nameKey="status" />} />
                   </PieChart>
                 </ChartContainer>
               </CardContent>
@@ -293,7 +329,5 @@ export default function Dashboard() {
     </div>
   )
 }
-
-    
 
     
