@@ -215,8 +215,13 @@ export default function ProjectSetupPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Project Manager">Project Manager</SelectItem>
-                                <SelectItem value="Engineer">Engineer</SelectItem>
+                                <SelectItem value="Site Engineer">Site Engineer</SelectItem>
                                 <SelectItem value="Architect">Architect</SelectItem>
+                                <SelectItem value="Quantity Surveyor">Quantity Surveyor</SelectItem>
+                                <SelectItem value="Safety Officer">Safety Officer</SelectItem>
+                                <SelectItem value="Foreman">Foreman</SelectItem>
+                                <SelectItem value="Subcontractor">Subcontractor</SelectItem>
+                                <SelectItem value="Client">Client</SelectItem>
                                 <SelectItem value="Viewer">Viewer</SelectItem>
                             </SelectContent>
                         </Select>
