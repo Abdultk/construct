@@ -57,11 +57,11 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Bar, BarChart as RechartsBarChart } from 'recharts';
 
 export default function ProjectDetailsPage({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
-  const project = projects.find((p) => p.id === params.id);
+  const project = projects.find((p) => p.id === id);
 
   if (!project) {
     notFound();

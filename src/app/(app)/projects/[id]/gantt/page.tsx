@@ -49,11 +49,11 @@ import {
 } from '@/ai/flows/optimize-project-schedule';
 
 export default function GanttChartPage({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
-  const project = projects.find((p) => p.id === params.id);
+  const project = projects.find((p) => p.id === id);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizeProjectScheduleOutput | null>(null);

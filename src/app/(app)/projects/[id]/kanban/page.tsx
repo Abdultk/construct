@@ -27,11 +27,11 @@ import {
 import { projects } from '@/lib/data';
 
 export default function KanbanBoardPage({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
-  const project = projects.find((p) => p.id === params.id);
+  const project = projects.find((p) => p.id === id);
 
   if (!project) {
     notFound();
