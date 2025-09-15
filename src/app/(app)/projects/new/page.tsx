@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,10 @@ export default function ProjectSetupPage() {
   const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
   const [newMemberEmail, setNewMemberEmail] = React.useState('');
   const [newMemberRole, setNewMemberRole] = React.useState('');
+
+  // Step 3 State
+  const [boqFile, setBoqFile] = React.useState<File | null>(null);
+  const [wbsFile, setWbsFile] = React.useState<File | null>(null);
 
   const nextStep = () => setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
@@ -101,6 +105,62 @@ export default function ProjectSetupPage() {
     router.push('/projects');
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'boq' | 'wbs') => {
+      if (e.target.files && e.target.files.length > 0) {
+          if (fileType === 'boq') {
+              setBoqFile(e.target.files[0]);
+          } else {
+              setWbsFile(e.target.files[0]);
+          }
+      }
+  }
+
+  const renderFileUpload = (fileType: 'boq' | 'wbs') => {
+    const file = fileType === 'boq' ? boqFile : wbsFile;
+    const acceptedFiles = fileType === 'boq' ? 'XLSX, CSV (MAX. 10MB)' : 'MPP, XER, XML (MAX. 5MB)';
+    const title = fileType === 'boq' ? 'Import Bill of Quantities' : 'Import Work Breakdown Structure';
+    const description = fileType === 'boq' ? 'Upload your BOQ file (e.g., Excel, CSV) to get started.' : 'Upload your WBS file (e.g., MS Project, Primavera) to build your schedule.';
+
+    if (file) {
+      return (
+        <Card className="border-solid">
+          <CardHeader className="items-center text-center">
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg bg-muted">
+              <FileIcon className="w-12 h-12 text-green-500" />
+              <p className="mt-2 font-semibold text-foreground">{file.name}</p>
+              <Badge variant="secondary" className="mt-2">Validated</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <Card className="border-dashed">
+        <CardHeader className="items-center text-center">
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center w-full">
+            <Label htmlFor={`${fileType}-file`} className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                <p className="text-xs text-muted-foreground">{acceptedFiles}</p>
+              </div>
+              <Input id={`${fileType}-file`} type="file" className="hidden" onChange={(e) => handleFileChange(e, fileType)} />
+            </Label>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will automatically validate your {fileType.toUpperCase()} for inconsistencies and potential cost-saving opportunities.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="flex flex-1 justify-center items-center">
@@ -315,46 +375,10 @@ export default function ProjectSetupPage() {
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="boq">
-                             <Card className="border-dashed">
-                                <CardHeader className="items-center text-center">
-                                    <CardTitle>Import Bill of Quantities</CardTitle>
-                                    <CardDescription>Upload your BOQ file (e.g., Excel, CSV) to get started.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-center justify-center w-full">
-                                        <Label htmlFor="boq-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-muted-foreground">XLSX, CSV (MAX. 10MB)</p>
-                                            </div>
-                                            <Input id="boq-file" type="file" className="hidden" />
-                                        </Label>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will automatically validate your BOQ for inconsistencies and potential cost-saving opportunities.</p>
-                                </CardContent>
-                            </Card>
+                            {renderFileUpload('boq')}
                         </TabsContent>
                          <TabsContent value="wbs">
-                             <Card className="border-dashed">
-                                <CardHeader className="items-center text-center">
-                                    <CardTitle>Import Work Breakdown Structure</CardTitle>
-                                    <CardDescription>Upload your WBS file (e.g., MS Project, Primavera) to build your schedule.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-center justify-center w-full">
-                                        <Label htmlFor="wbs-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-muted-foreground">MPP, XER, XML (MAX. 5MB)</p>
-                                            </div>
-                                            <Input id="wbs-file" type="file" className="hidden" />
-                                        </Label>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will analyze your schedule to predict potential delays and suggest optimizations.</p>
-                                </CardContent>
-                            </Card>
+                            {renderFileUpload('wbs')}
                         </TabsContent>
                     </Tabs>
                 </div>
@@ -381,8 +405,8 @@ export default function ProjectSetupPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <List className="h-5 w-5 text-muted-foreground"/>
-                                    <span className="font-semibold">BOQ.xlsx</span>
-                                    <Badge variant="secondary">Validated</Badge>
+                                    <span className="font-semibold">{boqFile?.name || 'BOQ not uploaded'}</span>
+                                    {boqFile && <Badge variant="secondary">Validated</Badge>}
                                 </div>
                             </div>
                         </CardContent>
@@ -470,5 +494,3 @@ export default function ProjectSetupPage() {
     </div>
   );
 }
-
-    
