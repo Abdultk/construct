@@ -16,6 +16,9 @@ import {
   Lightbulb,
   FileEdit,
   CheckCircle,
+  TrendingDown,
+  TrendingUp,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -57,6 +60,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { validateBoq, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 type BoqItem = {
   id: string;
@@ -76,6 +80,8 @@ type ChangeLog = {
     avatar: string;
     action: string;
     details: string;
+    originalValue?: any;
+    newValue?: any;
 };
 
 const initialBoqItems: BoqItem[] = [
@@ -122,7 +128,7 @@ const initialBoqItems: BoqItem[] = [
 ];
 
 const changeHistory: ChangeLog[] = [
-    { itemId: '1.2', date: '2024-07-28', user: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32', action: 'edit', details: 'Changed quantity from 1800 to 2000.' },
+    { itemId: '1.2', date: '2024-07-28', user: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32', action: 'edit', details: 'Changed quantity from 1800 to 2000.', originalValue: 1800, newValue: 2000 },
     { itemId: '1.2', date: '2024-07-27', user: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32', action: 'status', details: 'Status updated to Pending.' },
     { itemId: '1.1', date: '2024-07-26', user: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32', action: 'status', details: 'Status updated to Approved.' },
     { itemId: '2.0', date: '2024-07-25', user: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32', action: 'create', details: 'Item created.' },
@@ -290,6 +296,28 @@ export default function BoqDataGridPage() {
   }
 
   const selectedItemHistory = selectedItem ? changeHistory.filter(c => c.itemId === selectedItem.id) : [];
+
+  const getCostImpact = () => {
+    if (!selectedItem || selectedItem.isParent) return null;
+
+    const quantityChange = changeHistory.find(c => c.itemId === selectedItem.id && c.action === 'edit' && c.originalValue !== undefined);
+
+    if (!quantityChange) return null;
+    
+    const rate = typeof selectedItem.rate === 'number' ? selectedItem.rate : 0;
+    const originalAmount = quantityChange.originalValue * rate;
+    const currentAmount = selectedItem.amount;
+    const variance = currentAmount - originalAmount;
+
+    return {
+        originalAmount,
+        currentAmount,
+        variance,
+    }
+  }
+
+  const costImpact = getCostImpact();
+
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -514,7 +542,30 @@ export default function BoqDataGridPage() {
               <CardTitle>Cost Impact Analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Coming Soon</p>
+              {costImpact ? (
+                <div className="space-y-4 text-sm">
+                    <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Original Cost</span>
+                        <span className="font-code">${costImpact.originalAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Current Cost</span>
+                        <span className="font-code">${costImpact.currentAmount.toLocaleString()}</span>
+                    </div>
+                    <Separator />
+                     <div className="flex items-center justify-between font-bold">
+                        <span>Variance</span>
+                        <div className={`flex items-center font-code ${costImpact.variance > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                            {costImpact.variance > 0 ? <TrendingUp className="mr-2 h-4 w-4" /> : <TrendingDown className="mr-2 h-4 w-4" />}
+                            <span>${costImpact.variance.toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {selectedItem ? 'No cost changes recorded for this item.' : 'Select an item to see its cost impact.'}
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -522,5 +573,3 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
-
-    
