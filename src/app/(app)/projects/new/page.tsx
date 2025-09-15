@@ -2,6 +2,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { projects } from '@/lib/data';
 
 type TeamMember = {
     email: string;
@@ -30,9 +33,20 @@ type TeamMember = {
 export default function ProjectSetupPage() {
   const [step, setStep] = React.useState(1);
   const totalSteps = 4;
+  const router = useRouter();
+  const { toast } = useToast();
 
+  // Step 1 State
+  const [projectName, setProjectName] = React.useState('');
+  const [projectType, setProjectType] = React.useState('');
+  const [projectDescription, setProjectDescription] = React.useState('');
+  const [clientInfo, setClientInfo] = React.useState('');
+  const [contractValue, setContractValue] = React.useState('');
+  const [currency, setCurrency] = React.useState('NGN');
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
+
+  // Step 2 State
   const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
   const [newMemberEmail, setNewMemberEmail] = React.useState('');
   const [newMemberRole, setNewMemberRole] = React.useState('');
@@ -59,6 +73,32 @@ export default function ProjectSetupPage() {
 
   const handleRemoveMember = (emailToRemove: string) => {
     setTeamMembers(teamMembers.filter(member => member.email !== emailToRemove));
+  };
+  
+  const handleFinishSetup = () => {
+    // In a real app, you would send this data to your backend to create the project.
+    // For this prototype, we'll just show a success message and redirect.
+    const newProject = {
+        id: `proj-${String(projects.length + 1).padStart(3, '0')}`,
+        name: projectName || 'New Project',
+        status: 'On Track',
+        portfolioValue: Number(contractValue) || 0,
+        budgetHealth: 100, // Initial health
+        completionPercentage: 0,
+        budget: Number(contractValue) || 0,
+        spent: 0,
+        riskLevel: 'Low',
+    };
+
+    // This is a mock way to add to the list. This won't persist across page reloads.
+    projects.push(newProject);
+    
+    toast({
+        title: "Project Initialized!",
+        description: `"${newProject.name}" has been created successfully.`,
+    });
+
+    router.push('/projects');
   };
 
 
@@ -87,11 +127,11 @@ export default function ProjectSetupPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="project-name">Project Name</Label>
-                        <Input id="project-name" placeholder="e.g., Downtown Skyscraper" />
+                        <Input id="project-name" placeholder="e.g., Downtown Skyscraper" value={projectName} onChange={e => setProjectName(e.target.value)} />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="project-type">Project Type</Label>
-                        <Select>
+                        <Select value={projectType} onValueChange={setProjectType}>
                         <SelectTrigger id="project-type">
                             <SelectValue placeholder="Select project type" />
                         </SelectTrigger>
@@ -106,19 +146,19 @@ export default function ProjectSetupPage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="project-description">Project Description</Label>
-                    <Textarea id="project-description" placeholder="A brief description of the project." />
+                    <Textarea id="project-description" placeholder="A brief description of the project." value={projectDescription} onChange={e => setProjectDescription(e.target.value)} />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="client-info">Client Information</Label>
-                        <Input id="client-info" placeholder="Client name or contact" />
+                        <Input id="client-info" placeholder="Client name or contact" value={clientInfo} onChange={e => setClientInfo(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="contract-value">Contract Value</Label>
                         <div className="relative">
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="contract-value" type="number" placeholder="e.g., 1000000" className="pl-8" />
-                            <Select defaultValue="NGN">
+                            <Input id="contract-value" type="number" placeholder="e.g., 1000000" className="pl-8" value={contractValue} onChange={e => setContractValue(e.target.value)} />
+                             <Select value={currency} onValueChange={setCurrency}>
                                 <SelectTrigger className="absolute right-1 top-1/2 -translate-y-1/2 w-24 h-8">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -327,11 +367,11 @@ export default function ProjectSetupPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div className="grid grid-cols-2 gap-4">
-                                <div><span className="font-semibold">Project Name:</span> Downtown Skyscraper</div>
-                                <div><span className="font-semibold">Project Type:</span> Commercial</div>
-                                <div><span className="font-semibold">Start Date:</span> Jan 1, 2024</div>
-                                <div><span className="font-semibold">End Date:</span> Dec 31, 2025</div>
-                                <div><span className="font-semibold">Contract Value:</span> NGN 1,000,000,000</div>
+                                <div><span className="font-semibold">Project Name:</span> {projectName || 'N/A'}</div>
+                                <div><span className="font-semibold">Project Type:</span> {projectType || 'N/A'}</div>
+                                <div><span className="font-semibold">Start Date:</span> {startDate ? format(startDate, "PPP") : 'N/A'}</div>
+                                <div><span className="font-semibold">End Date:</span> {endDate ? format(endDate, "PPP") : 'N/A'}</div>
+                                <div><span className="font-semibold">Contract Value:</span> {currency} {Number(contractValue).toLocaleString() || 'N/A'}</div>
                             </div>
                             <Separator />
                             <div className="flex items-center gap-4">
@@ -421,7 +461,7 @@ export default function ProjectSetupPage() {
                 <ArrowRight className="ml-2" />
               </Button>
               ) : (
-                <Button>Finish Setup & Initialize Project</Button>
+                <Button onClick={handleFinishSetup}>Finish Setup & Initialize Project</Button>
               )}
             </div>
           </CardContent>
@@ -430,3 +470,5 @@ export default function ProjectSetupPage() {
     </div>
   );
 }
+
+    
