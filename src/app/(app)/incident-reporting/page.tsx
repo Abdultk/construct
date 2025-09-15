@@ -3,7 +3,7 @@
 
 import {
   Phone,
-  FirstAidKit,
+  BriefcaseMedical,
   DoorOpen,
   Siren,
   ShieldAlert,
@@ -75,7 +75,7 @@ export default function IncidentReportingPage() {
             <span>Emergency Contact</span>
           </Button>
           <Button variant="outline" className="flex-col h-20 border-destructive text-destructive hover:bg-destructive/20">
-            <FirstAidKit className="h-6 w-6 mb-1" />
+            <BriefcaseMedical className="h-6 w-6 mb-1" />
             <span>First Aid Guide</span>
           </Button>
           <Button variant="outline" className="flex-col h-20 border-destructive text-destructive hover:bg-destructive/20">
