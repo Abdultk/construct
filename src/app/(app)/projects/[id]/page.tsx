@@ -24,7 +24,8 @@ import {
   ShieldAlert,
   TrendingUp,
   Clock,
-  ThumbsUp
+  ThumbsUp,
+  ListTodo
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -183,7 +184,7 @@ export default function ProjectDetailsPage({
                     {stakeholders.map(s => (
                         <div key={s.name} className="flex items-center gap-3">
                             <Avatar className="h-9 w-9">
-                                <AvatarImage src={s.avatar} alt={s.name} />
+                                <AvatarImage src={s.avatar} alt={s.name} data-ai-hint="person face" />
                                 <AvatarFallback>{s.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
@@ -265,7 +266,7 @@ export default function ProjectDetailsPage({
                 </Card>
            </div>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <CardTitle>Schedule Performance</CardTitle>
                     <div className='flex items-center gap-2'>
                         <Button asChild variant="outline" size="sm">
@@ -282,8 +283,27 @@ export default function ProjectDetailsPage({
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Interactive Gantt chart coming soon</p>
+                <CardContent className="grid grid-cols-2 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Schedule Variance</CardTitle>
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-500">+3 Days</div>
+                            <p className="text-xs text-muted-foreground">Ahead of schedule</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Tasks to Complete</CardTitle>
+                            <ListTodo className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">128</div>
+                            <p className="text-xs text-muted-foreground">Out of 250 total tasks</p>
+                        </CardContent>
+                    </Card>
                 </CardContent>
             </Card>
         </div>
