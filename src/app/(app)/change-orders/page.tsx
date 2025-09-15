@@ -31,6 +31,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import * as React from "react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 
 type ChangeOrder = {
   id: string;
@@ -54,14 +55,17 @@ type CommentsByChangeOrder = {
   [key: string]: Comment[];
 };
 
+const initialChangeOrders: ChangeOrder[] = [
+    { id: 'CR-0011', title: 'Relocate HVAC unit on roof', status: 'Approved', project: 'Downtown Skyscraper', impact: '+$5,000', date: '2024-07-28', priority: 'Medium', requester: 'A. Johnson'},
+    { id: 'CR-0010', title: 'Substitute flooring material in lobby', status: 'Pending Review', project: 'Downtown Skyscraper', impact: '+$12,500', date: '2024-07-25', priority: 'High', requester: 'B. Miller'},
+    { id: 'CR-0009', title: 'Additional electrical outlets in offices', status: 'Rejected', project: 'City General Hospital Wing', impact: '+$8,200', date: '2024-07-22', priority: 'Low', requester: 'C. Davis'},
+    { id: 'CR-0008', title: 'Change of paint color in corridors', status: 'Approved', project: 'Suburban Housing Development', impact: '-$2,000', date: '2024-07-20', priority: 'Low', requester: 'A. Johnson'},
+];
+
 export default function ChangeOrdersPage() {
 
-    const changeOrders: ChangeOrder[] = [
-        { id: 'CR-0011', title: 'Relocate HVAC unit on roof', status: 'Approved', project: 'Downtown Skyscraper', impact: '+$5,000', date: '2024-07-28', priority: 'Medium', requester: 'A. Johnson'},
-        { id: 'CR-0010', title: 'Substitute flooring material in lobby', status: 'Pending Review', project: 'Downtown Skyscraper', impact: '+$12,500', date: '2024-07-25', priority: 'High', requester: 'B. Miller'},
-        { id: 'CR-0009', title: 'Additional electrical outlets in offices', status: 'Rejected', project: 'City General Hospital Wing', impact: '+$8,200', date: '2024-07-22', priority: 'Low', requester: 'C. Davis'},
-        { id: 'CR-0008', title: 'Change of paint color in corridors', status: 'Approved', project: 'Suburban Housing Development', impact: '-$2,000', date: '2024-07-20', priority: 'Low', requester: 'A. Johnson'},
-    ];
+    const router = useRouter();
+    const [changeOrders, setChangeOrders] = React.useState<ChangeOrder[]>(initialChangeOrders);
 
     const commentsData: CommentsByChangeOrder = {
         'CR-0010': [
@@ -94,6 +98,11 @@ export default function ChangeOrdersPage() {
         setNewComment('');
     };
 
+    const handleStatusChange = (id: string, status: 'Approved' | 'Rejected') => {
+        setChangeOrders(prev => 
+            prev.map(co => co.id === id ? { ...co, status } : co)
+        );
+    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -165,7 +174,7 @@ export default function ChangeOrdersPage() {
                 <Hourglass className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">1</div>
+                <div className="text-2xl font-bold">{changeOrders.filter(co => co.status === 'Pending Review').length}</div>
                 <p className="text-xs text-muted-foreground">Awaiting your approval</p>
             </CardContent>
           </Card>
@@ -185,7 +194,7 @@ export default function ChangeOrdersPage() {
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">2</div>
+                <div className="text-2xl font-bold">{changeOrders.filter(co => co.status === 'Approved').length}</div>
                 <p className="text-xs text-muted-foreground">In the last 7 days</p>
             </CardContent>
           </Card>
@@ -315,14 +324,14 @@ export default function ChangeOrdersPage() {
                  <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Approve</DropdownMenuItem>
-                             <DropdownMenuItem>Reject</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/visualize-impact')}>View Details</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusChange(co.id, 'Approved')} disabled={co.status === 'Approved'}>Approve</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusChange(co.id, 'Rejected')} disabled={co.status === 'Rejected'}>Reject</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                  </TableCell>
