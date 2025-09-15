@@ -54,17 +54,17 @@ export default function ChangeRequestFormPage() {
               Project: Downtown Skyscraper - CR-0012
             </p>
           </div>
-          <Badge variant="outline">Draft</Badge>
+          <Badge variant="outline" className="hidden sm:inline-flex">Draft</Badge>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">Save Draft</Button>
-          <Button>Submit for Review</Button>
+          <Button>Submit</Button>
         </div>
       </div>
 
       <div className="grid flex-1 grid-cols-12 gap-4">
         {/* Main Form */}
-        <div className="col-span-8 space-y-4">
+        <div className="col-span-12 lg:col-span-8 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Change Details</CardTitle>
@@ -90,7 +90,7 @@ export default function ChangeRequestFormPage() {
                   rows={5}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="wbs-affected">
                     Affected Work Package (WBS)
@@ -147,7 +147,7 @@ export default function ChangeRequestFormPage() {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-4 space-y-4">
+        <div className="col-span-12 lg:col-span-4 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -216,3 +216,5 @@ export default function ChangeRequestFormPage() {
     </div>
   );
 }
+
+    

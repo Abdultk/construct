@@ -132,22 +132,26 @@ export default function ProjectDetailsPage({
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/projects">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to projects</span>
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
-            <h1 className="truncate pr-2 font-headline text-xl">
-                {project.name}
-            </h1>
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" asChild>
+            <Link href="/projects">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to projects</span>
+            </Link>
+          </Button>
+          <div className="flex items-center gap-2">
+              <h1 className="truncate pr-2 font-headline text-xl lg:text-2xl">
+                  {project.name}
+              </h1>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
              <Badge variant={project.status === 'On Track' ? 'secondary' : project.status === 'At Risk' ? 'outline' : 'destructive'}>{project.status}</Badge>
              <Badge variant="outline">Construction Phase</Badge>
         </div>
         <div className='ml-auto flex items-center gap-2'>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="font-semibold">Health Score:</span>
                  <span
                   className={`font-bold text-lg ${getHealthScoreColor(
@@ -229,7 +233,7 @@ export default function ProjectDetailsPage({
                      <Button variant="secondary" size="sm" className="w-full">View All</Button>
                 </CardContent>
             </Card>
-             <Card>
+             <Card className="lg:hidden">
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
@@ -302,7 +306,7 @@ export default function ProjectDetailsPage({
                 </Card>
            </div>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between pb-4 gap-2">
                     <CardTitle>Schedule Performance</CardTitle>
                     <div className='flex items-center gap-2'>
                         <Button asChild variant="outline" size="sm">
@@ -319,7 +323,7 @@ export default function ProjectDetailsPage({
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Schedule Variance</CardTitle>
@@ -415,3 +419,5 @@ export default function ProjectDetailsPage({
     </div>
   );
 }
+
+    

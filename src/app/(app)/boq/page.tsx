@@ -52,7 +52,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { validateBoq, type BoqItemSchema, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
+import { validateBoq, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type BoqItem = {
@@ -274,10 +274,10 @@ export default function BoqDataGridPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
+          <Button variant="outline" className="hidden sm:flex">
             <Upload className="mr-2 h-4 w-4" /> Import
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="hidden sm:flex">
             <Download className="mr-2 h-4 w-4" /> Export
           </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -294,24 +294,24 @@ export default function BoqDataGridPage() {
       {/* Main Content */}
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* BOQ Grid */}
-        <div className="col-span-9 flex flex-col gap-4">
+        <div className="col-span-12 lg:col-span-9 flex flex-col gap-4">
           {/* Toolbar */}
           <Card>
-            <CardContent className="flex items-center justify-between p-3">
-              <div className="flex items-center gap-4">
+            <CardContent className="flex flex-col sm:flex-row items-center justify-between p-3 gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search items..." className="pl-8" />
+                  <Input placeholder="Search items..." className="pl-8 w-40 sm:w-auto" />
                 </div>
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                   <Filter className="mr-2 h-4 w-4" /> Filter
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" size="sm" className="hidden md:flex">
                   <Edit className="mr-2 h-4 w-4" /> Bulk Edit
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
+                    <Button variant="outline" size="sm">
                       <History className="mr-2 h-4 w-4" />
                       Version: 2.1
                       <ChevronDown className="ml-2 h-4 w-4" />
@@ -349,11 +349,11 @@ export default function BoqDataGridPage() {
                 <TableRow>
                   <TableHead className="w-24">Item</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead className="w-20">Unit</TableHead>
-                  <TableHead className="w-24 text-right">Quantity</TableHead>
-                  <TableHead className="w-24 text-right">Rate</TableHead>
+                  <TableHead className="w-20 hidden sm:table-cell">Unit</TableHead>
+                  <TableHead className="w-24 text-right hidden md:table-cell">Quantity</TableHead>
+                  <TableHead className="w-24 text-right hidden md:table-cell">Rate</TableHead>
                   <TableHead className="w-32 text-right">Amount</TableHead>
-                  <TableHead className="w-28 text-center">Status</TableHead>
+                  <TableHead className="w-28 text-center hidden sm:table-cell">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -383,11 +383,11 @@ export default function BoqDataGridPage() {
                           </p>
                         )}
                       </TableCell>
-                      <TableCell>{item.unit}</TableCell>
-                      <TableCell className="text-right font-code">
+                      <TableCell className="hidden sm:table-cell">{item.unit}</TableCell>
+                      <TableCell className="text-right font-code hidden md:table-cell">
                         {item.quantity?.toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-right font-code">
+                      <TableCell className="text-right font-code hidden md:table-cell">
                         {typeof item.rate === 'number'
                           ? item.rate.toLocaleString()
                           : item.rate}
@@ -395,7 +395,7 @@ export default function BoqDataGridPage() {
                       <TableCell className="text-right font-bold font-code">
                         {item.amount.toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center hidden sm:table-cell">
                         <Badge variant={getStatusBadge(item.status)}>
                           {item.status}
                         </Badge>
@@ -409,7 +409,7 @@ export default function BoqDataGridPage() {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-3 space-y-4 overflow-y-auto">
+        <div className="col-span-12 lg:col-span-3 space-y-4 overflow-y-auto">
           <Card>
             <CardHeader>
               <CardTitle>Item Details</CardTitle>
@@ -467,3 +467,5 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    

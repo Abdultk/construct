@@ -42,7 +42,7 @@ export default function FieldDashboardPage() {
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
       <Card>
-        <CardContent className="flex items-center justify-between p-4">
+        <CardContent className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
           <div className="flex flex-col">
             <h2 className="font-bold font-headline">Downtown Skyscraper</h2>
             <div className="flex items-center text-sm text-muted-foreground">
@@ -76,7 +76,7 @@ export default function FieldDashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Today's Tasks */}
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -197,3 +197,5 @@ export default function FieldDashboardPage() {
     </div>
   );
 }
+
+    

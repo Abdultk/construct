@@ -125,7 +125,7 @@ export default function CostTrackingPage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Filters Panel */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-12 lg:col-span-3 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Filters</CardTitle>
@@ -177,7 +177,7 @@ export default function CostTrackingPage() {
         </div>
 
         {/* Main Grid */}
-        <div className="col-span-9 flex flex-col gap-4">
+        <div className="col-span-12 lg:col-span-9 flex flex-col gap-4">
           <Card>
             <CardContent className="flex items-center justify-between p-3">
               <div className="relative w-full max-w-sm">
@@ -231,3 +231,5 @@ export default function CostTrackingPage() {
     </div>
   );
 }
+
+    
