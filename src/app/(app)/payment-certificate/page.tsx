@@ -117,18 +117,20 @@ export default function PaymentCertificatePage() {
                     </CardHeader>
                     <CardContent>
                         <Table>
-                            <TableRow>
-                                <TableHead>Work Completed to Date</TableHead>
-                                <TableCell className="text-right font-code">$2,700,000.00</TableCell>
-                            </TableRow>
-                             <TableRow>
-                                <TableHead>Previously Certified</TableHead>
-                                <TableCell className="text-right font-code">$2,430,000.00</TableCell>
-                            </TableRow>
-                             <TableRow className='bg-muted'>
-                                <TableHead className='font-bold'>This Certification</TableHead>
-                                <TableCell className="text-right font-bold font-code">$270,000.00</TableCell>
-                            </TableRow>
+                            <TableBody>
+                                <TableRow>
+                                    <TableHead>Work Completed to Date</TableHead>
+                                    <TableCell className="text-right font-code">$2,700,000.00</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableHead>Previously Certified</TableHead>
+                                    <TableCell className="text-right font-code">$2,430,000.00</TableCell>
+                                </TableRow>
+                                <TableRow className='bg-muted'>
+                                    <TableHead className='font-bold'>This Certification</TableHead>
+                                    <TableCell className="text-right font-bold font-code">$270,000.00</TableCell>
+                                </TableRow>
+                            </TableBody>
                         </Table>
                     </CardContent>
                 </Card>
@@ -169,18 +171,20 @@ export default function PaymentCertificatePage() {
                     </CardHeader>
                     <CardContent>
                          <Table>
-                            <TableRow>
-                                <TableHead>Variations</TableHead>
-                                <TableCell className="text-right font-code">$0.00</TableCell>
-                            </TableRow>
-                             <TableRow>
-                                <TableHead>Retention (10%)</TableHead>
-                                <TableCell className="text-right font-code text-destructive">-${(totalAmount * 0.1).toLocaleString()}</TableCell>
-                            </TableRow>
-                             <TableRow>
-                                <TableHead>Tax (5%)</TableHead>
-                                <TableCell className="text-right font-code">${(totalAmount * 0.9 * 0.05).toLocaleString()}</TableCell>
-                            </TableRow>
+                            <TableBody>
+                                <TableRow>
+                                    <TableHead>Variations</TableHead>
+                                    <TableCell className="text-right font-code">$0.00</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableHead>Retention (10%)</TableHead>
+                                    <TableCell className="text-right font-code text-destructive">-${(totalAmount * 0.1).toLocaleString()}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableHead>Tax (5%)</TableHead>
+                                    <TableCell className="text-right font-code">${(totalAmount * 0.9 * 0.05).toLocaleString()}</TableCell>
+                                </TableRow>
+                            </TableBody>
                         </Table>
                     </CardContent>
                      <CardFooter className="bg-muted p-4 rounded-b-lg">
