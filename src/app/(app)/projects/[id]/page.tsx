@@ -349,7 +349,9 @@ export default function ProjectDetailsPage({
                             </div>
                         </div>
                     ))}
-                    <Button variant="outline" size="sm" className="w-full">View All Insights</Button>
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href="/ai-insights">View All Insights</Link>
+                    </Button>
                 </CardContent>
             </Card>
         </div>
