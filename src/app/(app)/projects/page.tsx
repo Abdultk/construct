@@ -17,6 +17,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { projects } from "@/lib/data"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
 
 export default function ProjectsPage() {
   const formatCurrency = (value: number) =>
@@ -29,11 +31,19 @@ export default function ProjectsPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Projects</CardTitle>
-        <CardDescription>
-          A list of all projects in your portfolio.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>Projects</CardTitle>
+            <CardDescription>
+            A list of all projects in your portfolio.
+            </CardDescription>
+        </div>
+        <Button asChild>
+            <Link href="/projects/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Project
+            </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <Table>
