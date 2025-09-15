@@ -14,6 +14,8 @@ import {
   ChevronDown,
   Loader2,
   Lightbulb,
+  FileEdit,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,6 +56,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { validateBoq, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type BoqItem = {
   id: string;
@@ -64,6 +67,15 @@ type BoqItem = {
   amount: number;
   status: 'Approved' | 'Pending' | 'In Review' | 'Rejected';
   isParent: boolean;
+};
+
+type ChangeLog = {
+    itemId: string;
+    date: string;
+    user: string;
+    avatar: string;
+    action: string;
+    details: string;
 };
 
 const initialBoqItems: BoqItem[] = [
@@ -107,6 +119,13 @@ const initialBoqItems: BoqItem[] = [
     status: 'In Review',
     isParent: true,
   },
+];
+
+const changeHistory: ChangeLog[] = [
+    { itemId: '1.2', date: '2024-07-28', user: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32', action: 'edit', details: 'Changed quantity from 1800 to 2000.' },
+    { itemId: '1.2', date: '2024-07-27', user: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32', action: 'status', details: 'Status updated to Pending.' },
+    { itemId: '1.1', date: '2024-07-26', user: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32', action: 'status', details: 'Status updated to Approved.' },
+    { itemId: '2.0', date: '2024-07-25', user: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32', action: 'create', details: 'Item created.' },
 ];
 
 export default function BoqDataGridPage() {
@@ -260,6 +279,17 @@ export default function BoqDataGridPage() {
         </DialogContent>
     );
   }
+
+  const getHistoryIcon = (action: string) => {
+    switch (action) {
+      case 'edit': return <FileEdit className="h-4 w-4 text-blue-500" />;
+      case 'status': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'create': return <Plus className="h-4 w-4 text-purple-500" />;
+      default: return <History className="h-4 w-4" />;
+    }
+  }
+
+  const selectedItemHistory = selectedItem ? changeHistory.filter(c => c.itemId === selectedItem.id) : [];
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -451,7 +481,32 @@ export default function BoqDataGridPage() {
               <CardTitle>Historical Changes</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Coming Soon</p>
+              {selectedItemHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedItemHistory.map((change, index) => (
+                    <div key={index} className="flex gap-3 text-sm">
+                      <div className="flex flex-col items-center">
+                         <Avatar className="h-8 w-8">
+                            <AvatarImage src={change.avatar} />
+                            <AvatarFallback>{change.user.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        {index < selectedItemHistory.length - 1 && <div className="w-px h-full bg-border my-1"></div>}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <div className="flex items-center gap-2">
+                           {getHistoryIcon(change.action)}
+                           <p className="font-semibold">{change.details}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{change.user} on {change.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  {selectedItem ? 'No history for this item.' : 'Select an item to view its history.'}
+                </p>
+              )}
             </CardContent>
           </Card>
           <Card>
