@@ -218,6 +218,7 @@ export default function BoqDataGridPage() {
           title: 'AI Validation Failed',
           description: 'There was an error while validating the BOQ.',
         });
+        setAiValidationEnabled(false);
       } finally {
         setIsValidating(false);
       }
@@ -435,7 +436,7 @@ export default function BoqDataGridPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Label htmlFor="ai-validate-toggle">AI Validation</Label>
-                <Switch id="ai-validate-toggle" onCheckedChange={handleAiValidationToggle} disabled={isValidating}/>
+                <Switch id="ai-validate-toggle" checked={aiValidationEnabled} onCheckedChange={handleAiValidationToggle} disabled={isValidating}/>
                 {isValidating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5 text-ai-accent" />}
               </div>
             </CardContent>
@@ -624,5 +625,7 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    
 
     
