@@ -14,6 +14,7 @@ import {
   Wand2,
   Loader2,
   ShieldAlert,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +37,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   analyzeChangeImpact,
   type AnalyzeChangeImpactOutput,
@@ -52,6 +53,11 @@ export default function ChangeRequestFormPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] =
     useState<AnalyzeChangeImpactOutput | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([
+    new File([], "Updated_Roof_Spec_rev2.pdf"),
+    new File([], "Site_Photo_Existing_Condition.jpg"),
+  ]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleAnalyzeImpact = async () => {
@@ -77,6 +83,17 @@ export default function ChangeRequestFormPage() {
       setIsAnalyzing(false);
     }
   };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setAttachments(prev => [...prev, ...Array.from(event.target.files!)]);
+    }
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setAttachments(prev => prev.filter(file => file.name !== fileName));
+  };
+
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -186,7 +203,17 @@ export default function ChangeRequestFormPage() {
               <CardTitle>Attachments</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-6 rounded-lg border-dashed border-2 text-center">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                multiple
+                onChange={handleFileChange}
+              />
+              <div 
+                className="p-6 rounded-lg border-dashed border-2 text-center cursor-pointer hover:bg-muted/50"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
                 <p className="mt-2 text-sm text-muted-foreground">
                   <span className="font-semibold">Click to upload</span> or drag
@@ -197,14 +224,17 @@ export default function ChangeRequestFormPage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <Paperclip className="h-4 w-4" />
-                  Updated_Roof_Spec_rev2.pdf
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <Paperclip className="h-4 w-4" />
-                  Site_Photo_Existing_Condition.jpg
-                </Button>
+                {attachments.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 rounded-md border">
+                    <div className="flex items-center gap-2 truncate">
+                      <Paperclip className="h-4 w-4" />
+                      <span className="text-sm truncate">{file.name}</span>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(file.name)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
