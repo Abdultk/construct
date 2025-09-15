@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Users,
   Calendar,
+  CalendarIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +38,20 @@ import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, formatDistanceToNow } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+
 
 type WbsItem = {
   id: string;
@@ -52,7 +67,7 @@ type WbsItem = {
   resources: { name: string, avatar: string }[];
 };
 
-const wbsItems: WbsItem[] = [
+const initialWbsItems: WbsItem[] = [
     { id: '1', name: 'Project Initiation', status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}], children: [
         { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'}, status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-05'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}] }, 
         { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'}, status: 'Completed', startDate: new Date('2024-07-06'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}, { name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] }
@@ -69,12 +84,14 @@ const wbsItems: WbsItem[] = [
 ];
 
 export default function WbsHierarchyPage() {
+  const [wbsItems, setWbsItems] = useState<WbsItem[]>(initialWbsItems);
   const [selectedItem, setSelectedItem] = useState<WbsItem | null>(wbsItems[0] ?? null);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     '1': true,
     '2': true,
     '3': true,
   });
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
@@ -82,6 +99,38 @@ export default function WbsHierarchyPage() {
 
   const handleSelectItem = (item: WbsItem) => {
     setSelectedItem(item);
+  };
+  
+  const handleAddItem = (newItemData: Omit<WbsItem, 'status' | 'progress' | 'resources'> & { parentId?: string }) => {
+    const newItem: WbsItem = {
+      ...newItemData,
+      status: 'Not Started',
+      progress: 0,
+      resources: [],
+    };
+    
+    if (newItemData.parentId) {
+      const addRecursively = (items: WbsItem[]): WbsItem[] => {
+        return items.map(item => {
+          if (item.id === newItemData.parentId) {
+            return {
+              ...item,
+              children: [...(item.children || []), newItem]
+            };
+          }
+          if (item.children) {
+            return { ...item, children: addRecursively(item.children) };
+          }
+          return item;
+        });
+      };
+      setWbsItems(addRecursively(wbsItems));
+      setExpandedItems(prev => ({...prev, [newItemData.parentId!]: true}));
+    } else {
+      setWbsItems([...wbsItems, newItem]);
+    }
+
+    setIsAddOpen(false);
   };
 
   const getStatusBadge = (status: string) => {
@@ -128,6 +177,104 @@ export default function WbsHierarchyPage() {
     );
   };
 
+    const AddItemForm = () => {
+    const [id, setId] = useState('');
+    const [name, setName] = useState('');
+    const [parentId, setParentId] = useState(selectedItem?.id || '');
+    const [startDate, setStartDate] = useState<Date>();
+    const [endDate, setEndDate] = useState<Date>();
+
+    const handleSubmit = () => {
+        if (!id || !name || !startDate || !endDate) return;
+        handleAddItem({
+            id,
+            name,
+            parentId: parentId || undefined,
+            startDate,
+            endDate,
+        });
+    }
+
+    return (
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Add New Work Package</DialogTitle>
+                <DialogDescription>Enter the details for the new package.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="item-parentId">Parent ID (optional)</Label>
+                    <Input id="item-parentId" value={parentId} onChange={(e) => setParentId(e.target.value)} placeholder="e.g., 3.2"/>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="item-id">Item ID</Label>
+                    <Input id="item-id" value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g., 3.2.1"/>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="item-name">Name</Label>
+                    <Input id="item-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Install Windows"/>
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Start Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !startDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={startDate}
+                                onSelect={setStartDate}
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                     <div className="space-y-2">
+                        <Label>End Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !endDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={setEndDate}
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                <Button onClick={handleSubmit}>Add Package</Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+  }
+
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
       {/* Header */}
@@ -137,7 +284,12 @@ export default function WbsHierarchyPage() {
           <p className="text-muted-foreground">Project: Downtown Skyscraper</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary"><Plus className="mr-2 h-4 w-4" /> Add Work Package</Button>
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+                <Button variant="secondary"><Plus className="mr-2 h-4 w-4" /> Add Work Package</Button>
+            </DialogTrigger>
+            <AddItemForm />
+          </Dialog>
         </div>
       </div>
 
