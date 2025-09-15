@@ -28,7 +28,8 @@ import {
   LineChart,
   Library,
   Wrench,
-  RefreshCw
+  RefreshCw,
+  Bot
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -127,11 +128,18 @@ export function Header() {
               Cost Tracking
             </Link>
             <Link
-              href="/forecasting"
+              href="/ai-insights"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <TrendingUp className="h-5 w-5" />
-              Forecasting
+              AI Insights
+            </Link>
+             <Link
+              href="/ai-assistant"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Bot className="h-5 w-5" />
+              AI Assistant
             </Link>
              <Link
               href="/progress-entry"
