@@ -21,7 +21,8 @@ import {
   FilePlus,
   Eye,
   Shield,
-  ClipboardCheck
+  ClipboardCheck,
+  Siren
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -146,6 +147,13 @@ export function Header() {
             >
               <Shield className="h-5 w-5" />
               Safety
+            </Link>
+            <Link
+              href="/incident-reporting"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Siren className="h-5 w-5" />
+              Incident Reporting
             </Link>
             <Link
               href="/quality-control"
