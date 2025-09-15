@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 type TeamMember = {
     email: string;
@@ -319,8 +320,85 @@ export default function ProjectSetupPage() {
                 </div>
             )}
             {step === 4 && (
-                <div className="flex items-center justify-center h-60 bg-muted rounded-md">
-                    <p className="text-muted-foreground">Step {step} content coming soon...</p>
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Project Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><span className="font-semibold">Project Name:</span> Downtown Skyscraper</div>
+                                <div><span className="font-semibold">Project Type:</span> Commercial</div>
+                                <div><span className="font-semibold">Start Date:</span> Jan 1, 2024</div>
+                                <div><span className="font-semibold">End Date:</span> Dec 31, 2025</div>
+                                <div><span className="font-semibold">Contract Value:</span> NGN 1,000,000,000</div>
+                            </div>
+                            <Separator />
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Users className="h-5 w-5 text-muted-foreground"/>
+                                    <span className="font-semibold">{teamMembers.length} Team Members</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <List className="h-5 w-5 text-muted-foreground"/>
+                                    <span className="font-semibold">BOQ.xlsx</span>
+                                    <Badge variant="secondary">Validated</Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>AI-Generated Baseline</CardTitle>
+                            <CardDescription>Initial analysis based on the data provided.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <h4 className="font-semibold flex items-center"><BarChart3 className="mr-2 h-5 w-5 text-ai-accent" /> Initial Budget Allocation</h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between"><span>Materials</span> <span className="font-medium">40%</span></div>
+                                    <div className="flex justify-between"><span>Labor</span> <span className="font-medium">35%</span></div>
+                                    <div className="flex justify-between"><span>Equipment</span> <span className="font-medium">15%</span></div>
+                                    <div className="flex justify-between"><span>Overheads</span> <span className="font-medium">10%</span></div>
+                                </div>
+                            </div>
+                             <div className="space-y-4">
+                                <h4 className="font-semibold flex items-center"><ShieldAlert className="mr-2 h-5 w-5 text-ai-accent" /> Initial Risk Assessment</h4>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-start gap-2">
+                                        <Badge variant="destructive" className="mt-1">High</Badge>
+                                        <span>Risk of material price volatility for steel.</span>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <Badge variant="default" className="mt-1">Medium</Badge>
+                                        <span>Potential for permit delays based on historical data.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                         <CardFooter>
+                             <div className="space-y-4 w-full">
+                                <h4 className="font-semibold flex items-center"><GanttChartSquare className="mr-2 h-5 w-5 text-ai-accent" /> Key Milestones</h4>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <CheckCircle className="h-4 w-4 text-green-500"/>
+                                        <span className="font-medium">Foundation Complete:</span>
+                                        <span>Q3 2024</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <CheckCircle className="h-4 w-4 text-green-500"/>
+                                        <span className="font-medium">Structure Topped Out:</span>
+                                        <span>Q1 2025</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <CheckCircle className="h-4 w-4 text-green-500"/>
+                                        <span className="font-medium">Project Handover:</span>
+                                        <span>Q4 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardFooter>
+                    </Card>
                 </div>
             )}
             <div className="flex justify-between mt-8">
