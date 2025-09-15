@@ -7,3 +7,4 @@ import '@/ai/flows/suggest-process-improvements.ts';
 import '@/ai/flows/optimize-project-schedule.ts';
 import '@/ai/flows/balance-team-workload.ts';
 import '@/ai/flows/validate-boq.ts';
+import '@/ai/flows/analyze-change-impact.ts';
