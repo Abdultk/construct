@@ -12,7 +12,8 @@ import {
   Users,
   DollarSign,
   ClipboardList,
-  Network
+  Network,
+  ListFilter
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -85,6 +86,13 @@ export function Header() {
             >
               <DollarSign className="h-5 w-5" />
               Budget
+            </Link>
+            <Link
+              href="/cost-tracking"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <ListFilter className="h-5 w-5" />
+              Cost Tracking
             </Link>
             <Link
               href="/teams"
