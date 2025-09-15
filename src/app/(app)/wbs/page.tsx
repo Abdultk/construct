@@ -15,6 +15,7 @@ import {
   Calendar,
   CalendarIcon,
   ToyBrick,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -288,6 +289,27 @@ export default function WbsHierarchyPage() {
     );
   }
 
+  const DependencyNode = ({ item, type }: { item: {id: string, name: string} | undefined, type: 'Predecessor' | 'Successor' | 'Current'}) => {
+    if (!item) {
+        return (
+            <Card className="border-dashed w-48 h-24 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">None</p>
+            </Card>
+        );
+    }
+    return (
+        <Card className={`w-48 text-center ${type === 'Current' ? 'border-primary border-2' : ''}`}>
+            <CardHeader className="p-2">
+                <CardTitle className="text-sm">{type}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+                 <p className="text-sm font-semibold truncate">{item.name}</p>
+                <p className="text-xs text-muted-foreground font-code">{item.id}</p>
+            </CardContent>
+        </Card>
+    )
+  }
+
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
       {/* Header */}
@@ -397,17 +419,21 @@ export default function WbsHierarchyPage() {
                                 <CardTitle className='text-base'>Dependencies</CardTitle>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm"><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
+                                        <Button variant="outline" size="sm" disabled={!selectedItem}><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
                                     </DialogTrigger>
-                                    <DialogContent>
+                                    <DialogContent className="max-w-3xl">
                                         <DialogHeader>
                                             <DialogTitle>Dependency Visualization</DialogTitle>
                                             <DialogDescription>
-                                                Feature coming soon. This view will show a graph of task dependencies.
+                                                Visual flow of the direct dependencies for: <span className="font-semibold">{selectedItem.name}</span>
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="py-8 text-center text-muted-foreground">
-                                            <p>A visual graph of dependencies will be displayed here.</p>
+                                        <div className="py-8 flex items-center justify-center gap-2">
+                                            <DependencyNode item={selectedItem.predecessor} type="Predecessor" />
+                                            <ArrowRight className="h-8 w-8 text-muted-foreground mx-2" />
+                                            <DependencyNode item={{id: selectedItem.id, name: selectedItem.name}} type="Current" />
+                                            <ArrowRight className="h-8 w-8 text-muted-foreground mx-2" />
+                                            <DependencyNode item={selectedItem.successor} type="Successor" />
                                         </div>
                                     </DialogContent>
                                 </Dialog>
