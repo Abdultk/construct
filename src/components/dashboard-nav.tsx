@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck } from "lucide-react"
+import { GanttChartSquare, Home, Settings, Users, FileText, Bell, HardHat, DollarSign, ClipboardList, Network, ListFilter, TrendingUp, Edit, FileCheck, FilePlus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "./ui/badge";
@@ -15,6 +15,7 @@ export function DashboardNav() {
     { href: "/projects", label: "Projects", icon: GanttChartSquare, badge: '5' },
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/wbs", label: "WBS", icon: Network },
+    { href: "/change-orders", label: "Change Orders", icon: FilePlus, badge: '3' },
     { href: "/field-dashboard", label: "Field", icon: HardHat },
     { href: "/financial-dashboard", label: "Budget", icon: DollarSign },
     { href: "/cost-tracking", label: "Cost Tracking", icon: ListFilter },
