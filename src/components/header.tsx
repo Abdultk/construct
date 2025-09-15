@@ -24,7 +24,8 @@ import {
   ClipboardCheck,
   Siren,
   Orbit,
-  Signal
+  Signal,
+  LineChart
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -177,6 +178,13 @@ export function Header() {
             >
               <Signal className="h-5 w-5" />
               IoT Dashboard
+            </Link>
+            <Link
+              href="/facility-performance"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <LineChart className="h-5 w-5" />
+              Facility Performance
             </Link>
             <Link
               href="/teams"
