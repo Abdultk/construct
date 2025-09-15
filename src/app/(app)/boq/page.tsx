@@ -46,7 +46,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -144,6 +144,20 @@ export default function BoqDataGridPage() {
   const [validationResult, setValidationResult] = useState<ValidateBoqOutput | null>(null);
   const { toast } = useToast();
   const importInputRef = useRef<HTMLInputElement>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+
+  const formatNumber = (num: number | string | undefined | null) => {
+    if (typeof num !== 'number') return num;
+    if (isClient) {
+        return num.toLocaleString();
+    }
+    return String(num);
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -495,15 +509,13 @@ export default function BoqDataGridPage() {
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">{item.unit}</TableCell>
                       <TableCell className="text-right font-code hidden md:table-cell">
-                        {item.quantity?.toLocaleString()}
+                        {formatNumber(item.quantity)}
                       </TableCell>
                       <TableCell className="text-right font-code hidden md:table-cell">
-                        {typeof item.rate === 'number'
-                          ? item.rate.toLocaleString()
-                          : item.rate}
+                        {formatNumber(item.rate)}
                       </TableCell>
                       <TableCell className="text-right font-bold font-code">
-                        {item.amount.toLocaleString()}
+                        {formatNumber(item.amount)}
                       </TableCell>
                       <TableCell className="text-center hidden sm:table-cell">
                         <Badge variant={getStatusBadge(item.status)}>
@@ -536,17 +548,17 @@ export default function BoqDataGridPage() {
                         <>
                              <div className='flex justify-between'>
                                 <span className='text-muted-foreground'>Quantity</span>
-                                <span className='font-medium'>{selectedItem.quantity?.toLocaleString()} {selectedItem.unit}</span>
+                                <span className='font-medium'>{formatNumber(selectedItem.quantity)} {selectedItem.unit}</span>
                             </div>
                             <div className='flex justify-between'>
                                 <span className='text-muted-foreground'>Rate</span>
-                                <span className='font-medium'>${typeof selectedItem.rate === 'number' ? selectedItem.rate.toLocaleString() : ''} / {selectedItem.unit}</span>
+                                <span className='font-medium'>${formatNumber(selectedItem.rate)} / {selectedItem.unit}</span>
                             </div>
                         </>
                     )}
                      <div className='flex justify-between pt-2 border-t'>
                         <span className='font-bold'>Total Amount</span>
-                        <span className='font-bold'>${selectedItem.amount.toLocaleString()}</span>
+                        <span className='font-bold'>${formatNumber(selectedItem.amount)}</span>
                     </div>
                 </div>
               ) : (
@@ -598,18 +610,18 @@ export default function BoqDataGridPage() {
                 <div className="space-y-4 text-sm">
                     <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Original Cost</span>
-                        <span className="font-code">${costImpact.originalAmount.toLocaleString()}</span>
+                        <span className="font-code">${formatNumber(costImpact.originalAmount)}</span>
                     </div>
                     <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Current Cost</span>
-                        <span className="font-code">${costImpact.currentAmount.toLocaleString()}</span>
+                        <span className="font-code">${formatNumber(costImpact.currentAmount)}</span>
                     </div>
                     <Separator />
                      <div className="flex items-center justify-between font-bold">
                         <span>Variance</span>
                         <div className={`flex items-center font-code ${costImpact.variance > 0 ? 'text-destructive' : 'text-green-600'}`}>
                             {costImpact.variance > 0 ? <TrendingUp className="mr-2 h-4 w-4" /> : <TrendingDown className="mr-2 h-4 w-4" />}
-                            <span>${costImpact.variance.toLocaleString()}</span>
+                            <span>${formatNumber(costImpact.variance)}</span>
                         </div>
                     </div>
                 </div>
