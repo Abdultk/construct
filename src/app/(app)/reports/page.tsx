@@ -27,6 +27,7 @@ import {
   Filter,
 } from 'lucide-react';
 import Link from 'next/link';
+import { projects } from '@/lib/data';
 
 export default function ReportsPage() {
   const kpis = {
@@ -36,10 +37,7 @@ export default function ReportsPage() {
     scheduleVariance: 1.2,
   };
 
-  const projectsAtRisk = [
-    { name: 'Suburban Housing', reason: 'Budget Overrun', variance: '-8%' },
-    { name: 'City General Hospital', reason: 'Schedule Delay', variance: '+12 days' },
-  ];
+  const projectsAtRisk = projects.filter(p => p.status === 'At Risk' || p.status === 'Delayed');
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', {
@@ -190,23 +188,23 @@ export default function ReportsPage() {
               <TableRow>
                 <TableHead>Project</TableHead>
                 <TableHead>Issue Type</TableHead>
-                <TableHead className="text-right">Variance</TableHead>
+                <TableHead className="text-right">Budget Health</TableHead>
                 <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {projectsAtRisk.map((project) => (
-                <TableRow key={project.name}>
+                <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{project.reason}</Badge>
+                    <Badge variant="outline">{project.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-code text-destructive">
-                    {project.variance}
+                    {project.budgetHealth}%
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      View Details
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/projects/${project.id}`}>View Details</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
