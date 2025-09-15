@@ -16,7 +16,7 @@ export function DashboardNav() {
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/wbs", label: "WBS", icon: Network },
     { href: "/field-dashboard", label: "Field", icon: HardHat },
-    { href: "/financial-dashboard", label: "Financials", icon: DollarSign },
+    { href: "/financial-dashboard", label: "Budget", icon: DollarSign },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/notifications", label: "Notifications", icon: Bell, badge: '2' },

@@ -7,7 +7,9 @@ import {
     Download,
     LineChart,
     Wallet,
-    TrendingDown
+    TrendingDown,
+    Gauge,
+    AlertTriangle
 } from 'lucide-react';
 import {
     Card,
@@ -26,6 +28,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 
 export default function FinancialDashboardPage() {
     const formatCurrency = (value: number) =>
@@ -46,11 +49,19 @@ export default function FinancialDashboardPage() {
   return (
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-headline">Financial Dashboard</h1>
+        <h1 className="text-2xl font-bold font-headline">Budget & Cost Control</h1>
         <div className="flex items-center gap-2">
+            <Badge variant="outline" className="gap-2 text-base p-2">
+                <Gauge className='h-5 w-5 text-green-500' />
+                <span className='font-bold'>Budget Health: 82%</span>
+            </Badge>
+             <Button variant="destructive" size="sm">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                2 AI Anomalies
+            </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Export Data
+            Export Report
           </Button>
         </div>
       </div>
@@ -58,42 +69,42 @@ export default function FinancialDashboardPage() {
        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Budget vs. Spent</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
             <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-headline">{formatCurrency(457000000)} / {formatCurrency(770000000)}</div>
-            <p className="text-xs text-muted-foreground">59% of total budget utilized</p>
+            <div className="text-2xl font-bold font-headline">{formatCurrency(770000000)}</div>
+            <p className="text-xs text-muted-foreground">Across all active projects</p>
           </CardContent>
         </Card>
         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Spent to Date</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold font-headline">{formatCurrency(457000000)}</div>
+             <Progress value={59} className="h-2 mt-1" />
+          </CardContent>
+        </Card>
+         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Committed Costs</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-headline">{formatCurrency(85200000)}</div>
-            <p className="text-xs text-muted-foreground">Costs for signed contracts</p>
+            <p className="text-xs text-muted-foreground">For signed contracts</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+            <CardTitle className="text-sm font-medium">Remaining Budget</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-headline">{formatCurrency(12500000)}</div>
-            <p className="text-xs text-muted-foreground">+5.2% from last week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cash Flow Projection</CardTitle>
-            <LineChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-headline">{formatCurrency(298000000)}</div>
-            <p className="text-xs text-muted-foreground">Projected balance in 6 months</p>
+            <div className="text-2xl font-bold font-headline">{formatCurrency(227800000)}</div>
+             <p className="text-xs text-muted-foreground">30% of total budget</p>
           </CardContent>
         </Card>
       </div>
@@ -101,13 +112,51 @@ export default function FinancialDashboardPage() {
        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
          <Card>
             <CardHeader>
-                <CardTitle>Detailed Analytics</CardTitle>
+                <CardTitle>Budget vs. Actual</CardTitle>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Cost Breakdown, Earned Value Analysis, Payment Schedule, and Variance Analysis Coming Soon.</p>
+                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Cost Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
             </CardContent>
         </Card>
          <Card>
+            <CardHeader>
+                <CardTitle>Earned Value Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+            </CardContent>
+        </Card>
+         <Card>
+            <CardHeader>
+                <CardTitle>Cash Flow Projection</CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+            </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className='lg:col-span-2'>
+          <CardHeader>
+            <CardTitle>Budget Variances</CardTitle>
+            <CardDescription>
+                Top variances by work package across all projects.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+             <p className="text-sm text-muted-foreground">Table Coming Soon.</p>
+          </CardContent>
+        </Card>
+        <Card>
             <CardHeader>
                 <CardTitle>AI-Detected Anomalies</CardTitle>
             </CardHeader>
