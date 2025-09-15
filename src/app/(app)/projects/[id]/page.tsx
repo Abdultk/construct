@@ -86,6 +86,19 @@ export default function ProjectDetailsPage({
     }
   }
 
+  const getRiskColor = (risk: 'Low' | 'Medium' | 'High') => {
+    switch (risk) {
+        case 'Low':
+            return 'text-green-500';
+        case 'Medium':
+            return 'text-yellow-500';
+        case 'High':
+            return 'text-red-500';
+        default:
+            return 'text-muted-foreground';
+    }
+  };
+
   const stakeholders = [
     { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/100/100' },
     { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100' },
@@ -280,8 +293,11 @@ export default function ProjectDetailsPage({
                     <CardHeader className='items-center pb-2'>
                          <CardTitle className="text-base">Risk</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground text-center">Heatmap Coming Soon</p>
+                    <CardContent className='flex flex-col items-center justify-center h-full'>
+                        <div className={`text-2xl font-bold ${getRiskColor(project.riskLevel)}`}>
+                            {project.riskLevel}
+                        </div>
+                        <p className="text-xs text-muted-foreground">AI Confidence: 88%</p>
                     </CardContent>
                 </Card>
            </div>

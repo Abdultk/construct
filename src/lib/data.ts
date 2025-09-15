@@ -7,6 +7,7 @@ export type Project = {
     completionPercentage: number;
     budget: number;
     spent: number;
+    riskLevel: 'Low' | 'Medium' | 'High';
 };
   
 export const projects: Project[] = [
@@ -19,6 +20,7 @@ export const projects: Project[] = [
       completionPercentage: 45,
       budget: 100000000,
       spent: 42000000,
+      riskLevel: 'Low',
     },
     {
       id: 'proj-002',
@@ -29,6 +31,7 @@ export const projects: Project[] = [
       completionPercentage: 80,
       budget: 65000000,
       spent: 58000000,
+      riskLevel: 'High',
     },
     {
       id: 'proj-003',
@@ -39,6 +42,7 @@ export const projects: Project[] = [
       completionPercentage: 22,
       budget: 220000000,
       spent: 45000000,
+      riskLevel: 'Medium',
     },
     {
       id: 'proj-004',
@@ -49,6 +53,7 @@ export const projects: Project[] = [
       completionPercentage: 65,
       budget: 80000000,
       spent: 71000000,
+      riskLevel: 'High',
     },
     {
       id: 'proj-005',
@@ -59,6 +64,7 @@ export const projects: Project[] = [
       completionPercentage: 100,
       budget: 300000000,
       spent: 295000000,
+      riskLevel: 'Low',
     },
 ];
 
