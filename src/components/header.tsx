@@ -15,7 +15,8 @@ import {
   Network,
   ListFilter,
   TrendingUp,
-  Edit
+  Edit,
+  FileCheck
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -109,6 +110,13 @@ export function Header() {
             >
               <Edit className="h-5 w-5" />
               Progress Entry
+            </Link>
+             <Link
+              href="/payment-certificate"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <FileCheck className="h-5 w-5" />
+              Payments
             </Link>
             <Link
               href="/teams"
