@@ -1,11 +1,10 @@
 import Link from "next/link"
 import {
   Bell,
+  FileText,
   GanttChartSquare,
   Home,
   Menu,
-  Package,
-  Package2,
   Search,
   Settings,
   Users,
@@ -13,21 +12,6 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserNav } from "./user-nav"
@@ -61,7 +45,7 @@ export function Header() {
             </Link>
             <Link
               href="/dashboard/projects"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <GanttChartSquare className="h-5 w-5" />
               Projects
@@ -70,14 +54,31 @@ export function Header() {
               </Badge>
             </Link>
             <Link
-              href="#"
+              href="/dashboard/teams"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Users className="h-5 w-5" />
               Teams
             </Link>
             <Link
-              href="#"
+              href="/dashboard/reports"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <FileText className="h-5 w-5" />
+              Reports
+            </Link>
+             <Link
+              href="/dashboard/notifications"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Bell className="h-5 w-5" />
+              Notifications
+               <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                2
+              </Badge>
+            </Link>
+            <Link
+              href="/dashboard/settings"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Settings className="h-5 w-5" />
@@ -100,6 +101,11 @@ export function Header() {
         </form>
       </div>
       <ThemeToggle />
+       <Button variant="ghost" size="icon" className="relative">
+        <Bell className="h-5 w-5" />
+        <Badge className="absolute top-0 right-0 flex h-4 w-4 shrink-0 items-center justify-center rounded-full p-1 text-[10px]">2</Badge>
+        <span className="sr-only">Toggle notifications</span>
+      </Button>
       <UserNav />
     </header>
   )

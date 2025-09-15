@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { DashboardNav } from "@/components/dashboard-nav";
-import { UserNav } from "@/components/user-nav";
 import { Logo } from "@/components/logo";
 
 export default function AppLayout({
@@ -16,11 +15,8 @@ export default function AppLayout({
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
               <Logo />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 overflow-auto py-2">
               <DashboardNav />
-            </div>
-            <div className="mt-auto p-4">
-              {/* Future card for upgrades or info */}
             </div>
           </div>
         </div>
