@@ -4,6 +4,7 @@ import {
   Bell,
   FileText,
   GanttChartSquare,
+  HardHat,
   Home,
   Menu,
   Search,
@@ -53,6 +54,13 @@ export function Header() {
               <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                 5
               </Badge>
+            </Link>
+             <Link
+              href="/field-dashboard"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <HardHat className="h-5 w-5" />
+              Field
             </Link>
             <Link
               href="/teams"
