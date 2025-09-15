@@ -11,6 +11,8 @@ import {
   Check,
   TrendingUp,
   TrendingDown,
+  ThumbsUp,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,15 +26,34 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 export default function ChangeImpactVisualizationPage() {
+
+    const communicationPlan = [
+        { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100', status: 'Acknowledged' },
+        { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/100/100', status: 'Notified' },
+        { name: 'Structural Team', role: 'Engineering', avatar: 'https://picsum.photos/seed/32/100/100', status: 'Pending' },
+    ];
+
+    const getStatusBadgeVariant = (status: string) => {
+        switch (status) {
+            case 'Acknowledged': return 'secondary';
+            case 'Notified': return 'default';
+            default: return 'outline';
+        }
+    }
+
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="outline" size="icon" asChild>
+            <Link href="/change-orders">
+                <ArrowLeft className="h-4 w-4" />
+            </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-bold font-headline">
@@ -246,9 +267,25 @@ export default function ChangeImpactVisualizationPage() {
            <Card>
             <CardHeader>
               <CardTitle>Communication Plan</CardTitle>
+              <CardDescription>Key stakeholders to be notified.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">Coming Soon.</p>
+            <CardContent className='space-y-4'>
+                {communicationPlan.map(person => (
+                    <div key={person.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                                <AvatarImage src={person.avatar} />
+                                <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="text-sm font-medium">{person.name}</p>
+                                <p className="text-xs text-muted-foreground">{person.role}</p>
+                            </div>
+                        </div>
+                        <Badge variant={getStatusBadgeVariant(person.status)}>{person.status}</Badge>
+                    </div>
+                ))}
+                 <Button variant="outline" className="w-full"><MessageSquare className="mr-2 h-4 w-4" /> Notify All</Button>
             </CardContent>
           </Card>
         </div>
