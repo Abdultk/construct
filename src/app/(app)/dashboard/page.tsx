@@ -1,3 +1,4 @@
+
 'use client'
 import {
   Activity,
@@ -6,6 +7,7 @@ import {
   ShieldCheck,
   TrendingUp,
   CheckCircle,
+  AlertTriangle,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -52,6 +54,12 @@ export default function Dashboard() {
     { name: "Facade Completion (proj-001)", date: "Aug 30, 2024" },
     { name: "Core & Shell Handover (proj-002)", date: "Sep 15, 2024" },
     { name: "Final Inspections (proj-004)", date: "Oct 01, 2024" },
+  ];
+
+  const topRisks = [
+    { level: 'High', description: 'High probability of steel supplier delaying delivery by 2 weeks.', color: 'text-destructive' },
+    { level: 'Medium', description: 'Potential for 1-week delay on HVAC permits due to city backlog.', color: 'text-yellow-500' },
+    { level: 'Low', description: 'Upcoming forecast shows minimal rain, low impact on schedule.', color: 'text-green-500' },
   ];
 
   return (
@@ -157,9 +165,18 @@ export default function Dashboard() {
             <Card>
                 <CardHeader>
                     <CardTitle>Risk Assessment</CardTitle>
+                    <CardDescription>Top identified project risks.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className="space-y-3">
+                    {topRisks.map((risk, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                            <AlertTriangle className={`h-5 w-5 flex-shrink-0 ${risk.color}`} />
+                            <div>
+                                <p className="font-semibold text-sm">{risk.level} Risk</p>
+                                <p className="text-xs text-muted-foreground">{risk.description}</p>
+                            </div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
         </div>
@@ -276,5 +293,7 @@ export default function Dashboard() {
     </div>
   )
 }
+
+    
 
     
