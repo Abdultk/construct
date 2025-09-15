@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,8 +42,8 @@ export default function ProjectSetupPage() {
             <CardDescription>
                 {step === 1 && "Start by providing the basic details of your new project."}
                 {step === 2 && "Assign team members and define their roles for this project."}
-                {step === 3 && "Import your Bill of Quantities (BOQ) or Work Breakdown Structure (WBS)."}
-                {step === 4 && "Set up the project baseline, including budget, milestones, and risks."}
+                {step === 3 && "Import your Bill of Quantities (BOQ) or Work Breakdown Structure (WBS) for AI-powered validation and analysis."}
+                {step === 4 && "Review and establish the project baseline, including budget, milestones, and initial risk assessment."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -175,7 +175,7 @@ export default function ProjectSetupPage() {
                 <ArrowRight className="ml-2" />
               </Button>
               ) : (
-                <Button>Finish Setup</Button>
+                <Button>Finish Setup & Initialize Project</Button>
               )}
             </div>
           </CardContent>
