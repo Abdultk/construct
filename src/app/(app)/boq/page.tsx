@@ -37,53 +37,78 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+
+type BoqItem = {
+  id: string;
+  description: string;
+  unit: string;
+  quantity: number | string;
+  rate: number | string;
+  amount: number;
+  status: 'Approved' | 'Pending' | 'In Review' | 'Rejected';
+  isParent: boolean;
+};
+
+const initialBoqItems: BoqItem[] = [
+  {
+    id: '1.0',
+    description: 'Site Preparation',
+    unit: '',
+    quantity: '',
+    rate: '',
+    amount: 150000,
+    status: 'Approved',
+    isParent: true,
+  },
+  {
+    id: '1.1',
+    description: 'Clearing and Grubbing',
+    unit: 'LS',
+    quantity: 1,
+    rate: 50000,
+    amount: 50000,
+    status: 'Approved',
+    isParent: false,
+  },
+  {
+    id: '1.2',
+    description: 'Excavation and Earthwork',
+    unit: 'm³',
+    quantity: 2000,
+    rate: 50,
+    amount: 100000,
+    status: 'Pending',
+    isParent: false,
+  },
+  {
+    id: '2.0',
+    description: 'Concrete Works',
+    unit: '',
+    quantity: '',
+    rate: '',
+    amount: 750000,
+    status: 'In Review',
+    isParent: true,
+  },
+];
 
 export default function BoqDataGridPage() {
-  const boqItems = [
-    {
-      id: '1.0',
-      description: 'Site Preparation',
-      unit: '',
-      quantity: '',
-      rate: '',
-      amount: 150000,
-      status: 'Approved',
-      isParent: true,
-    },
-    {
-      id: '1.1',
-      description: 'Clearing and Grubbing',
-      unit: 'LS',
-      quantity: 1,
-      rate: 50000,
-      amount: 50000,
-      status: 'Approved',
-      isParent: false,
-    },
-    {
-      id: '1.2',
-      description: 'Excavation and Earthwork',
-      unit: 'm³',
-      quantity: 2000,
-      rate: 50,
-      amount: 100000,
-      status: 'Pending',
-      isParent: false,
-    },
-    {
-      id: '2.0',
-      description: 'Concrete Works',
-      unit: '',
-      quantity: '',
-      rate: '',
-      amount: 750000,
-      status: 'In Review',
-      isParent: true,
-    },
-  ];
+  const [boqItems, setBoqItems] = useState<BoqItem[]>(initialBoqItems);
+  const [selectedItem, setSelectedItem] = useState<BoqItem | null>(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -97,6 +122,93 @@ export default function BoqDataGridPage() {
         return 'destructive';
     }
   };
+
+  const handleAddItem = (newItemData: Omit<BoqItem, 'amount'>) => {
+    const amount = (typeof newItemData.quantity === 'number' && typeof newItemData.rate === 'number')
+      ? newItemData.quantity * newItemData.rate
+      : 0;
+
+    const newItem: BoqItem = {
+        ...newItemData,
+        amount: newItemData.isParent ? 0 : amount,
+        status: 'Pending',
+    };
+
+    const parentIndex = boqItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
+
+    let newItems = [...boqItems];
+    if (parentIndex !== -1) {
+        newItems.splice(parentIndex + 1, 0, newItem);
+    } else {
+        newItems.push(newItem);
+    }
+
+    setBoqItems(newItems);
+    setIsAddOpen(false);
+  };
+  
+  const AddItemForm = () => {
+    const [id, setId] = useState('');
+    const [description, setDescription] = useState('');
+    const [isParent, setIsParent] = useState(false);
+    const [unit, setUnit] = useState('');
+    const [quantity, setQuantity] = useState('');
+    const [rate, setRate] = useState('');
+
+    const handleSubmit = () => {
+        handleAddItem({
+            id,
+            description,
+            isParent,
+            unit,
+            quantity: isParent ? '' : Number(quantity),
+            rate: isParent ? '' : Number(rate)
+        });
+    }
+
+    return (
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Add New BOQ Item</DialogTitle>
+                <DialogDescription>Enter the details for the new item.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="flex items-center space-x-2">
+                    <Switch id="is-parent" checked={isParent} onCheckedChange={setIsParent} />
+                    <Label htmlFor="is-parent">Is this a parent item?</Label>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="item-id">Item ID</Label>
+                    <Input id="item-id" value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g., 2.1"/>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="item-description">Description</Label>
+                    <Textarea id="item-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g., Formwork for columns"/>
+                </div>
+                {!isParent && (
+                     <div className="grid grid-cols-3 gap-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="item-unit">Unit</Label>
+                            <Input id="item-unit" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g., m²"/>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="item-quantity">Quantity</Label>
+                            <Input id="item-quantity" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="e.g., 500"/>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="item-rate">Rate</Label>
+                            <Input id="item-rate" type="number" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="e.g., 150"/>
+                        </div>
+                    </div>
+                )}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                <Button onClick={handleSubmit}>Add Item</Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -117,9 +229,14 @@ export default function BoqDataGridPage() {
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" /> Export
           </Button>
-          <Button variant="secondary">
-            <Plus className="mr-2 h-4 w-4" /> Add Item
-          </Button>
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+                <Button variant="secondary">
+                    <Plus className="mr-2 h-4 w-4" /> Add Item
+                </Button>
+            </DialogTrigger>
+            <AddItemForm />
+          </Dialog>
         </div>
       </div>
 
@@ -182,7 +299,10 @@ export default function BoqDataGridPage() {
                 {boqItems.map((item) => (
                   <TableRow
                     key={item.id}
-                    className={item.isParent ? 'bg-muted/50' : ''}
+                    className={`cursor-pointer ${
+                      item.isParent ? 'bg-muted/50' : ''
+                    } ${selectedItem?.id === item.id ? 'bg-muted' : ''}`}
+                    onClick={() => setSelectedItem(item)}
                   >
                     <TableCell
                       className={`font-medium font-code ${item.isParent ? '' : 'pl-8'}`}
@@ -196,10 +316,12 @@ export default function BoqDataGridPage() {
                     </TableCell>
                     <TableCell>{item.unit}</TableCell>
                     <TableCell className="text-right font-code">
-                      {item.quantity}
+                      {item.quantity?.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-code">
-                      {item.rate}
+                      {typeof item.rate === 'number'
+                        ? item.rate.toLocaleString()
+                        : item.rate}
                     </TableCell>
                     <TableCell className="text-right font-bold font-code">
                       {item.amount.toLocaleString()}
@@ -217,16 +339,41 @@ export default function BoqDataGridPage() {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-3 space-y-4 overflow-y-auto">
           <Card>
             <CardHeader>
               <CardTitle>Item Details</CardTitle>
-              <CardDescription>Select an item to view details</CardDescription>
+              <CardDescription>{selectedItem ? `${selectedItem.id} - ${selectedItem.description}` : "Select an item to view details"}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Item details will be shown here.
-              </p>
+              {selectedItem ? (
+                <div className="space-y-4 text-sm">
+                    <div className='flex justify-between'>
+                        <span className='text-muted-foreground'>Status</span>
+                        <Badge variant={getStatusBadge(selectedItem.status)}>{selectedItem.status}</Badge>
+                    </div>
+                    {!selectedItem.isParent && (
+                        <>
+                             <div className='flex justify-between'>
+                                <span className='text-muted-foreground'>Quantity</span>
+                                <span className='font-medium'>{selectedItem.quantity?.toLocaleString()} {selectedItem.unit}</span>
+                            </div>
+                            <div className='flex justify-between'>
+                                <span className='text-muted-foreground'>Rate</span>
+                                <span className='font-medium'>${typeof selectedItem.rate === 'number' ? selectedItem.rate.toLocaleString() : selectedItem.rate} / {selectedItem.unit}</span>
+                            </div>
+                        </>
+                    )}
+                     <div className='flex justify-between pt-2 border-t'>
+                        <span className='font-bold'>Total Amount</span>
+                        <span className='font-bold'>${selectedItem.amount.toLocaleString()}</span>
+                    </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Select an item to see its details.
+                </p>
+              )}
             </CardContent>
           </Card>
           <Card>
