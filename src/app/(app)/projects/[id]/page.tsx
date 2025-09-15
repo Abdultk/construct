@@ -27,7 +27,7 @@ import {
   ThumbsUp,
   ListTodo
 } from 'lucide-react';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,11 +56,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart } from 'recharts';
 
-export default function ProjectDetailsPage({
-  params: { id },
-}: {
-  params: { id: string };
-}) {
+export default function ProjectDetailsPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+
   const project = projects.find((p) => p.id === id);
 
   if (!project) {
