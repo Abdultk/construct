@@ -46,7 +46,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -61,6 +61,7 @@ import { validateBoq, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 type BoqItem = {
   id: string;
@@ -141,6 +142,8 @@ export default function BoqDataGridPage() {
   const [aiValidationEnabled, setAiValidationEnabled] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidateBoqOutput | null>(null);
+  const { toast } = useToast();
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -210,7 +213,11 @@ export default function BoqDataGridPage() {
         setValidationResult(result);
       } catch (error) {
         console.error("AI Validation failed", error);
-        // You might want to show a toast message here
+        toast({
+          variant: 'destructive',
+          title: 'AI Validation Failed',
+          description: 'There was an error while validating the BOQ.',
+        });
       } finally {
         setIsValidating(false);
       }
@@ -223,6 +230,49 @@ export default function BoqDataGridPage() {
     return validationResult?.anomalies.find(a => a.itemId === id);
   }
   
+  const handleExport = () => {
+    const headers = ['id', 'description', 'unit', 'quantity', 'rate', 'amount', 'status', 'isParent'];
+    const csvContent = [
+      headers.join(','),
+      ...boqItems.map(item => headers.map(header => JSON.stringify(item[header as keyof BoqItem])).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    link.href = URL.createObjectURL(blob);
+    link.download = `boq-export-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: 'Export Successful',
+      description: 'The BOQ data has been exported to CSV.',
+    });
+  };
+
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // In a real app, you would parse the CSV/XLSX file here
+      // For this demo, we'll just show a toast message
+      toast({
+        title: 'Import Started',
+        description: `"${file.name}" is being processed. This is a demo and data will not be imported.`,
+      });
+    }
+    // Reset file input
+    if (event.target) {
+        event.target.value = '';
+    }
+  };
+
   const AddItemForm = () => {
     const [id, setId] = useState('');
     const [description, setDescription] = useState('');
@@ -332,12 +382,13 @@ export default function BoqDataGridPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="hidden sm:flex">
-            <Upload className="mr-2 h-4 w-4" /> Import
-          </Button>
-          <Button variant="outline" className="hidden sm:flex">
-            <Download className="mr-2 h-4 w-4" /> Export
-          </Button>
+            <input type="file" ref={importInputRef} className="hidden" onChange={handleFileImport} accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            <Button variant="outline" className="hidden sm:flex" onClick={handleImportClick}>
+                <Upload className="mr-2 h-4 w-4" /> Import
+            </Button>
+            <Button variant="outline" className="hidden sm:flex" onClick={handleExport}>
+                <Download className="mr-2 h-4 w-4" /> Export
+            </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
                 <Button variant="secondary">
@@ -573,3 +624,5 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    
