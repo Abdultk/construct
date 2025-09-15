@@ -18,7 +18,8 @@ import {
   Edit,
   FileCheck,
   FilePlus,
-  Eye
+  Eye,
+  Shield
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -136,6 +137,13 @@ export function Header() {
             >
               <FileCheck className="h-5 w-5" />
               Payments
+            </Link>
+            <Link
+              href="/safety-dashboard"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Shield className="h-5 w-5" />
+              Safety
             </Link>
             <Link
               href="/teams"
