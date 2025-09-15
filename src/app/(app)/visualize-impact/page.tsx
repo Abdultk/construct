@@ -23,6 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ChangeImpactVisualizationPage() {
   return (
@@ -129,16 +130,82 @@ export default function ChangeImpactVisualizationPage() {
               {/* Schedule Comparison */}
               <div>
                 <h3 className="mb-2 font-semibold">Schedule Impact</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gantt chart comparison coming soon.
-                </p>
+                <div className="space-y-4">
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground mb-2">Before: Original Timeline</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Phase 1</span>
+                      <Progress value={100} className="h-3" />
+                      <span className="text-xs">20 Days</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Roofing</span>
+                      <Progress value={100} className="h-3" />
+                      <span className="text-xs">15 Days</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Phase 3</span>
+                      <Progress value={100} className="h-3" />
+                      <span className="text-xs">30 Days</span>
+                    </div>
+                  </div>
+                   <div className="rounded-lg border p-4 border-primary">
+                    <p className="text-sm text-muted-foreground mb-2">After: New Timeline</p>
+                     <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Phase 1</span>
+                      <Progress value={100} className="h-3" />
+                      <span className="text-xs">20 Days</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Roofing</span>
+                      <Progress value={100} className="h-3 bg-primary/20" />
+                      <span className="text-xs font-bold">20 Days (+5)</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                      <span className="text-xs w-24">Phase 3</span>
+                      <Progress value={100} className="h-3" />
+                      <span className="text-xs">30 Days</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               {/* Resource Comparison */}
               <div>
                 <h3 className="mb-2 font-semibold">Resource Impact</h3>
-                 <p className="text-sm text-muted-foreground">
-                  Resource allocation chart coming soon.
-                </p>
+                 <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Affected Resources</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span className="text-sm">Roofing Subcontractor</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span className="text-sm">Crane Operator</span>
+                          </div>
+                      </CardContent>
+                    </Card>
+                     <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Workload Change</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                         <div className="flex items-center gap-2 text-sm">
+                           <TrendingUp className="h-4 w-4 text-destructive" />
+                           <span className="font-semibold">Roofing Team:</span>
+                           <span>+40 man-hours</span>
+                         </div>
+                         <div className="flex items-center gap-2 text-sm">
+                           <TrendingDown className="h-4 w-4 text-green-600" />
+                           <span className="font-semibold">Logistics:</span>
+                           <span>-8 man-hours</span>
+                         </div>
+                      </CardContent>
+                    </Card>
+                 </div>
               </div>
             </CardContent>
           </Card>
