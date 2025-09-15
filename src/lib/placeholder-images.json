@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "login-hero",
+      "description": "A sprawling construction site at sunset, showcasing the scale of projects managed by the platform.",
+      "imageUrl": "https://picsum.photos/seed/1/1200/900",
+      "imageHint": "construction site"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Profile picture for a user.",
+      "imageUrl": "https://picsum.photos/seed/2/100/100",
+      "imageHint": "user portrait"
+    }
+  ]
 }
