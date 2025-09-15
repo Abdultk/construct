@@ -14,7 +14,11 @@ import {
   Star,
   Users,
   GanttChartSquare,
-  Trello
+  Trello,
+  Briefcase,
+  File,
+  User,
+  Paperclip
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -41,6 +45,7 @@ import {
   ProgressCircular,
   ProgressCircularLabel,
 } from '@/components/ui/progress-circular';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ProjectDetailsPage({
   params,
@@ -71,6 +76,25 @@ export default function ProjectDetailsPage({
         return 'bg-gray-500';
     }
   }
+
+  const stakeholders = [
+    { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/100/100' },
+    { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100' },
+    { name: 'Bob Miller', role: 'Lead Architect', avatar: 'https://picsum.photos/seed/11/100/100' },
+  ];
+
+  const recentActivity = [
+    { avatar: 'https://picsum.photos/seed/10/100/100', fallback: 'OM', name: 'Olivia Martin', action: 'Approved change order #12.', time: '5m ago' },
+    { avatar: 'https://picsum.photos/seed/11/100/100', fallback: 'JL', name: 'Jackson Lee', action: 'Marked task "Foundation Pour" as complete.', time: '15m ago' },
+    { avatar: 'https://picsum.photos/seed/12/100/100', fallback: 'CD', name: 'Charlie Davis', action: 'Uploaded new blueprint "Floor-Plan-Rev3".', time: '1h ago' },
+  ];
+  
+  const documents = [
+      { name: "Project Charter.pdf", type: "Document" },
+      { name: "Architectural_Plans_v2.dwg", type: "CAD" },
+      { name: "Geotechnical_Report.pdf", type: "Report" },
+  ]
+
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -143,24 +167,55 @@ export default function ProjectDetailsPage({
                 <CardHeader>
                     <CardTitle>Stakeholders</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className='space-y-4'>
+                    {stakeholders.map(s => (
+                        <div key={s.name} className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                                <AvatarImage src={s.avatar} alt={s.name} />
+                                <AvatarFallback>{s.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="text-sm font-medium">{s.name}</p>
+                                <p className="text-xs text-muted-foreground">{s.role}</p>
+                            </div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
              <Card>
                 <CardHeader>
                     <CardTitle>Document Library</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className='space-y-3'>
+                     {documents.map(doc => (
+                        <Button key={doc.name} variant="outline" className='w-full justify-start text-sm'>
+                            <Paperclip className="mr-2 h-4 w-4" />
+                            <span className="truncate">{doc.name}</span>
+                        </Button>
+                    ))}
+                     <Button variant="secondary" size="sm" className="w-full">View All</Button>
                 </CardContent>
             </Card>
              <Card>
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                 <CardContent className="grid gap-4">
+                    {recentActivity.map((activity, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                            <Avatar className="hidden h-9 w-9 sm:flex">
+                                <AvatarImage src={activity.avatar} alt="Avatar" data-ai-hint="user portrait" />
+                                <AvatarFallback>{activity.fallback}</AvatarFallback>
+                            </Avatar>
+                            <div className="grid gap-1">
+                                <p className="text-sm font-medium leading-none">{activity.name}</p>
+                                <p className="text-sm text-muted-foreground">{activity.action}</p>
+                            </div>
+                            <div className="ml-auto text-xs text-muted-foreground">
+                                {activity.time}
+                            </div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
         </div>
