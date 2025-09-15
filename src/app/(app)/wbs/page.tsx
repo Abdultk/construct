@@ -14,6 +14,7 @@ import {
   Users,
   Calendar,
   CalendarIcon,
+  Brick,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +54,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 
 
+type Material = {
+  name: string;
+  quantity: string;
+  spec: string;
+};
+
 type WbsItem = {
   id: string;
   name: string;
@@ -65,6 +72,7 @@ type WbsItem = {
   endDate: Date;
   progress: number;
   resources: { name: string, avatar: string }[];
+  materials?: Material[];
 };
 
 const initialWbsItems: WbsItem[] = [
@@ -77,8 +85,13 @@ const initialWbsItems: WbsItem[] = [
         { id: '2.2', name: 'Permit Application', predecessor: {id: '2.1', name: 'Schematic Design'}, successor: {id: '3.1', name: 'Foundation'}, status: 'In Progress', startDate: new Date('2024-08-06'), endDate: new Date('2024-08-20'), progress: 60, resources: [{ name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32'}] }
     ] },
     { id: '3', name: 'Construction', status: 'In Progress', startDate: new Date('2024-08-21'), endDate: new Date('2024-10-30'), progress: 10, resources: [{ name: 'D. M.', avatar: 'https://picsum.photos/seed/13/32/32'}, { name: 'E. N.', avatar: 'https://picsum.photos/seed/14/32/32'}], children: [
-        { id: '3.1', name: 'Foundation', isCritical: true, predecessor: {id: '2.2', name: 'Permit Application'}, successor: {id: '3.2', name: 'Superstructure'}, status: 'In Progress', startDate: new Date('2024-08-21'), endDate: new Date('2024-09-10'), progress: 20, resources: [{ name: 'D. M.', avatar: 'https://picsum.photos/seed/13/32/32'}] }, 
-        { id: '3.2', name: 'Superstructure', predecessor: {id: '3.1', name: 'Foundation'}, status: 'Not Started', startDate: new Date('2024-09-11'), endDate: new Date('2024-10-30'), progress: 5, resources: [{ name: 'E. N.', avatar: 'https://picsum.photos/seed/14/32/32'}] }
+        { id: '3.1', name: 'Foundation', isCritical: true, predecessor: {id: '2.2', name: 'Permit Application'}, successor: {id: '3.2', name: 'Superstructure'}, status: 'In Progress', startDate: new Date('2024-08-21'), endDate: new Date('2024-09-10'), progress: 20, resources: [{ name: 'D. M.', avatar: 'https://picsum.photos/seed/13/32/32'}], materials: [
+            { name: 'Concrete', quantity: '1500 m³', spec: 'Grade C35/45' },
+            { name: 'Reinforcement Steel', quantity: '75 Tons', spec: 'Grade B500B' }
+        ] }, 
+        { id: '3.2', name: 'Superstructure', predecessor: {id: '3.1', name: 'Foundation'}, status: 'Not Started', startDate: new Date('2024-09-11'), endDate: new Date('2024-10-30'), progress: 5, resources: [{ name: 'E. N.', avatar: 'https://picsum.photos/seed/14/32/32'}], materials: [
+             { name: 'Structural Steel', quantity: '250 Tons', spec: 'S355JR' }
+        ] }
     ] },
     { id: '4', name: 'Project Closeout', status: 'Not Started', startDate: new Date('2024-11-01'), endDate: new Date('2024-11-15'), progress: 0, resources: [] }
 ];
@@ -446,8 +459,25 @@ export default function WbsHierarchyPage() {
             <CardHeader>
               <CardTitle>Material Specifications</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Coming Soon</p>
+            <CardContent className='space-y-4'>
+               {selectedItem?.materials && selectedItem.materials.length > 0 ? (
+                 selectedItem.materials.map((mat, index) => (
+                    <div key={index} className="p-3 rounded-md border text-sm">
+                        <div className="flex items-center gap-2 font-semibold">
+                            <Brick className="h-4 w-4 text-muted-foreground" />
+                            <span>{mat.name}</span>
+                        </div>
+                        <div className="pl-6">
+                            <p><strong>Qty:</strong> {mat.quantity}</p>
+                            <p><strong>Spec:</strong> {mat.spec}</p>
+                        </div>
+                    </div>
+                 ))
+               ) : (
+                <p className="text-sm text-muted-foreground">
+                    {selectedItem ? 'No materials specified for this package.' : 'Select a package to see materials.'}
+                </p>
+               )}
             </CardContent>
           </Card>
         </div>
