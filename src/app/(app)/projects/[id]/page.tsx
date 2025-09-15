@@ -53,6 +53,8 @@ import {
   ProgressCircularLabel,
 } from '@/components/ui/progress-circular';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart as RechartsBarChart } from 'recharts';
 
 export default function ProjectDetailsPage({
   params,
@@ -107,6 +109,11 @@ export default function ProjectDetailsPage({
       { icon: ShieldAlert, text: 'High probability of rain next week. Secure waterproofing materials now.', type: 'Risk' },
       { icon: Lightbulb, text: 'Consider pre-fabricated bathroom pods to accelerate interior fit-out.', type: 'Opportunity' },
   ]
+
+  const costPerformanceData = [
+    { name: 'Budget', value: project.budget, fill: 'hsl(var(--secondary))' },
+    { name: 'Spent', value: project.spent, fill: 'hsl(var(--primary))' },
+  ];
 
 
   return (
@@ -253,7 +260,20 @@ export default function ProjectDetailsPage({
                          <CardTitle className="text-base">Cost Performance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground text-center">Chart Coming Soon</p>
+                        <ChartContainer config={{}} className="min-h-[120px] w-full">
+                            <RechartsBarChart
+                                data={costPerformanceData}
+                                layout="vertical"
+                                barSize={16}
+                                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                            >
+                                <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                                />
+                                <Bar dataKey="value" radius={4} />
+                            </RechartsBarChart>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
                  <Card>
