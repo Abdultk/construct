@@ -35,7 +35,6 @@ export function DashboardNav() {
     { href: "/lifecycle-cost-analysis", label: "Lifecycle Cost", icon: RefreshCw },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/reports", label: "Reports", icon: FileText },
-    { href: "/notifications", label: "Notifications", icon: Bell, badge: '2' },
     { href: "/settings", label: "Settings", icon: Settings },
   ]
 

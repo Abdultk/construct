@@ -233,16 +233,6 @@ export function Header() {
               Reports
             </Link>
              <Link
-              href="/notifications"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Bell className="h-5 w-5" />
-              Notifications
-               <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                2
-              </Badge>
-            </Link>
-            <Link
               href="/settings"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
