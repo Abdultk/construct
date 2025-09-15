@@ -13,7 +13,8 @@ import {
   MoreVertical,
   Star,
   Users,
-  GanttChartSquare
+  GanttChartSquare,
+  Trello
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -199,12 +200,20 @@ export default function ProjectDetailsPage({
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Schedule Performance</CardTitle>
-                     <Button asChild variant="outline" size="sm">
-                        <Link href={`/projects/${project.id}/gantt`}>
-                            <GanttChartSquare className="mr-2 h-4 w-4" />
-                            View Gantt Chart
-                        </Link>
-                    </Button>
+                    <div className='flex items-center gap-2'>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/projects/${project.id}/kanban`}>
+                                <Trello className="mr-2 h-4 w-4" />
+                                View Board
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/projects/${project.id}/gantt`}>
+                                <GanttChartSquare className="mr-2 h-4 w-4" />
+                                View Gantt Chart
+                            </Link>
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">Interactive Gantt chart coming soon</p>
