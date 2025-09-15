@@ -1,4 +1,5 @@
 
+
 import Link from "next/link"
 import {
   Bell,
@@ -19,7 +20,8 @@ import {
   FileCheck,
   FilePlus,
   Eye,
-  Shield
+  Shield,
+  ClipboardCheck
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -144,6 +146,13 @@ export function Header() {
             >
               <Shield className="h-5 w-5" />
               Safety
+            </Link>
+            <Link
+              href="/quality-control"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <ClipboardCheck className="h-5 w-5" />
+              Quality
             </Link>
             <Link
               href="/teams"
