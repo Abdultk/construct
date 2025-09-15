@@ -8,7 +8,6 @@
  *
  * It exports:
  * - `validateBoq`: The main function to trigger the BOQ validation.
- * - `BoqItemSchema`: The Zod schema for a single BOQ item.
  * - `ValidateBoqInput`: The input type for the validation function.
  * - `ValidateBoqOutput`: The output type for the validation function.
  */
@@ -16,7 +15,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const BoqItemSchema = z.object({
+const BoqItemSchema = z.object({
   id: z.string().describe('The unique identifier for the BOQ item (e.g., "1.1", "2.3.4").'),
   description: z.string().describe('The description of the work item.'),
   unit: z.string().optional().describe('The unit of measurement (e.g., "m³", "sqm", "LS").'),
