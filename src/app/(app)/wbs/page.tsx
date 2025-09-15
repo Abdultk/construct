@@ -11,6 +11,8 @@ import {
   ChevronRight,
   Package,
   ChevronDown,
+  Users,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +34,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { format, formatDistanceToNow } from 'date-fns';
 
 type WbsItem = {
   id: string;
@@ -40,26 +45,31 @@ type WbsItem = {
   predecessor?: { id: string, name: string };
   successor?: { id: string, name: string };
   children?: WbsItem[];
+  status: 'Not Started' | 'In Progress' | 'Completed' | 'At Risk';
+  startDate: Date;
+  endDate: Date;
+  progress: number;
+  resources: { name: string, avatar: string }[];
 };
 
 const wbsItems: WbsItem[] = [
-    { id: '1', name: 'Project Initiation', children: [
-        { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'} }, 
-        { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'} }
+    { id: '1', name: 'Project Initiation', status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}], children: [
+        { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'}, status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-05'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}] }, 
+        { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'}, status: 'Completed', startDate: new Date('2024-07-06'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}, { name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] }
     ] },
-    { id: '2', name: 'Design & Planning', children: [
-        { id: '2.1', name: 'Schematic Design', predecessor: {id: '1.2', name: 'Project Charter'}, successor: {id: '2.2', name: 'Permit Application'} }, 
-        { id: '2.2', name: 'Permit Application', predecessor: {id: '2.1', name: 'Schematic Design'}, successor: {id: '3.1', name: 'Foundation'} }
+    { id: '2', name: 'Design & Planning', status: 'In Progress', startDate: new Date('2024-07-11'), endDate: new Date('2024-08-20'), progress: 75, resources: [{ name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}, { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32'}], children: [
+        { id: '2.1', name: 'Schematic Design', predecessor: {id: '1.2', name: 'Project Charter'}, successor: {id: '2.2', name: 'Permit Application'}, status: 'Completed', startDate: new Date('2024-07-11'), endDate: new Date('2024-08-05'), progress: 100, resources: [{ name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] }, 
+        { id: '2.2', name: 'Permit Application', predecessor: {id: '2.1', name: 'Schematic Design'}, successor: {id: '3.1', name: 'Foundation'}, status: 'In Progress', startDate: new Date('2024-08-06'), endDate: new Date('2024-08-20'), progress: 60, resources: [{ name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32'}] }
     ] },
-    { id: '3', name: 'Construction', children: [
-        { id: '3.1', name: 'Foundation', isCritical: true, predecessor: {id: '2.2', name: 'Permit Application'}, successor: {id: '3.2', name: 'Superstructure'} }, 
-        { id: '3.2', name: 'Superstructure', predecessor: {id: '3.1', name: 'Foundation'} }
+    { id: '3', name: 'Construction', status: 'In Progress', startDate: new Date('2024-08-21'), endDate: new Date('2024-10-30'), progress: 10, resources: [{ name: 'D. M.', avatar: 'https://picsum.photos/seed/13/32/32'}, { name: 'E. N.', avatar: 'https://picsum.photos/seed/14/32/32'}], children: [
+        { id: '3.1', name: 'Foundation', isCritical: true, predecessor: {id: '2.2', name: 'Permit Application'}, successor: {id: '3.2', name: 'Superstructure'}, status: 'In Progress', startDate: new Date('2024-08-21'), endDate: new Date('2024-09-10'), progress: 20, resources: [{ name: 'D. M.', avatar: 'https://picsum.photos/seed/13/32/32'}] }, 
+        { id: '3.2', name: 'Superstructure', predecessor: {id: '3.1', name: 'Foundation'}, status: 'Not Started', startDate: new Date('2024-09-11'), endDate: new Date('2024-10-30'), progress: 5, resources: [{ name: 'E. N.', avatar: 'https://picsum.photos/seed/14/32/32'}] }
     ] },
-    { id: '4', name: 'Project Closeout' }
+    { id: '4', name: 'Project Closeout', status: 'Not Started', startDate: new Date('2024-11-01'), endDate: new Date('2024-11-15'), progress: 0, resources: [] }
 ];
 
 export default function WbsHierarchyPage() {
-  const [selectedItem, setSelectedItem] = useState<WbsItem | null>(wbsItems[2]?.children?.[0] ?? null);
+  const [selectedItem, setSelectedItem] = useState<WbsItem | null>(wbsItems[0] ?? null);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     '1': true,
     '2': true,
@@ -72,6 +82,15 @@ export default function WbsHierarchyPage() {
 
   const handleSelectItem = (item: WbsItem) => {
     setSelectedItem(item);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Completed': return 'secondary';
+      case 'In Progress': return 'default';
+      case 'At Risk': return 'destructive';
+      default: return 'outline';
+    }
   };
 
   const WbsItemRow = ({ item, level }: { item: WbsItem, level: number }) => {
@@ -125,7 +144,7 @@ export default function WbsHierarchyPage() {
       {/* Main Content */}
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Left Panel: Tree View */}
-        <div className="col-span-3 flex flex-col gap-4">
+        <div className="col-span-12 md:col-span-4 lg:col-span-3 flex flex-col gap-4">
           <Card className='h-full overflow-y-auto'>
              <CardHeader>
                 <CardTitle>WBS Hierarchy</CardTitle>
@@ -149,7 +168,7 @@ export default function WbsHierarchyPage() {
         </div>
 
         {/* Main Panel: Details */}
-        <div className="col-span-6 flex flex-col gap-4">
+        <div className="col-span-12 md:col-span-8 lg:col-span-6 flex flex-col gap-4 overflow-y-auto">
            <Card>
             <CardHeader>
                 <CardTitle>Work Package Details: {selectedItem ? `${selectedItem.name} (${selectedItem.id})` : 'None'}</CardTitle>
@@ -158,14 +177,54 @@ export default function WbsHierarchyPage() {
             <CardContent className="space-y-4">
                 {selectedItem ? (
                     <>
-                        <div className='grid grid-cols-2 gap-4'>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                            <div className="space-y-1">
+                                <p className="text-muted-foreground">Status</p>
+                                <Badge variant={getStatusBadge(selectedItem.status)}>{selectedItem.status}</Badge>
+                            </div>
+                             <div className="space-y-1">
+                                <p className="text-muted-foreground">Start Date</p>
+                                <p className="font-medium">{format(selectedItem.startDate, 'MMM d, yyyy')}</p>
+                            </div>
+                             <div className="space-y-1">
+                                <p className="text-muted-foreground">End Date</p>
+                                <p className="font-medium">{format(selectedItem.endDate, 'MMM d, yyyy')}</p>
+                            </div>
+                             <div className="space-y-1">
+                                <p className="text-muted-foreground">Duration</p>
+                                <p className="font-medium">{formatDistanceToNow(selectedItem.endDate)}</p>
+                            </div>
+                        </div>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                             <Card>
-                                <CardHeader><CardTitle className='text-base'>Resource Requirements</CardTitle></CardHeader>
-                                <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
+                                <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+                                    <Users className="w-5 h-5" />
+                                    <CardTitle className='text-base'>Resource Requirements</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {selectedItem.resources.length > 0 ? selectedItem.resources.map(res => (
+                                        <div key={res.name} className="flex items-center gap-2">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={res.avatar} />
+                                                <AvatarFallback>{res.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-sm font-medium">{res.name}</span>
+                                        </div>
+                                    )) : <p className="text-sm text-muted-foreground">No resources assigned.</p>}
+                                </CardContent>
                             </Card>
                              <Card>
-                                <CardHeader><CardTitle className='text-base'>Progress Tracking</CardTitle></CardHeader>
-                                <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
+                                <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+                                    <Calendar className="w-5 h-5" />
+                                    <CardTitle className='text-base'>Progress Tracking</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                    <div className="flex justify-between items-baseline">
+                                        <span className="text-sm text-muted-foreground">Completion</span>
+                                        <span className="text-xl font-bold">{selectedItem.progress}%</span>
+                                    </div>
+                                    <Progress value={selectedItem.progress} />
+                                </CardContent>
                             </Card>
                         </div>
                         <Card>
@@ -220,7 +279,7 @@ export default function WbsHierarchyPage() {
         </div>
 
         {/* Properties Panel */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-12 md:col-span-12 lg:col-span-3 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Properties</CardTitle>
