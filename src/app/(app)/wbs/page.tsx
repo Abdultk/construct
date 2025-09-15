@@ -10,6 +10,7 @@ import {
   GitMerge,
   ChevronRight,
   Package,
+  ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,14 +31,83 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useState } from 'react';
+
+type WbsItem = {
+  id: string;
+  name: string;
+  isCritical?: boolean;
+  predecessor?: { id: string, name: string };
+  successor?: { id: string, name: string };
+  children?: WbsItem[];
+};
+
+const wbsItems: WbsItem[] = [
+    { id: '1', name: 'Project Initiation', children: [
+        { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'} }, 
+        { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'} }
+    ] },
+    { id: '2', name: 'Design & Planning', children: [
+        { id: '2.1', name: 'Schematic Design', predecessor: {id: '1.2', name: 'Project Charter'}, successor: {id: '2.2', name: 'Permit Application'} }, 
+        { id: '2.2', name: 'Permit Application', predecessor: {id: '2.1', name: 'Schematic Design'}, successor: {id: '3.1', name: 'Foundation'} }
+    ] },
+    { id: '3', name: 'Construction', children: [
+        { id: '3.1', name: 'Foundation', isCritical: true, predecessor: {id: '2.2', name: 'Permit Application'}, successor: {id: '3.2', name: 'Superstructure'} }, 
+        { id: '3.2', name: 'Superstructure', predecessor: {id: '3.1', name: 'Foundation'} }
+    ] },
+    { id: '4', name: 'Project Closeout' }
+];
 
 export default function WbsHierarchyPage() {
-  const wbsItems = [
-    { id: '1', name: 'Project Initiation', children: [{ id: '1.1', name: 'Feasibility Study' }, { id: '1.2', name: 'Project Charter' }] },
-    { id: '2', name: 'Design & Planning', children: [{ id: '2.1', name: 'Schematic Design' }, { id: '2.2', name: 'Permit Application' }] },
-    { id: '3', name: 'Construction', children: [{ id: '3.1', name: 'Foundation', isCritical: true }, { id: '3.2', name: 'Superstructure' }] },
-    { id: '4', name: 'Project Closeout' }
-  ];
+  const [selectedItem, setSelectedItem] = useState<WbsItem | null>(wbsItems[2]?.children?.[0] ?? null);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    '1': true,
+    '2': true,
+    '3': true,
+  });
+
+  const toggleExpand = (id: string) => {
+    setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleSelectItem = (item: WbsItem) => {
+    setSelectedItem(item);
+  };
+
+  const WbsItemRow = ({ item, level }: { item: WbsItem, level: number }) => {
+    const isExpanded = expandedItems[item.id] ?? false;
+
+    return (
+      <div>
+        <div 
+          className={`flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-pointer ${selectedItem?.id === item.id ? 'bg-muted' : ''}`}
+          style={{ paddingLeft: `${level * 1.5}rem`}}
+          onClick={() => handleSelectItem(item)}
+        >
+          {item.children && item.children.length > 0 ? (
+            isExpanded ? (
+              <ChevronDown className="h-4 w-4 shrink-0" onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }} />
+            ) : (
+              <ChevronRight className="h-4 w-4 shrink-0" onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }} />
+            )
+          ) : (
+            <span className='w-4'></span>
+          )}
+          <Package className="h-4 w-4" />
+          <span className={`font-medium text-sm ${item.children ? '' : 'font-normal'} ${item.isCritical ? 'text-destructive' : ''}`}>
+            {item.id} - {item.name}
+          </span>
+        </div>
+        {isExpanded && item.children && (
+          <div>
+            {item.children.map(child => (
+              <WbsItemRow key={child.id} item={child} level={level + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -71,23 +141,7 @@ export default function WbsHierarchyPage() {
             <CardContent>
               <div className="space-y-1">
                 {wbsItems.map(item => (
-                  <div key={item.id}>
-                    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-pointer">
-                        <ChevronRight className="h-4 w-4 shrink-0" />
-                        <Package className="h-4 w-4" />
-                        <span className={`font-medium text-sm ${item.children ? '' : 'font-normal'}`}>{item.name}</span>
-                    </div>
-                     {item.children && (
-                        <div className="pl-6 border-l-2 ml-3">
-                        {item.children.map(child => (
-                             <div key={child.id} className="flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-pointer">
-                                <Package className="h-4 w-4 text-muted-foreground" />
-                                <span className={`text-sm ${child.isCritical ? 'text-destructive' : ''}`}>{child.name}</span>
-                            </div>
-                        ))}
-                        </div>
-                    )}
-                  </div>
+                  <WbsItemRow key={item.id} item={item} level={0} />
                 ))}
               </div>
             </CardContent>
@@ -98,49 +152,69 @@ export default function WbsHierarchyPage() {
         <div className="col-span-6 flex flex-col gap-4">
            <Card>
             <CardHeader>
-                <CardTitle>Work Package Details: Foundation (3.1)</CardTitle>
+                <CardTitle>Work Package Details: {selectedItem ? `${selectedItem.name} (${selectedItem.id})` : 'None'}</CardTitle>
                 <CardDescription>Detailed information for the selected work package.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className='grid grid-cols-2 gap-4'>
-                    <Card>
-                        <CardHeader><CardTitle className='text-base'>Resource Requirements</CardTitle></CardHeader>
-                        <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader><CardTitle className='text-base'>Progress Tracking</CardTitle></CardHeader>
-                        <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
-                    </Card>
-                </div>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className='text-base'>Dependencies</CardTitle>
-                        <Button variant="outline" size="sm"><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
-                    </CardHeader>
-                    <CardContent>
-                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead>Type</TableHead>
-                                <TableHead>WBS Code</TableHead>
-                                <TableHead>Description</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <TableRow>
-                                <TableCell><Badge variant="outline">Predecessor</Badge></TableCell>
-                                <TableCell className='font-code'>2.2</TableCell>
-                                <TableCell>Permit Application</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                <TableCell><Badge variant="outline">Successor</Badge></TableCell>
-                                <TableCell className='font-code'>3.2</TableCell>
-                                <TableCell>Superstructure</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                {selectedItem ? (
+                    <>
+                        <div className='grid grid-cols-2 gap-4'>
+                            <Card>
+                                <CardHeader><CardTitle className='text-base'>Resource Requirements</CardTitle></CardHeader>
+                                <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
+                            </Card>
+                             <Card>
+                                <CardHeader><CardTitle className='text-base'>Progress Tracking</CardTitle></CardHeader>
+                                <CardContent><p className="text-sm text-muted-foreground">Coming Soon</p></CardContent>
+                            </Card>
+                        </div>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle className='text-base'>Dependencies</CardTitle>
+                                <Button variant="outline" size="sm"><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
+                            </CardHeader>
+                            <CardContent>
+                                 <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>WBS Code</TableHead>
+                                        <TableHead>Description</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {selectedItem.predecessor ? (
+                                            <TableRow>
+                                                <TableCell><Badge variant="outline">Predecessor</Badge></TableCell>
+                                                <TableCell className='font-code'>{selectedItem.predecessor.id}</TableCell>
+                                                <TableCell>{selectedItem.predecessor.name}</TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-muted-foreground text-center">No predecessor</TableCell>
+                                            </TableRow>
+                                        )}
+                                        {selectedItem.successor ? (
+                                             <TableRow>
+                                                <TableCell><Badge variant="outline">Successor</Badge></TableCell>
+                                                <TableCell className='font-code'>{selectedItem.successor.id}</TableCell>
+                                                <TableCell>{selectedItem.successor.name}</TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-muted-foreground text-center">No successor</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </>
+                ) : (
+                    <div className="text-center text-muted-foreground py-10">
+                        Select a work package from the hierarchy to see its details.
+                    </div>
+                )}
             </CardContent>
            </Card>
         </div>
