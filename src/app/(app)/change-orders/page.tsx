@@ -26,6 +26,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import * as React from "react"
 
 export default function ChangeOrdersPage() {
 
@@ -55,6 +58,31 @@ export default function ChangeOrdersPage() {
         }
     }
 
+    const pipelineData = React.useMemo(() => {
+        const statuses = ['Pending Review', 'Approved', 'Rejected'];
+        return statuses.map(status => ({
+            status,
+            count: changeOrders.filter(co => co.status === status).length,
+        }));
+    }, [changeOrders]);
+
+    const chartConfig = {
+      count: {
+        label: "Count",
+      },
+      "Pending Review": {
+        label: "Pending",
+        color: "hsl(var(--chart-4))",
+      },
+      Approved: {
+        label: "Approved",
+        color: "hsl(var(--chart-2))",
+      },
+      Rejected: {
+        label: "Rejected",
+        color: "hsl(var(--chart-1))",
+      },
+    }
 
   return (
     <div className="flex flex-col gap-4">
@@ -113,7 +141,24 @@ export default function ChangeOrdersPage() {
                 <CardTitle>Change Pipeline Overview</CardTitle>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                    <BarChart data={pipelineData} accessibilityLayer>
+                         <CartesianGrid vertical={false} />
+                         <XAxis
+                            dataKey="status"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                         />
+                         <YAxis allowDecimals={false}/>
+                         <ChartTooltip content={<ChartTooltipContent />} />
+                         <Bar dataKey="count" radius={4}>
+                            {pipelineData.map((d) => (
+                                <div key={d.status} />
+                            ))}
+                         </Bar>
+                    </BarChart>
+                 </ChartContainer>
             </CardContent>
         </Card>
         <Card>
