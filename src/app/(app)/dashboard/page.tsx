@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   ShieldCheck,
   TrendingUp,
+  CheckCircle,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -46,6 +47,12 @@ export default function Dashboard() {
       notation: "compact",
       compactDisplay: "short",
     }).format(value)
+
+  const upcomingMilestones = [
+    { name: "Facade Completion (proj-001)", date: "Aug 30, 2024" },
+    { name: "Core & Shell Handover (proj-002)", date: "Sep 15, 2024" },
+    { name: "Final Inspections (proj-004)", date: "Oct 01, 2024" },
+  ];
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -251,8 +258,16 @@ export default function Dashboard() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base">Upcoming Milestones</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                         <p className="text-sm text-muted-foreground">Coming Soon</p>
+                    <CardContent className="space-y-3 pt-4">
+                      {upcomingMilestones.map((milestone, index) => (
+                        <div key={index} className="flex items-center">
+                          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                          <div className="ml-3 flex-1">
+                            <p className="text-sm font-medium">{milestone.name}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{milestone.date}</p>
+                        </div>
+                      ))}
                     </CardContent>
                 </Card>
             </CardContent>
@@ -261,3 +276,5 @@ export default function Dashboard() {
     </div>
   )
 }
+
+    
