@@ -94,7 +94,12 @@ export default function KanbanBoardPage({
     try {
       const allTasks = columns.flatMap(col => col.tasks);
       const result = await balanceTeamWorkload({
-        tasks: allTasks,
+        tasks: allTasks.map(t => ({
+          ...t,
+          dueDate: t.dueDate || undefined,
+          aiEstimate: t.aiEstimate || undefined,
+          isCritical: t.isCritical || undefined,
+        })),
         teamMembers: teamMembers.map(m => ({ id: m.id, name: m.name })),
       });
       setBalanceResult(result);
