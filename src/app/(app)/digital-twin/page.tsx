@@ -26,8 +26,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function DigitalTwinViewerPage() {
+    const twinImage = PlaceHolderImages.find(p => p.id === 'digital-twin-model');
+
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
       {/* Header */}
@@ -59,8 +63,17 @@ export default function DigitalTwinViewerPage() {
             </Card>
             {/* Viewport */}
             <Card className="flex-1">
-                 <CardContent className="flex h-full items-center justify-center p-6 bg-muted/50 rounded-lg">
-                    <p className="text-muted-foreground">Interactive 3D model viewer coming soon.</p>
+                 <CardContent className="flex h-full items-center justify-center p-0 bg-muted/50 rounded-lg overflow-hidden">
+                    {twinImage && (
+                        <Image
+                            src={twinImage.imageUrl}
+                            alt="Digital Twin Model"
+                            width={1200}
+                            height={900}
+                            data-ai-hint={twinImage.imageHint}
+                            className="w-full h-full object-cover"
+                        />
+                    )}
                 </CardContent>
             </Card>
         </div>

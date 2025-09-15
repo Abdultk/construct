@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -11,6 +12,12 @@
       "description": "Profile picture for a user.",
       "imageUrl": "https://picsum.photos/seed/2/100/100",
       "imageHint": "user portrait"
+    },
+    {
+      "id": "digital-twin-model",
+      "description": "A 3D architectural rendering of a modern skyscraper, used for the digital twin viewer.",
+      "imageUrl": "https://picsum.photos/seed/42/1200/900",
+      "imageHint": "building model"
     }
   ]
 }
