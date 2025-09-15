@@ -18,7 +18,13 @@ import {
   Briefcase,
   File,
   User,
-  Paperclip
+  Paperclip,
+  Wand2,
+  Lightbulb,
+  ShieldAlert,
+  TrendingUp,
+  Clock,
+  ThumbsUp
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -93,6 +99,12 @@ export default function ProjectDetailsPage({
       { name: "Project Charter.pdf", type: "Document" },
       { name: "Architectural_Plans_v2.dwg", type: "CAD" },
       { name: "Geotechnical_Report.pdf", type: "Report" },
+  ]
+
+  const aiRecommendations = [
+      { icon: TrendingUp, text: 'Re-sequence drywall and electrical work to save 3 project days.', type: 'Schedule' },
+      { icon: ShieldAlert, text: 'High probability of rain next week. Secure waterproofing materials now.', type: 'Risk' },
+      { icon: Lightbulb, text: 'Consider pre-fabricated bathroom pods to accelerate interior fit-out.', type: 'Opportunity' },
   ]
 
 
@@ -282,32 +294,62 @@ export default function ProjectDetailsPage({
                 <CardHeader>
                     <CardTitle>Upcoming Milestones</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                        <p>Facade Completion</p>
+                        <p className="text-muted-foreground">Aug 30, 2024</p>
+                    </div>
+                     <div className="flex items-center justify-between">
+                        <p>Core & Shell Handover</p>
+                        <p className="text-muted-foreground">Oct 15, 2024</p>
+                    </div>
                 </CardContent>
             </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Pending Approvals</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className="space-y-3 text-sm">
+                     <div className="flex items-start justify-between">
+                        <p>Change Order CR-0012</p>
+                        <Badge variant="outline">Awaiting Review</Badge>
+                    </div>
+                      <div className="flex items-start justify-between">
+                        <p>Payment Cert. #004</p>
+                        <Badge variant="outline">Awaiting Review</Badge>
+                    </div>
                 </CardContent>
             </Card>
              <Card>
                 <CardHeader>
                     <CardTitle>Change Orders</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                        <p>Approved</p>
+                        <p className="font-bold">5</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <p>Pending</p>
+                        <p className="font-bold">1</p>
+                    </div>
                 </CardContent>
             </Card>
              <Card>
                 <CardHeader>
-                    <CardTitle>AI Recommendations</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Wand2 className="h-5 w-5 text-ai-accent" /> AI Recommendations</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                <CardContent className="space-y-4">
+                    {aiRecommendations.map((rec, index) => (
+                         <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                            <rec.icon className="h-5 w-5 flex-shrink-0 text-ai-accent mt-1" />
+                            <div>
+                                <p className="text-sm font-medium">{rec.text}</p>
+                                <Badge variant="secondary" className="mt-1">{rec.type}</Badge>
+                            </div>
+                        </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full">View All Insights</Button>
                 </CardContent>
             </Card>
         </div>
