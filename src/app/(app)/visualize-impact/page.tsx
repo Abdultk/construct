@@ -27,8 +27,10 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ChangeImpactVisualizationPage() {
+    const { toast } = useToast();
 
     const communicationPlan = [
         { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100', status: 'Acknowledged' },
@@ -42,6 +44,13 @@ export default function ChangeImpactVisualizationPage() {
             case 'Notified': return 'default';
             default: return 'outline';
         }
+    }
+    
+    const handleApprove = () => {
+        toast({
+            title: 'Change Order Approved',
+            description: 'CR-0012 has been approved and the implementation plan is now active.',
+        });
     }
 
 
@@ -66,7 +75,7 @@ export default function ChangeImpactVisualizationPage() {
           <Badge variant="outline">In Review</Badge>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary">Approve & Implement</Button>
+          <Button variant="secondary" onClick={handleApprove}>Approve & Implement</Button>
         </div>
       </div>
 
