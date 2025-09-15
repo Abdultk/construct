@@ -22,7 +22,8 @@ import {
   Eye,
   Shield,
   ClipboardCheck,
-  Siren
+  Siren,
+  Orbit
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -161,6 +162,13 @@ export function Header() {
             >
               <ClipboardCheck className="h-5 w-5" />
               Quality
+            </Link>
+             <Link
+              href="/digital-twin"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Orbit className="h-5 w-5" />
+              Digital Twin
             </Link>
             <Link
               href="/teams"
