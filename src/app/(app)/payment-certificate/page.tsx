@@ -13,7 +13,10 @@ import {
   MoreVertical,
   Paperclip,
   ArrowLeft,
-  FileCheck
+  FileCheck,
+  ThumbsUp,
+  ThumbsDown,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +39,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export default function PaymentCertificatePage() {
 
@@ -57,12 +62,13 @@ export default function PaymentCertificatePage() {
             </Button>
             <div>
                 <h1 className="text-2xl font-bold font-headline">
-                    Payment Certificate
+                    Payment Certificate #003
                 </h1>
                 <p className="text-muted-foreground">
-                    Project: Downtown Skyscraper
+                    Project: Downtown Skyscraper - Due: July 30, 2024
                 </p>
             </div>
+             <Badge variant="destructive">High Priority</Badge>
         </div>
         <div className="flex items-center gap-2">
            <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
@@ -73,7 +79,7 @@ export default function PaymentCertificatePage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Main Document */}
-        <div className="col-span-9 overflow-y-auto">
+        <div className="col-span-8 overflow-y-auto pr-4">
             <Card className='p-8'>
                 <CardHeader className="p-0 grid grid-cols-2">
                     <div>
@@ -101,7 +107,7 @@ export default function PaymentCertificatePage() {
                     </div>
                     <div>
                         <p className="text-muted-foreground">Status:</p>
-                        <Badge variant="secondary"><CheckCircle className='mr-2 h-4 w-4' />Approved</Badge>
+                        <Badge variant="secondary"><Clock className='mr-2 h-4 w-4' />Pending Approval</Badge>
                     </div>
                 </div>
 
@@ -189,8 +195,56 @@ export default function PaymentCertificatePage() {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-4 space-y-4">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Approval Panel</CardTitle>
+                    <CardDescription>Review and action this certificate.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="check-quantities" />
+                            <Label htmlFor="check-quantities">Quantities match progress reports</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="check-rates" />
+                            <Label htmlFor="check-rates">Rates align with contract</Label>
+                        </div>
+                         <div className="flex items-center space-x-2">
+                            <Checkbox id="check-evidence" />
+                            <Label htmlFor="check-evidence">Supporting evidence is sufficient</Label>
+                        </div>
+                    </div>
+                     <Separator />
+                     <Textarea placeholder="Add approval comments or conditions..." />
+                     <div className="grid grid-cols-2 gap-2">
+                        <Button><ThumbsUp className="mr-2 h-4 w-4" /> Approve</Button>
+                        <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" /> Reject</Button>
+                     </div>
+                     <Button variant="outline" className="w-full"><Send className="mr-2 h-4 w-4" /> Return for Revision</Button>
+                </CardContent>
+            </Card>
             <Card>
+                <CardHeader>
+                    <CardTitle>Supporting Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                    <Button variant="outline" className="w-full justify-start gap-2">
+                        <Paperclip className="h-4 w-4"/>
+                        Progress Report_July.pdf
+                    </Button>
+                     <Button variant="outline" className="w-full justify-start gap-2">
+                        <Paperclip className="h-4 w-4"/>
+                        Site_Photos_July.zip
+                    </Button>
+                     <Button variant="outline" className="w-full justify-start gap-2">
+                        <Paperclip className="h-4 w-4"/>
+                        Change_Order_CO-05.pdf
+                    </Button>
+                </CardContent>
+            </Card>
+             <Card>
                 <CardHeader>
                     <CardTitle>Approval Workflow</CardTitle>
                 </CardHeader>
@@ -199,41 +253,23 @@ export default function PaymentCertificatePage() {
                         <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
                         <div>
                             <p className="font-semibold">Foreman</p>
-                            <p className="text-muted-foreground">Approved by J. Smith</p>
+                            <p className="text-muted-foreground">Approved by J. Smith - 7/28/24</p>
                         </div>
                     </div>
                      <div className='flex gap-4'>
                         <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
                         <div>
                             <p className="font-semibold">Project Manager</p>
-                            <p className="text-muted-foreground">Approved by A. Johnson</p>
+                            <p className="text-muted-foreground">Approved by A. Johnson - 7/29/24</p>
                         </div>
                     </div>
                      <div className='flex gap-4'>
                         <Clock className="h-5 w-5 text-yellow-500 mt-1" />
                         <div>
-                            <p className="font-semibold">Client</p>
+                            <p className="font-semibold">You (Client)</p>
                             <p className="text-muted-foreground">Pending Approval</p>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle>Comments</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Textarea placeholder="Add a comment..." />
-                    <Button className='mt-2 w-full'>Submit Comment</Button>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle>Distribution</CardTitle>
-                </CardHeader>
-                <CardContent className='flex gap-2'>
-                   <Button variant="outline" size="icon"><Mail /></Button>
-                   <Button variant="outline" size="icon"><MessageSquare /></Button>
                 </CardContent>
             </Card>
         </div>
