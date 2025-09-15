@@ -73,6 +73,20 @@ export default function DailyReviewPage() {
     }
   };
 
+  const getReviewLink = (type: string) => {
+    switch (type) {
+      case 'Progress Report':
+        return '/progress-entry';
+      case 'Site Photo':
+        return '/progress-entry'; // Or a dedicated gallery page if it exists
+      case 'Incident Report':
+        return '/incident-reporting';
+      default:
+        return '#';
+    }
+  };
+
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
@@ -126,8 +140,10 @@ export default function DailyReviewPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          Review <ArrowRight className="ml-2 h-4 w-4" />
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={getReviewLink(sub.type)}>
+                            Review <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
                         </Button>
                       </TableCell>
                     </TableRow>
