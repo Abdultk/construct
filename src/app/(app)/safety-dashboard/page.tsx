@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -21,6 +22,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function SafetyDashboardPage() {
   return (
@@ -116,6 +118,11 @@ export default function SafetyDashboardPage() {
           <CardContent className="space-y-3">
             <Button className="w-full justify-start">
               <Plus className="mr-2 h-4 w-4" /> Schedule Safety Inspection
+            </Button>
+            <Button asChild variant="secondary" className="w-full justify-start">
+              <Link href="/incident-reporting">
+                <Siren className="mr-2 h-4 w-4" /> Report New Incident
+              </Link>
             </Button>
             <Button variant="secondary" className="w-full justify-start">
               <UserCheck className="mr-2 h-4 w-4" /> Assign Training
