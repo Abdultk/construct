@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,15 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+
+type TeamMember = {
+    email: string;
+    role: string;
+    name: string;
+    avatar: string;
+};
 
 export default function ProjectSetupPage() {
   const [step, setStep] = React.useState(1);
@@ -22,11 +31,34 @@ export default function ProjectSetupPage() {
 
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
+  const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
+  const [newMemberEmail, setNewMemberEmail] = React.useState('');
+  const [newMemberRole, setNewMemberRole] = React.useState('');
 
   const nextStep = () => setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
 
   const progress = (step / totalSteps) * 100;
+
+  const handleAddMember = () => {
+    if (newMemberEmail && newMemberRole) {
+      const name = newMemberEmail.split('@')[0].replace('.', ' ').replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+      const newMember: TeamMember = {
+        email: newMemberEmail,
+        role: newMemberRole,
+        name: name,
+        avatar: `https://picsum.photos/seed/${Math.random()}/40/40`,
+      };
+      setTeamMembers([...teamMembers, newMember]);
+      setNewMemberEmail('');
+      setNewMemberRole('');
+    }
+  };
+
+  const handleRemoveMember = (emailToRemove: string) => {
+    setTeamMembers(teamMembers.filter(member => member.email !== emailToRemove));
+  };
+
 
   return (
     <div className="flex flex-1 justify-center items-center">
@@ -160,7 +192,69 @@ export default function ProjectSetupPage() {
                 </div>
               </div>
             )}
-             {step > 1 && (
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-4 rounded-lg border p-4">
+                  <h3 className="font-semibold">Invite Team Members</h3>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="member-email" className="sr-only">Email</Label>
+                        <Input
+                            id="member-email"
+                            type="email"
+                            placeholder="member@example.com"
+                            value={newMemberEmail}
+                            onChange={(e) => setNewMemberEmail(e.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="member-role" className="sr-only">Role</Label>
+                        <Select value={newMemberRole} onValueChange={setNewMemberRole}>
+                            <SelectTrigger id="member-role" className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Project Manager">Project Manager</SelectItem>
+                                <SelectItem value="Engineer">Engineer</SelectItem>
+                                <SelectItem value="Architect">Architect</SelectItem>
+                                <SelectItem value="Viewer">Viewer</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button onClick={handleAddMember} disabled={!newMemberEmail || !newMemberRole}>
+                      <UserPlus className="mr-2" /> Add Member
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Project Team ({teamMembers.length})</h3>
+                  <Separator />
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {teamMembers.length > 0 ? teamMembers.map((member, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={member.avatar} />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{member.name}</p>
+                            <p className="text-sm text-muted-foreground">{member.role}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveMember(member.email)}>
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    )) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">No team members added yet.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+             {step > 2 && (
                 <div className="flex items-center justify-center h-60 bg-muted rounded-md">
                     <p className="text-muted-foreground">Step {step} content coming soon...</p>
                 </div>
