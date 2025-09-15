@@ -26,6 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 export default function FieldDashboardPage() {
   const [isOnline, setIsOnline] = useState(true);
