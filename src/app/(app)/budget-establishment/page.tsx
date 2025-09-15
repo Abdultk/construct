@@ -1,3 +1,5 @@
+
+
 'use client';
 import {
     ArrowUpRight,
@@ -29,7 +31,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
-export default function BudgetEstablishmentPage() {
+export default function FinancialDashboardPage() {
     const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",

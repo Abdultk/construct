@@ -19,7 +19,7 @@ export function DashboardNav() {
     { href: "/change-orders", label: "Change Orders", icon: FilePlus, badge: '3' },
     { href: "/visualize-impact", label: "Impact Viz", icon: Eye },
     { href: "/field-dashboard", label: "Field", icon: HardHat },
-    { href: "/financial-dashboard", label: "Budget", icon: DollarSign },
+    { href: "/budget-establishment", label: "Budget", icon: DollarSign },
     { href: "/cost-tracking", label: "Cost Tracking", icon: ListFilter },
     { href: "/ai-insights", label: "AI Insights", icon: TrendingUp },
     { href: "/ai-assistant", label: "AI Assistant", icon: Bot },
