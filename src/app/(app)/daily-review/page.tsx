@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -28,8 +29,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
 
 export default function DailyReviewPage() {
+  const [date, setDate] = useState('');
+
+  useEffect(() => {
+    setDate(new Date().toLocaleDateString());
+  }, []);
+
   const submissions = [
     {
       id: 'DPR-0728',
@@ -73,7 +81,7 @@ export default function DailyReviewPage() {
             Daily Management Review
           </h1>
           <p className="text-muted-foreground">
-            Project: Downtown Skyscraper - {new Date().toLocaleDateString()}
+            Project: Downtown Skyscraper - {date}
           </p>
         </div>
         <div className="flex items-center gap-2">
