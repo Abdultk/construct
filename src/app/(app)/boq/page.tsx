@@ -12,6 +12,8 @@ import {
   Upload,
   Wand2,
   ChevronDown,
+  Loader2,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +52,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { validateBoq, type BoqItemSchema, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type BoqItem = {
   id: string;
@@ -109,6 +113,9 @@ export default function BoqDataGridPage() {
   const [boqItems, setBoqItems] = useState<BoqItem[]>(initialBoqItems);
   const [selectedItem, setSelectedItem] = useState<BoqItem | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [aiValidationEnabled, setAiValidationEnabled] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidateBoqOutput | null>(null);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -123,29 +130,73 @@ export default function BoqDataGridPage() {
     }
   };
 
-  const handleAddItem = (newItemData: Omit<BoqItem, 'amount'>) => {
+  const handleAddItem = (newItemData: Omit<BoqItem, 'amount' | 'status'>) => {
     const amount = (typeof newItemData.quantity === 'number' && typeof newItemData.rate === 'number')
       ? newItemData.quantity * newItemData.rate
       : 0;
 
     const newItem: BoqItem = {
         ...newItemData,
-        amount: newItemData.isParent ? 0 : amount,
+        amount: newItemData.isParent ? initialBoqItems.filter(i => i.id.startsWith(newItemData.id + '.')).reduce((sum, i) => sum + i.amount, 0) : amount,
         status: 'Pending',
     };
 
     const parentIndex = boqItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
-
+    
     let newItems = [...boqItems];
     if (parentIndex !== -1) {
-        newItems.splice(parentIndex + 1, 0, newItem);
+        const lastChildIndex = newItems.map(i => i.id).lastIndexOf(newItems.filter(i => i.id.startsWith(newItems[parentIndex].id + '.')).pop()?.id || newItems[parentIndex].id);
+        newItems.splice(lastChildIndex + 1, 0, newItem);
     } else {
         newItems.push(newItem);
     }
+    
+    // Recalculate parent amounts
+    newItems = newItems.map(item => {
+        if (item.isParent) {
+            return {
+                ...item,
+                amount: newItems.filter(i => i.id.startsWith(item.id + '.') && !i.isParent).reduce((sum, i) => sum + i.amount, 0)
+            }
+        }
+        return item;
+    })
 
     setBoqItems(newItems);
     setIsAddOpen(false);
   };
+
+  const handleAiValidationToggle = async (checked: boolean) => {
+    setAiValidationEnabled(checked);
+    if (checked) {
+      setIsValidating(true);
+      setValidationResult(null);
+      try {
+        const result = await validateBoq({
+          items: boqItems.map(i => ({
+            id: i.id,
+            description: i.description,
+            unit: i.unit,
+            quantity: typeof i.quantity === 'number' ? i.quantity : undefined,
+            rate: typeof i.rate === 'number' ? i.rate : undefined,
+            isParent: i.isParent,
+          }))
+        });
+        setValidationResult(result);
+      } catch (error) {
+        console.error("AI Validation failed", error);
+        // You might want to show a toast message here
+      } finally {
+        setIsValidating(false);
+      }
+    } else {
+      setValidationResult(null);
+    }
+  };
+
+  const getValidationForId = (id: string) => {
+    return validationResult?.anomalies.find(a => a.itemId === id);
+  }
   
   const AddItemForm = () => {
     const [id, setId] = useState('');
@@ -275,11 +326,21 @@ export default function BoqDataGridPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Label htmlFor="ai-validate-toggle">AI Validation</Label>
-                <Switch id="ai-validate-toggle" />
-                <Wand2 className="h-5 w-5 text-ai-accent" />
+                <Switch id="ai-validate-toggle" onCheckedChange={handleAiValidationToggle} disabled={isValidating}/>
+                {isValidating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5 text-ai-accent" />}
               </div>
             </CardContent>
           </Card>
+
+          {validationResult && (
+            <Alert>
+              <Lightbulb className="h-4 w-4" />
+              <AlertTitle>AI Validation Summary</AlertTitle>
+              <AlertDescription>
+                {validationResult.summary}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Grid Interface */}
           <div className="flex-1 overflow-auto rounded-md border">
@@ -296,43 +357,52 @@ export default function BoqDataGridPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {boqItems.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className={`cursor-pointer ${
-                      item.isParent ? 'bg-muted/50' : ''
-                    } ${selectedItem?.id === item.id ? 'bg-muted' : ''}`}
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    <TableCell
-                      className={`font-medium font-code ${item.isParent ? '' : 'pl-8'}`}
+                {boqItems.map((item) => {
+                  const anomaly = getValidationForId(item.id);
+                  return (
+                    <TableRow
+                      key={item.id}
+                      className={`cursor-pointer ${
+                        item.isParent ? 'bg-muted/50' : ''
+                      } ${selectedItem?.id === item.id ? 'bg-muted' : ''} ${anomaly ? 'bg-yellow-500/10' : ''}`}
+                      onClick={() => setSelectedItem(item)}
                     >
-                      {item.id}
-                    </TableCell>
-                    <TableCell
-                      className={`font-semibold ${item.isParent ? '' : 'font-normal'}`}
-                    >
-                      {item.description}
-                    </TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell className="text-right font-code">
-                      {item.quantity?.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right font-code">
-                      {typeof item.rate === 'number'
-                        ? item.rate.toLocaleString()
-                        : item.rate}
-                    </TableCell>
-                    <TableCell className="text-right font-bold font-code">
-                      {item.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={getStatusBadge(item.status)}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell
+                        className={`font-medium font-code ${item.isParent ? '' : 'pl-8'}`}
+                      >
+                        {item.id}
+                      </TableCell>
+                      <TableCell
+                        className={`font-semibold ${item.isParent ? '' : 'font-normal'}`}
+                      >
+                        {item.description}
+                        {anomaly && (
+                          <p className="text-xs text-yellow-600">
+                            <Wand2 className="inline-block h-3 w-3 mr-1" />
+                            {anomaly.suggestion}
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell>{item.unit}</TableCell>
+                      <TableCell className="text-right font-code">
+                        {item.quantity?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right font-code">
+                        {typeof item.rate === 'number'
+                          ? item.rate.toLocaleString()
+                          : item.rate}
+                      </TableCell>
+                      <TableCell className="text-right font-bold font-code">
+                        {item.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={getStatusBadge(item.status)}>
+                          {item.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -360,7 +430,7 @@ export default function BoqDataGridPage() {
                             </div>
                             <div className='flex justify-between'>
                                 <span className='text-muted-foreground'>Rate</span>
-                                <span className='font-medium'>${typeof selectedItem.rate === 'number' ? selectedItem.rate.toLocaleString() : selectedItem.rate} / {selectedItem.unit}</span>
+                                <span className='font-medium'>${typeof selectedItem.rate === 'number' ? selectedItem.rate.toLocaleString() : ''} / {selectedItem.unit}</span>
                             </div>
                         </>
                     )}
