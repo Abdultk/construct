@@ -30,6 +30,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { projects } from '@/lib/data';
 import { Progress } from '@/components/ui/progress';
+import { differenceInDays, format, addDays } from 'date-fns';
 
 export default function GanttChartPage({
   params,
@@ -43,15 +44,45 @@ export default function GanttChartPage({
   }
   
   const wbsItems = [
-    { id: '1', name: 'Project Initiation', progress: 100, resource: 'A.J.', dep: '' },
-    { id: '1.1', name: 'Feasibility Study', progress: 100, resource: 'A.J.', dep: '', isChild: true },
-    { id: '2', name: 'Design & Planning', progress: 75, resource: 'B.K.', dep: '1' },
-    { id: '2.1', name: 'Schematic Design', progress: 90, resource: 'B.K.', dep: '1.1', isChild: true },
-    { id: '2.2', name: 'Permit Application', progress: 60, resource: 'C.L.', dep: '2.1', isChild: true },
-    { id: '3', name: 'Construction', progress: 10, resource: 'D.M.', dep: '2.2' },
-    { id: '3.1', name: 'Foundation', progress: 20, resource: 'D.M.', dep: '2.2', isChild: true, isCritical: true },
-    { id: '3.2', name: 'Superstructure', progress: 5, resource: 'E.N.', dep: '3.1', isChild: true, isCritical: true },
+    { id: '1', name: 'Project Initiation', progress: 100, resource: 'A.J.', dep: '', start: new Date('2024-07-01'), end: new Date('2024-07-10') },
+    { id: '1.1', name: 'Feasibility Study', progress: 100, resource: 'A.J.', dep: '', isChild: true, start: new Date('2024-07-01'), end: new Date('2024-07-10') },
+    { id: '2', name: 'Design & Planning', progress: 75, resource: 'B.K.', dep: '1', start: new Date('2024-07-11'), end: new Date('2024-08-20') },
+    { id: '2.1', name: 'Schematic Design', progress: 90, resource: 'B.K.', dep: '1.1', isChild: true, start: new Date('2024-07-11'), end: new Date('2024-08-05') },
+    { id: '2.2', name: 'Permit Application', progress: 60, resource: 'C.L.', dep: '2.1', isChild: true, start: new Date('2024-08-06'), end: new Date('2024-08-20') },
+    { id: '3', name: 'Construction', progress: 10, resource: 'D.M.', dep: '2.2', start: new Date('2024-08-21'), end: new Date('2024-10-30') },
+    { id: '3.1', name: 'Foundation', progress: 20, resource: 'D.M.', dep: '2.2', isChild: true, isCritical: true, start: new Date('2024-08-21'), end: new Date('2024-09-10') },
+    { id: '3.2', name: 'Superstructure', progress: 5, resource: 'E.N.', dep: '3.1', isChild: true, isCritical: true, start: new Date('2024-09-11'), end: new Date('2024-10-30') },
   ]
+
+  const startDate = wbsItems.reduce((min, item) => item.start < min ? item.start : min, wbsItems[0].start);
+  const endDate = wbsItems.reduce((max, item) => item.end > max ? item.end : max, wbsItems[0].end);
+  const totalDays = differenceInDays(endDate, startDate) + 1;
+  const dayWidth = 40;
+
+  const months = [];
+  let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  while (currentMonth <= endDate) {
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    let startDayOfMonth = 1;
+    let daysToShow = daysInMonth;
+
+    if (currentMonth.getMonth() === startDate.getMonth() && currentMonth.getFullYear() === startDate.getFullYear()) {
+        startDayOfMonth = startDate.getDate();
+        daysToShow = daysInMonth - startDate.getDate() + 1;
+    }
+    
+    if (currentMonth.getMonth() === endDate.getMonth() && currentMonth.getFullYear() === endDate.getFullYear()) {
+        daysToShow = endDate.getDate() - startDayOfMonth + 1;
+        if(startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
+            daysToShow = endDate.getDate() - startDate.getDate() + 1;
+        }
+    }
+    
+    months.push({ name: format(currentMonth, 'MMMM yyyy'), days: daysToShow });
+    currentMonth = addDays(currentMonth, daysInMonth);
+  }
+
+  const days = Array.from({ length: totalDays }, (_, i) => addDays(startDate, i));
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -129,26 +160,53 @@ export default function GanttChartPage({
         </Card>
 
         {/* Main Timeline */}
-        <Card className="col-span-8 overflow-x-auto overflow-y-hidden">
+        <div className="col-span-8 overflow-auto">
+          <Card className="h-full">
             <CardHeader>
                 <CardTitle>Project Timeline</CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="relative h-[500px] w-[2000px]">
-                    <p className="text-muted-foreground">Interactive timeline coming soon.</p>
-                    {/* Grid background */}
-                    <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(to_bottom,white,transparent)] dark:bg-grid-slate-700/50"></div>
+            <CardContent className='relative'>
+                 <div className="relative" style={{ width: `${totalDays * dayWidth}px` }}>
+                    {/* Header */}
+                    <div className="sticky top-0 z-10 bg-card">
+                        <div className="flex h-10">
+                            {months.map((month, index) => (
+                                <div key={index} className="flex items-center justify-center border-r border-b" style={{ width: `${month.days * dayWidth}px` }}>
+                                    <span className="font-semibold text-sm">{month.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                         <div className="flex h-8">
+                            {days.map((day, index) => (
+                                <div key={index} className="flex items-center justify-center border-r" style={{ width: `${dayWidth}px` }}>
+                                    <span className="text-xs text-muted-foreground">{format(day, 'd')}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                     {/* Rows */}
+                    <div className="relative">
+                       {wbsItems.map((item, index) => {
+                            const left = differenceInDays(item.start, startDate) * dayWidth;
+                            const width = differenceInDays(item.end, item.start) * dayWidth;
+                            return (
+                                <div key={item.id} className="h-12 flex items-center border-b border-dashed">
+                                    <div style={{ left: `${left}px`, width: `${width}px`}} className={`absolute h-8 rounded-md ${item.isCritical ? 'bg-destructive/70' : 'bg-primary/80'} flex items-center`}>
+                                        <div style={{width: `${item.progress}%`}} className={`h-full rounded-md ${item.isCritical ? 'bg-destructive' : 'bg-primary'}`}></div>
+                                        <span className="absolute left-2 text-xs text-white truncate pr-2">{item.name}</span>
+                                    </div>
+                                </div>
+                            )
+                       })}
+                       {/* Grid lines */}
+                       {days.map((day, index) => (
+                           <div key={index} className="absolute top-0 h-full border-r" style={{ left: `${index * dayWidth}px`, zIndex: -1 }}></div>
+                       ))}
+                    </div>
                 </div>
             </CardContent>
-        </Card>
-
-        {/* Right Panel placeholder - can be implemented in future */}
-        {/* <div className="col-span-3 space-y-4">
-             <Card>
-                <CardHeader><CardTitle>Task Details</CardTitle></CardHeader>
-                <CardContent><p className="text-sm text-muted-foreground">Select a task to see details</p></CardContent>
-            </Card>
-        </div> */}
+          </Card>
+        </div>
       </div>
     </div>
   );
