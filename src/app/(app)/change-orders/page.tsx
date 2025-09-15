@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle } from "lucide-react"
+import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle, Send } from "lucide-react"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -29,15 +29,71 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import * as React from "react"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+
+type ChangeOrder = {
+  id: string;
+  title: string;
+  status: 'Approved' | 'Pending Review' | 'Rejected';
+  project: string;
+  impact: string;
+  date: string;
+  priority: 'Low' | 'Medium' | 'High';
+  requester: string;
+};
+
+type Comment = {
+  id: string;
+  user: { name: string; avatar: string; fallback: string };
+  text: string;
+  timestamp: string;
+};
+
+type CommentsByChangeOrder = {
+  [key: string]: Comment[];
+};
 
 export default function ChangeOrdersPage() {
 
-    const changeOrders = [
+    const changeOrders: ChangeOrder[] = [
         { id: 'CR-0011', title: 'Relocate HVAC unit on roof', status: 'Approved', project: 'Downtown Skyscraper', impact: '+$5,000', date: '2024-07-28', priority: 'Medium', requester: 'A. Johnson'},
         { id: 'CR-0010', title: 'Substitute flooring material in lobby', status: 'Pending Review', project: 'Downtown Skyscraper', impact: '+$12,500', date: '2024-07-25', priority: 'High', requester: 'B. Miller'},
         { id: 'CR-0009', title: 'Additional electrical outlets in offices', status: 'Rejected', project: 'City General Hospital Wing', impact: '+$8,200', date: '2024-07-22', priority: 'Low', requester: 'C. Davis'},
         { id: 'CR-0008', title: 'Change of paint color in corridors', status: 'Approved', project: 'Suburban Housing Development', impact: '-$2,000', date: '2024-07-20', priority: 'Low', requester: 'A. Johnson'},
-    ]
+    ];
+
+    const commentsData: CommentsByChangeOrder = {
+        'CR-0010': [
+            { id: 'comment-1', user: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100', fallback: 'AJ' }, text: 'Can we get a cost breakdown for this new material? The impact seems high.', timestamp: '3h ago' },
+            { id: 'comment-2', user: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100', fallback: 'BM' }, text: 'Attached. The supplier has a minimum order quantity which is driving up the price.', timestamp: '2h ago' },
+        ],
+        'CR-0011': [
+            { id: 'comment-3', user: { name: 'Charlie Davis', avatar: 'https://picsum.photos/seed/12/100/100', fallback: 'CD' }, text: 'Structural has signed off on the new location. We are good to go.', timestamp: '1d ago' },
+        ]
+    };
+    
+    const [selectedChangeOrder, setSelectedChangeOrder] = React.useState<ChangeOrder | null>(null);
+    const [comments, setComments] = React.useState<Comment[]>([]);
+    const [newComment, setNewComment] = React.useState('');
+
+    const handleRowClick = (co: ChangeOrder) => {
+        setSelectedChangeOrder(co);
+        setComments(commentsData[co.id] || []);
+    };
+    
+    const handleAddComment = () => {
+        if (newComment.trim() === '' || !selectedChangeOrder) return;
+        const newCommentObj: Comment = {
+            id: `comment-${Date.now()}`,
+            user: { name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/100/100', fallback: 'JD' },
+            text: newComment,
+            timestamp: 'Just now'
+        };
+        setComments(prev => [...prev, newCommentObj]);
+        setNewComment('');
+    };
+
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -164,9 +220,51 @@ export default function ChangeOrdersPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Comments & Discussion</CardTitle>
+                 <CardDescription>
+                    {selectedChangeOrder ? `Comments for ${selectedChangeOrder.id}` : 'Select a change order to view comments'}
+                </CardDescription>
             </CardHeader>
-            <CardContent>
-                 <p className="text-sm text-muted-foreground">Coming Soon.</p>
+            <CardContent className="space-y-4">
+                 <div className="space-y-4 h-32 overflow-y-auto pr-2">
+                    {selectedChangeOrder ? (
+                        comments.length > 0 ? (
+                            comments.map(comment => (
+                                <div key={comment.id} className="flex items-start gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={comment.user.avatar} />
+                                        <AvatarFallback>{comment.user.fallback}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="rounded-lg bg-muted p-2 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-semibold text-xs">{comment.user.name}</p>
+                                            <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
+                                        </div>
+                                        <p className="text-sm">{comment.text}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : <p className="text-sm text-muted-foreground text-center pt-8">No comments for this item.</p>
+                    ) : <p className="text-sm text-muted-foreground text-center pt-8">Select a change order to begin discussion.</p>}
+                 </div>
+                 <div className="relative">
+                    <Input 
+                        placeholder="Type a comment..." 
+                        className="pr-10" 
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
+                        disabled={!selectedChangeOrder}
+                    />
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute inset-y-0 right-0 h-full w-10"
+                        onClick={handleAddComment}
+                        disabled={!selectedChangeOrder || newComment.trim() === ''}
+                    >
+                        <Send className="h-5 w-5" />
+                    </Button>
+                </div>
             </CardContent>
         </Card>
       </div>
@@ -194,7 +292,11 @@ export default function ChangeOrdersPage() {
           </TableHeader>
           <TableBody>
             {changeOrders.map((co) => (
-              <TableRow key={co.id} className="cursor-pointer hover:bg-muted/50">
+              <TableRow 
+                key={co.id} 
+                className={`cursor-pointer hover:bg-muted/50 ${selectedChangeOrder?.id === co.id ? 'bg-muted' : ''}`}
+                onClick={() => handleRowClick(co)}
+              >
                 <TableCell className="font-medium font-code">{co.id}</TableCell>
                 <TableCell>{co.title}</TableCell>
                 <TableCell className="hidden md:table-cell">{co.project}</TableCell>
