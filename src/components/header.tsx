@@ -25,7 +25,10 @@ import {
   Siren,
   Orbit,
   Signal,
-  LineChart
+  LineChart,
+  Library,
+  Wrench,
+  RefreshCw
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -185,6 +188,27 @@ export function Header() {
             >
               <LineChart className="h-5 w-5" />
               Facility Performance
+            </Link>
+            <Link
+              href="/asset-registry"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Library className="h-5 w-5" />
+              Asset Registry
+            </Link>
+            <Link
+              href="/maintenance-management"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Wrench className="h-5 w-5" />
+              Maintenance
+            </Link>
+            <Link
+              href="/lifecycle-cost-analysis"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-5 w-5" />
+              Lifecycle Cost
             </Link>
             <Link
               href="/teams"
