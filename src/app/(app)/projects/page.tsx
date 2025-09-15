@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { projects } from "@/lib/data"
+import Link from "next/link"
 
 export default function ProjectsPage() {
   const formatCurrency = (value: number) =>
@@ -49,10 +50,12 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <TableRow key={project.id}>
                 <TableCell>
-                  <div className="font-medium font-headline">{project.name}</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    ID: {project.id}
-                  </div>
+                  <Link href={`/projects/${project.id}`} className="hover:underline">
+                    <div className="font-medium font-headline">{project.name}</div>
+                    <div className="hidden text-sm text-muted-foreground md:inline">
+                      ID: {project.id}
+                    </div>
+                  </Link>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   <Badge

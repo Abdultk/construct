@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 import {
   Bell,
@@ -44,7 +45,7 @@ export function Header() {
               Dashboard
             </Link>
             <Link
-              href="/dashboard/projects"
+              href="/projects"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <GanttChartSquare className="h-5 w-5" />
@@ -54,21 +55,21 @@ export function Header() {
               </Badge>
             </Link>
             <Link
-              href="/dashboard/teams"
+              href="/teams"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Users className="h-5 w-5" />
               Teams
             </Link>
             <Link
-              href="/dashboard/reports"
+              href="/reports"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <FileText className="h-5 w-5" />
               Reports
             </Link>
              <Link
-              href="/dashboard/notifications"
+              href="/notifications"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Bell className="h-5 w-5" />
@@ -78,7 +79,7 @@ export function Header() {
               </Badge>
             </Link>
             <Link
-              href="/dashboard/settings"
+              href="/settings"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Settings className="h-5 w-5" />

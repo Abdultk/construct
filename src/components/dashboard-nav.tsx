@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link"
@@ -23,10 +24,10 @@ export function DashboardNav() {
       {navItems.map(({ href, label, icon: Icon, badge }) => (
         <Link
           key={label}
-          href={`/dashboard${href === '/dashboard' ? '' : href}`}
+          href={href}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-            (pathname === `/dashboard${href === '/dashboard' ? '' : href}` || (href !== '/dashboard' && pathname.startsWith(`/dashboard${href}`))) && "bg-muted text-primary"
+            (pathname === href || (href !== '/dashboard' && pathname.startsWith(href))) && "bg-muted text-primary"
           )}
         >
           <Icon className="h-4 w-4" />
