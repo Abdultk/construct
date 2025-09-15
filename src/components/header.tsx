@@ -10,6 +10,7 @@ import {
   Search,
   Settings,
   Users,
+  DollarSign
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +62,13 @@ export function Header() {
             >
               <HardHat className="h-5 w-5" />
               Field
+            </Link>
+             <Link
+              href="/financial-dashboard"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <DollarSign className="h-5 w-5" />
+              Financials
             </Link>
             <Link
               href="/teams"
