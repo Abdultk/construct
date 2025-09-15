@@ -14,7 +14,7 @@ import {
   Users,
   Calendar,
   CalendarIcon,
-  Brick,
+  ToyBrick,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -395,7 +395,22 @@ export default function WbsHierarchyPage() {
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle className='text-base'>Dependencies</CardTitle>
-                                <Button variant="outline" size="sm"><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm"><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Dependency Visualization</DialogTitle>
+                                            <DialogDescription>
+                                                Feature coming soon. This view will show a graph of task dependencies.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="py-8 text-center text-muted-foreground">
+                                            <p>A visual graph of dependencies will be displayed here.</p>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
                             </CardHeader>
                             <CardContent>
                                  <Table>
@@ -464,7 +479,7 @@ export default function WbsHierarchyPage() {
                  selectedItem.materials.map((mat, index) => (
                     <div key={index} className="p-3 rounded-md border text-sm">
                         <div className="flex items-center gap-2 font-semibold">
-                            <Brick className="h-4 w-4 text-muted-foreground" />
+                            <ToyBrick className="h-4 w-4 text-muted-foreground" />
                             <span>{mat.name}</span>
                         </div>
                         <div className="pl-6">
