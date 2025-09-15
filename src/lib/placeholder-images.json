@@ -18,6 +18,12 @@
       "description": "A 3D architectural rendering of a modern skyscraper, used for the digital twin viewer.",
       "imageUrl": "https://picsum.photos/seed/42/1200/900",
       "imageHint": "building model"
+    },
+    {
+      "id": "digital-twin-wireframe",
+      "description": "A wireframe 3D model of a building, giving a more technical and interactive feel.",
+      "imageUrl": "https://picsum.photos/seed/43/1200/900",
+      "imageHint": "wireframe building"
     }
   ]
 }
