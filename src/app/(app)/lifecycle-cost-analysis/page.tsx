@@ -15,10 +15,29 @@ import {
   BarChart,
   LineChart,
   Repeat,
-  Calculator
+  Calculator,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { useState } from 'react';
+
+type AnalysisTool = 'Cost Modeling' | 'ROI Calculation' | 'Replacement Analysis' | 'Budget Planning' | null;
 
 export default function LifecycleCostAnalysisPage() {
+  const [selectedTool, setSelectedTool] = useState<AnalysisTool>(null);
+
+  const analysisTools = [
+    { id: 'Cost Modeling' as const, icon: Calculator, variant: 'secondary' as const },
+    { id: 'ROI Calculation' as const, icon: DollarSign, variant: 'outline' as const },
+    { id: 'Replacement Analysis' as const, icon: Repeat, variant: 'outline' as const },
+    { id: 'Budget Planning' as const, icon: BarChart, variant: 'outline' as const },
+  ];
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
@@ -117,22 +136,18 @@ export default function LifecycleCostAnalysisPage() {
                 <CardDescription>Model costs, calculate ROI, and plan for the future.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-                <Button variant="secondary" size="lg" className="h-20 flex-col items-start p-4">
-                    <Calculator className="h-6 w-6 mb-2" />
-                    <p className="font-semibold">Cost Modeling</p>
+              {analysisTools.map(tool => (
+                <Button
+                  key={tool.id}
+                  variant={tool.variant}
+                  size="lg"
+                  className="h-20 flex-col items-start p-4"
+                  onClick={() => setSelectedTool(tool.id)}
+                >
+                  <tool.icon className="h-6 w-6 mb-2" />
+                  <p className="font-semibold">{tool.id}</p>
                 </Button>
-                 <Button variant="outline" size="lg" className="h-20 flex-col items-start p-4">
-                    <DollarSign className="h-6 w-6 mb-2" />
-                    <p className="font-semibold">ROI Calculation</p>
-                </Button>
-                 <Button variant="outline" size="lg" className="h-20 flex-col items-start p-4">
-                    <Repeat className="h-6 w-6 mb-2" />
-                    <p className="font-semibold">Replacement Analysis</p>
-                </Button>
-                 <Button variant="outline" size="lg" className="h-20 flex-col items-start p-4">
-                    <BarChart className="h-6 w-6 mb-2" />
-                    <p className="font-semibold">Budget Planning</p>
-                </Button>
+              ))}
             </CardContent>
         </Card>
         
@@ -146,6 +161,20 @@ export default function LifecycleCostAnalysisPage() {
             </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!selectedTool} onOpenChange={(isOpen) => !isOpen && setSelectedTool(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedTool}</DialogTitle>
+            <DialogDescription>
+              This feature is under development.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-8 text-center text-muted-foreground">
+            <p>Analysis interface for {selectedTool} will be available here soon.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
