@@ -100,7 +100,9 @@ export default function DailyReviewPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">View Project Dashboard</Button>
+          <Button variant="outline" asChild>
+            <Link href="/projects/proj-001">View Project Dashboard</Link>
+          </Button>
         </div>
       </div>
 
