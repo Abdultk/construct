@@ -13,6 +13,7 @@ import {
   MoreVertical,
   Star,
   Users,
+  GanttChartSquare
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -196,8 +197,14 @@ export default function ProjectDetailsPage({
                 </Card>
            </div>
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Schedule Performance</CardTitle>
+                     <Button asChild variant="outline" size="sm">
+                        <Link href={`/projects/${project.id}/gantt`}>
+                            <GanttChartSquare className="mr-2 h-4 w-4" />
+                            View Gantt Chart
+                        </Link>
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">Interactive Gantt chart coming soon</p>
