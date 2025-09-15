@@ -42,10 +42,11 @@ import {
 } from '@/ai/flows/balance-team-workload';
 
 export default function KanbanBoardPage({
-  params: { id },
+  params,
 }: {
   params: { id: string };
 }) {
+  const { id } = params;
   const project = projects.find((p) => p.id === id);
   const [isBalancing, setIsBalancing] = useState(false);
   const [balanceResult, setBalanceResult] =
