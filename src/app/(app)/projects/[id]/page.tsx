@@ -8,8 +8,11 @@ import {
   CheckCircle2,
   ChevronDown,
   CircleDollarSign,
+  FileText,
   Gauge,
+  MoreVertical,
   Star,
+  Users,
 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -26,11 +29,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { projects } from '@/lib/data';
 import Link from 'next/link';
+import {
+  ProgressCircular,
+  ProgressCircularLabel,
+} from '@/components/ui/progress-circular';
 
 export default function ProjectDetailsPage({
   params,
@@ -48,9 +56,23 @@ export default function ProjectDetailsPage({
     if (score > 75) return 'text-yellow-500';
     return 'text-red-500';
   };
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'On Track':
+        return 'bg-green-500';
+      case 'At Risk':
+        return 'bg-yellow-500';
+      case 'Delayed':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href="/projects">
@@ -58,164 +80,167 @@ export default function ProjectDetailsPage({
             <span className="sr-only">Back to projects</span>
           </Link>
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex-1 sm:flex-none">
-              <h1 className="truncate pr-2 font-headline text-lg">
+        <div className="flex items-center gap-2">
+            <h1 className="truncate pr-2 font-headline text-xl">
                 {project.name}
-              </h1>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            {projects.map((p) => (
-              <DropdownMenuItem key={p.id} asChild>
-                <Link href={`/projects/${p.id}`}>{p.name}</Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Project Overview Card */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Project Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Phase</span>
-              <span className="font-medium">Construction</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Completion</span>
-              <span className="font-medium">
-                {project.completionPercentage}%
-              </span>
-            </div>
-            <Separator />
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Health Score</span>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`font-bold ${getHealthScoreColor(
+            </h1>
+             <Badge variant={project.status === 'On Track' ? 'secondary' : project.status === 'At Risk' ? 'outline' : 'destructive'}>{project.status}</Badge>
+             <Badge variant="outline">Construction Phase</Badge>
+        </div>
+        <div className='ml-auto flex items-center gap-2'>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-semibold">Health Score:</span>
+                 <span
+                  className={`font-bold text-lg ${getHealthScoreColor(
                     project.budgetHealth
                   )}`}
                 >
                   {project.budgetHealth}%
                 </span>
-                <Badge variant="secondary">AI Confidence: 92%</Badge>
-              </div>
+                 <Badge variant="secondary">AI Confidence: 92%</Badge>
             </div>
-            <Separator />
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Start Date</span>
-                <span className="font-medium">Jan 15, 2023</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Current Milestone</span>
-                <span className="font-medium">Structural Steel</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Est. Completion</span>
-                <span className="font-medium">Dec 20, 2024</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Critical Metrics Row */}
-        <div className="md:col-span-2">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Budget Status
-                </CardTitle>
-                <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-500">On Track</div>
-                <p className="text-xs text-muted-foreground">
-                  $42M of $100M spent
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Schedule Perf.
-                </CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-yellow-500">
-                  -5 days
-                </div>
-                <p className="text-xs text-muted-foreground">Behind schedule</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Quality Score
-                </CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-2xl font-bold">
-                  4.8
-                  <Star className="ml-1 h-5 w-5 fill-yellow-400 text-yellow-400" />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Based on 12 inspections
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Safety</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">125</div>
-                <p className="text-xs text-muted-foreground">
-                  Days without incident
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid grid-cols-1 gap-4 pt-4">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Central Panel</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Gantt Chart, Resource Utilization, Weather Impact Coming Soon</p>
-                </CardContent>
-            </Card>
-          </div>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <MoreVertical />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end'>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className='text-destructive'>Archive</DropdownMenuItem>
+                </DropdownMenuContent>
+             </DropdownMenu>
         </div>
       </div>
-       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-         <Card className="md:col-span-2">
-            <CardHeader>
-                <CardTitle>AI Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">Coming Soon</p>
-            </CardContent>
-        </Card>
-         <Card className="md:col-span-1">
-            <CardHeader>
-                <CardTitle>Right Sidebar</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">Change Orders, Approvals, Activity Feed Coming Soon</p>
-            </CardContent>
-        </Card>
-       </div>
+      
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        {/* Left Panel */}
+        <div className="lg:col-span-3 space-y-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Key Information</CardTitle>
+                </CardHeader>
+                 <CardContent className='text-sm space-y-2'>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Start Date</span>
+                        <span>Jan 15, 2023</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Est. Completion</span>
+                        <span>Dec 20, 2024</span>
+                    </div>
+                     <div className="flex justify-between">
+                        <span className="text-muted-foreground">Project Manager</span>
+                        <span>Alice Johnson</span>
+                    </div>
+                 </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Stakeholders</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Document Library</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Center Panel */}
+        <div className="lg:col-span-6 space-y-4">
+           <div className='grid grid-cols-3 gap-4'>
+                <Card>
+                    <CardHeader className='items-center pb-2'>
+                         <CardTitle className="text-base">Progress</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex justify-center">
+                        <ProgressCircular value={project.completionPercentage} size="lg">
+                            <ProgressCircularLabel className="text-2xl font-bold">
+                                {project.completionPercentage}%
+                            </ProgressCircularLabel>
+                        </ProgressCircular>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className='items-center pb-2'>
+                         <CardTitle className="text-base">Cost Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground text-center">Chart Coming Soon</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className='items-center pb-2'>
+                         <CardTitle className="text-base">Risk</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground text-center">Heatmap Coming Soon</p>
+                    </CardContent>
+                </Card>
+           </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Schedule Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Interactive Gantt chart coming soon</p>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Right Panel */}
+        <div className="lg:col-span-3 space-y-4">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Upcoming Milestones</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Pending Approvals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Change Orders</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>AI Recommendations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                </CardContent>
+            </Card>
+        </div>
+      </div>
     </div>
   );
 }
