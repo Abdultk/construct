@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -111,4 +112,8 @@ export {
   DrawerTrigger,
   DrawerClose,
   DrawerContent,
-  DrawerHeader
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+}
