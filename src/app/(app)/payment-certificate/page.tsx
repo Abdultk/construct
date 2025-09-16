@@ -42,10 +42,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
 
 export default function PaymentCertificatePage() {
 
     const { toast } = useToast();
+    const [currentDate, setCurrentDate] = useState('');
+
+    useEffect(() => {
+        setCurrentDate(new Date().toLocaleDateString());
+    }, []);
 
     const lineItems = [
         { wbs: '3.1.1', description: 'Excavation', completed: '100%', amount: 60000 },
@@ -130,7 +136,7 @@ export default function PaymentCertificatePage() {
                 <CardHeader className="p-0 grid grid-cols-2">
                     <div>
                         <h2 className="font-bold text-3xl font-headline">Payment Certificate #003</h2>
-                        <p className="text-muted-foreground">Date: {new Date().toLocaleDateString()}</p>
+                        <p className="text-muted-foreground">Date: {currentDate}</p>
                     </div>
                     <div className="text-right">
                         <p className="font-semibold">ConstructAI Corp.</p>

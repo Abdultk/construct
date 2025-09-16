@@ -36,7 +36,12 @@ export default function DailyReviewPage() {
   const [date, setDate] = useState('');
 
   useEffect(() => {
-    setDate(new Date().toLocaleDateString());
+    // Set date on client-side to avoid hydration mismatch
+    setDate(new Date().toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }));
   }, []);
 
   const submissions = [
