@@ -17,6 +17,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Send,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,14 +44,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function PaymentCertificatePage() {
 
     const { toast } = useToast();
     const [currentDate, setCurrentDate] = useState('');
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
-        setCurrentDate(new Date().toLocaleDateString());
+        setCurrentDate(new Date().toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }));
     }, []);
 
     const lineItems = [
@@ -65,12 +73,44 @@ export default function PaymentCertificatePage() {
         window.print();
     }
 
-    const handleDownloadPdf = () => {
-        toast({
-            title: 'Prepare to Download',
-            description: 'In the print dialog, select "Save as PDF" as the destination to download the certificate.',
-        });
-        window.print();
+    const handleDownloadPdf = async () => {
+        const certificateElement = document.getElementById('payment-certificate');
+        if (!certificateElement) return;
+
+        setIsDownloading(true);
+
+        try {
+            const canvas = await html2canvas(certificateElement, {
+                scale: 2, // Higher scale for better quality
+                useCORS: true,
+                backgroundColor: null,
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`Payment_Certificate_003_${new Date().toISOString().split('T')[0]}.pdf`);
+
+            toast({
+                title: 'Download Successful',
+                description: 'The payment certificate has been downloaded as a PDF.',
+            });
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Download Failed',
+                description: 'Could not generate the PDF at this time.',
+            });
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
     const handleShare = async () => {
@@ -103,6 +143,11 @@ export default function PaymentCertificatePage() {
         }
     };
 
+  const formatNumber = (num: number) => {
+    if (typeof num !== 'number') return num;
+    // This function will run on the client, so we can use toLocaleString
+    return num.toLocaleString();
+  };
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -124,7 +169,14 @@ export default function PaymentCertificatePage() {
         </div>
         <div className="flex items-center gap-2">
            <Button variant="outline" onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Print</Button>
-           <Button variant="outline" onClick={handleDownloadPdf}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
+           <Button variant="outline" onClick={handleDownloadPdf} disabled={isDownloading}>
+                {isDownloading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                )}
+                Download PDF
+            </Button>
            <Button variant="secondary" onClick={handleShare}><Share2 className="mr-2 h-4 w-4" /> Share</Button>
         </div>
       </div>
@@ -132,7 +184,7 @@ export default function PaymentCertificatePage() {
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Main Document */}
         <div className="col-span-8 overflow-y-auto pr-4">
-            <Card className='p-8'>
+            <Card className='p-8' id="payment-certificate">
                 <CardHeader className="p-0 grid grid-cols-2">
                     <div>
                         <h2 className="font-bold text-3xl font-headline">Payment Certificate #003</h2>
@@ -204,14 +256,14 @@ export default function PaymentCertificatePage() {
                                     <TableCell className='font-code'>{item.wbs}</TableCell>
                                     <TableCell>{item.description}</TableCell>
                                     <TableCell>{item.completed}</TableCell>
-                                    <TableCell className="text-right font-code">${item.amount.toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-code">${formatNumber(item.amount)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={3} className="text-right font-bold">Subtotal</TableCell>
-                                <TableCell className="text-right font-bold font-code">${totalAmount.toLocaleString()}</TableCell>
+                                <TableCell className="text-right font-bold font-code">${formatNumber(totalAmount)}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -230,11 +282,11 @@ export default function PaymentCertificatePage() {
                                 </TableRow>
                                 <TableRow>
                                     <TableHead>Retention (10%)</TableHead>
-                                    <TableCell className="text-right font-code text-destructive">-${(totalAmount * 0.1).toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-code text-destructive">-${formatNumber(totalAmount * 0.1)}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableHead>Tax (5%)</TableHead>
-                                    <TableCell className="text-right font-code">${(totalAmount * 0.9 * 0.05).toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-code">${formatNumber(totalAmount * 0.9 * 0.05)}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -242,7 +294,7 @@ export default function PaymentCertificatePage() {
                      <CardFooter className="bg-muted p-4 rounded-b-lg">
                         <div className="flex justify-between w-full">
                             <span className="font-bold text-lg">Total for this Certificate</span>
-                            <span className="font-bold text-lg font-code">${(totalAmount * 0.9 * 1.05).toLocaleString()}</span>
+                            <span className="font-bold text-lg font-code">${formatNumber(totalAmount * 0.9 * 1.05)}</span>
                         </div>
                     </CardFooter>
                 </Card>
@@ -334,3 +386,5 @@ export default function PaymentCertificatePage() {
     </div>
   );
 }
+
+    
