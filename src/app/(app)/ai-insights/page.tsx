@@ -29,7 +29,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import Link from 'next/link';
 
 const costProjectionData = [
     { name: 'Apr', actual: 4000, projected: 4000 },
@@ -139,8 +140,16 @@ export default function AiInsightsPage() {
               <CardDescription>Drill down into project data.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start"><TrendingUp className="mr-2 h-4 w-4" /> Impact Analysis</Button>
-                <Button variant="outline" className="w-full justify-start"><FileText className="mr-2 h-4 w-4" /> Correlation Analysis</Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                    <Link href="/visualize-impact">
+                        <TrendingUp className="mr-2 h-4 w-4" /> Impact Analysis
+                    </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                     <Link href="/cost-tracking">
+                        <FileText className="mr-2 h-4 w-4" /> Correlation Analysis
+                    </Link>
+                </Button>
             </CardContent>
           </Card>
 
