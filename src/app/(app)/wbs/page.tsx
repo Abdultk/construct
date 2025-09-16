@@ -36,10 +36,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, isValid } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 
 
 type Material = {
@@ -146,6 +149,26 @@ export default function WbsHierarchyPage() {
 
     setIsAddOpen(false);
   };
+
+  const updateWbsItem = (id: string, updates: Partial<WbsItem>) => {
+    const updateRecursively = (items: WbsItem[]): WbsItem[] => {
+      return items.map(item => {
+        if (item.id === id) {
+          return { ...item, ...updates };
+        }
+        if (item.children) {
+          return { ...item, children: updateRecursively(item.children) };
+        }
+        return item;
+      });
+    };
+    const updatedItems = updateRecursively(wbsItems);
+    setWbsItems(updatedItems);
+    if (selectedItem?.id === id) {
+        setSelectedItem(prev => prev ? { ...prev, ...updates } : null);
+    }
+  };
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -355,7 +378,7 @@ export default function WbsHierarchyPage() {
         </div>
 
         {/* Main Panel: Details */}
-        <div className="col-span-12 md:col-span-8 lg:col-span-6 flex flex-col gap-4 overflow-y-auto">
+        <div className="col-span-12 md:col-span-8 lg:col-span-6 flex flex-col gap-4 overflow-y-auto pr-2">
            <Card>
             <CardHeader>
                 <CardTitle>Work Package Details: {selectedItem ? `${selectedItem.name} (${selectedItem.id})` : 'None'}</CardTitle>
@@ -490,10 +513,96 @@ export default function WbsHierarchyPage() {
             <CardHeader>
               <CardTitle>Properties</CardTitle>
             </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">
-                    Edit work package properties here. Form coming soon.
-                </p>
+            <CardContent className="space-y-4">
+               {selectedItem ? (
+                <div className="space-y-4 text-sm">
+                    <div className="space-y-2">
+                        <Label htmlFor="prop-name">Name</Label>
+                        <Input
+                            id="prop-name"
+                            value={selectedItem.name}
+                            onChange={(e) => updateWbsItem(selectedItem.id, { name: e.target.value })}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="prop-status">Status</Label>
+                        <Select
+                            value={selectedItem.status}
+                            onValueChange={(value: WbsItem['status']) => updateWbsItem(selectedItem.id, { status: value })}
+                        >
+                            <SelectTrigger id="prop-status">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Not Started">Not Started</SelectItem>
+                                <SelectItem value="In Progress">In Progress</SelectItem>
+                                <SelectItem value="Completed">Completed</SelectItem>
+                                <SelectItem value="At Risk">At Risk</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Start Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full font-normal">
+                                    {isValid(selectedItem.startDate) ? format(selectedItem.startDate, 'P') : 'Pick date'}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedItem.startDate}
+                                        onSelect={(date) => date && updateWbsItem(selectedItem.id, { startDate: date })}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                         <div className="space-y-2">
+                            <Label>End Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full font-normal">
+                                    {isValid(selectedItem.endDate) ? format(selectedItem.endDate, 'P') : 'Pick date'}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedItem.endDate}
+                                        onSelect={(date) => date && updateWbsItem(selectedItem.id, { endDate: date })}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label>Progress: {selectedItem.progress}%</Label>
+                        <Slider
+                            value={[selectedItem.progress]}
+                            onValueChange={(value) => updateWbsItem(selectedItem.id, { progress: value[0] })}
+                            max={100}
+                            step={1}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg border p-3">
+                        <Label htmlFor="critical-path-switch" className="flex flex-col gap-y-1.5">
+                            <span>Critical Path</span>
+                             <span className="font-normal leading-snug text-muted-foreground text-xs">
+                                Mark this as a critical task.
+                            </span>
+                        </Label>
+                        <Switch
+                            id="critical-path-switch"
+                            checked={selectedItem.isCritical}
+                            onCheckedChange={(checked) => updateWbsItem(selectedItem.id, { isCritical: checked })}
+                        />
+                    </div>
+                </div>
+               ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Select a package to edit properties.</p>
+               )}
             </CardContent>
           </Card>
            <Card>
