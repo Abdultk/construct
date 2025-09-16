@@ -41,8 +41,11 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PaymentCertificatePage() {
+
+    const { toast } = useToast();
 
     const lineItems = [
         { wbs: '3.1.1', description: 'Excavation', completed: '100%', amount: 60000 },
@@ -51,6 +54,49 @@ export default function PaymentCertificatePage() {
     ];
 
     const totalAmount = lineItems.reduce((acc, item) => acc + item.amount, 0);
+
+    const handlePrint = () => {
+        window.print();
+    }
+
+    const handleDownloadPdf = () => {
+        toast({
+            title: 'Prepare to Download',
+            description: 'In the print dialog, select "Save as PDF" as the destination to download the certificate.',
+        });
+        window.print();
+    }
+
+    const handleShare = async () => {
+        const shareData = {
+            title: 'Payment Certificate #003',
+            text: 'Please review Payment Certificate #003 for the Downtown Skyscraper project.',
+            url: window.location.href,
+        };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+                toast({
+                    title: 'Shared Successfully',
+                    description: 'The payment certificate has been shared.',
+                });
+            } else {
+                 await navigator.clipboard.writeText(window.location.href);
+                toast({
+                    title: 'Link Copied',
+                    description: 'The link to the payment certificate has been copied to your clipboard.',
+                });
+            }
+        } catch (error) {
+            console.error('Error sharing:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Sharing Failed',
+                description: 'Could not share the certificate at this time.',
+            });
+        }
+    };
+
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -71,9 +117,9 @@ export default function PaymentCertificatePage() {
              <Badge variant="destructive">High Priority</Badge>
         </div>
         <div className="flex items-center gap-2">
-           <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
-           <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
-           <Button variant="secondary"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
+           <Button variant="outline" onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Print</Button>
+           <Button variant="outline" onClick={handleDownloadPdf}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
+           <Button variant="secondary" onClick={handleShare}><Share2 className="mr-2 h-4 w-4" /> Share</Button>
         </div>
       </div>
 
