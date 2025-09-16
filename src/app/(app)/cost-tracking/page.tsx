@@ -38,8 +38,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useState, useEffect } from 'react';
 
 export default function CostTrackingPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const transactions = [
     {
       id: 'TRN001',
@@ -83,13 +90,20 @@ export default function CostTrackingPage() {
     },
   ];
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      compactDisplay: 'short',
-    }).format(value);
+    const formatCurrency = (value: number) => {
+        if (!isClient) {
+            return new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+            }).format(value);
+        }
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            notation: 'compact',
+            compactDisplay: 'short',
+        }).format(value);
+    }
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -231,5 +245,3 @@ export default function CostTrackingPage() {
     </div>
   );
 }
-
-    

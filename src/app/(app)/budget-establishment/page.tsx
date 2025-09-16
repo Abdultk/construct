@@ -1,5 +1,4 @@
 
-
 'use client';
 import {
     ArrowUpRight,
@@ -30,15 +29,29 @@ import {
 } from "@/components/ui/table"
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useState, useEffect } from 'react';
 
 export default function FinancialDashboardPage() {
-    const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      notation: "compact",
-      compactDisplay: "short",
-    }).format(value);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const formatCurrency = (value: number) => {
+        if (!isClient) {
+            return new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+            }).format(value);
+        }
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            notation: "compact",
+            compactDisplay: "short",
+        }).format(value);
+    }
 
     const recentTransactions = [
         { id: 'TRN001', project: 'Downtown Skyscraper', category: 'Materials', amount: 75000, status: 'Approved' },
