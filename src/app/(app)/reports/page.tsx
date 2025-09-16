@@ -27,7 +27,15 @@ import {
   Filter,
 } from 'lucide-react';
 import Link from 'next/link';
-import { projects } from '@/lib/data';
+import { projects, portfolioPerformance } from '@/lib/data';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 export default function ReportsPage() {
   const kpis = {
@@ -150,13 +158,23 @@ export default function ReportsPage() {
           <CardHeader>
             <CardTitle>Historical Performance</CardTitle>
             <CardDescription>
-              Budget vs. Actuals over the last 12 months.
+              Budget vs. Actuals over the last 6 months.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Chart coming soon.
-            </p>
+            <ChartContainer config={{}} className="min-h-[250px] w-full">
+                <BarChart data={portfolioPerformance}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
+                    <YAxis tickFormatter={(value) => `$${value}M`} />
+                    <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <Bar dataKey="budget" fill="hsl(var(--secondary))" radius={4} />
+                    <Bar dataKey="actual" fill="hsl(var(--primary))" radius={4} />
+                </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
         <Card>
