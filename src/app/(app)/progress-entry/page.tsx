@@ -34,14 +34,36 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
+type WorkPackage = {
+  id: string;
+  name: string;
+  progress: number;
+  totalQuantity: string;
+  completedToday?: string;
+  notes?: string;
+};
+
+const initialWorkPackages: WorkPackage[] = [
+    { id: '3.1.1', name: 'Excavation', progress: 80, totalQuantity: '600 m³' },
+    { id: '3.1.2', name: 'Formwork', progress: 40, totalQuantity: '700 m²' },
+    { id: '3.1.3', name: 'Rebar Installation', progress: 25, totalQuantity: '50 Tons' },
+];
+
 export default function ProgressEntryPage() {
   const [isOnline, setIsOnline] = useState(true);
+  const [workPackages, setWorkPackages] = useState<WorkPackage[]>(initialWorkPackages);
 
-  const workPackages = [
-    { id: '3.1.1', name: 'Excavation', progress: 80, quantity: '500/600 m³' },
-    { id: '3.1.2', name: 'Formwork', progress: 40, quantity: '250/700 m²' },
-    { id: '3.1.3', name: 'Rebar Installation', progress: 25, quantity: '12/50 Tons' },
-  ];
+  const handleProgressChange = (id: string, newProgress: number[]) => {
+    setWorkPackages(prev => 
+      prev.map(pkg => pkg.id === id ? { ...pkg, progress: newProgress[0] } : pkg)
+    );
+  };
+
+  const handleInputChange = (id: string, field: 'completedToday' | 'notes', value: string) => {
+    setWorkPackages(prev => 
+      prev.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg)
+    );
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-4 max-w-2xl mx-auto">
@@ -93,15 +115,31 @@ export default function ProgressEntryPage() {
                 <AccordionContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>Progress: {pkg.progress}%</Label>
-                    <Slider defaultValue={[pkg.progress]} max={100} step={5} />
+                    <Slider 
+                      defaultValue={[pkg.progress]} 
+                      max={100} 
+                      step={5} 
+                      onValueChange={(value) => handleProgressChange(pkg.id, value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Quantity Completed Today</Label>
-                    <Input placeholder="e.g., 50 m³" />
+                    <Input 
+                      placeholder={`e.g., 50 ${pkg.totalQuantity.split(' ')[1]}`}
+                      value={pkg.completedToday || ''}
+                      onChange={(e) => handleInputChange(pkg.id, 'completedToday', e.target.value)}
+                    />
+                     <p className="text-xs text-muted-foreground">
+                        Total quantity for this package is {pkg.totalQuantity}.
+                    </p>
                   </div>
                    <div className="space-y-2">
                     <Label>Notes</Label>
-                    <Textarea placeholder="Add any notes or comments..."/>
+                    <Textarea 
+                      placeholder="Add any notes or comments..."
+                      value={pkg.notes || ''}
+                      onChange={(e) => handleInputChange(pkg.id, 'notes', e.target.value)}
+                    />
                   </div>
                   <Button variant="outline" size="sm"><Camera className="mr-2 h-4 w-4" />Attach Photo</Button>
                 </AccordionContent>
