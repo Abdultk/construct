@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -9,6 +8,8 @@ import {
   Filter,
   Search,
   Wand2,
+  X,
+  Info,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -45,34 +46,48 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Pie, PieChart, Cell } from 'recharts';
+import { projects } from '@/lib/data';
+import { DateRange } from 'react-day-picker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Transaction = {
   id: string;
   project: string;
+  projectId: string;
   category: 'Materials' | 'Labor' | 'Equipment' | 'Subcontractor';
   wbs: string;
   amount: number;
   status: 'Approved' | 'Pending' | 'Rejected';
   date: string;
   isAnomaly?: boolean;
+  anomalyReason?: string;
 };
 
 const allTransactions: Transaction[] = [
-    { id: 'TRN001', project: 'Downtown Skyscraper', category: 'Materials', wbs: '3.2.1', amount: 75000, status: 'Approved', date: '2024-07-15', isAnomaly: false },
-    { id: 'TRN002', project: 'Suburban Housing', category: 'Labor', wbs: '4.1.2', amount: 120000, status: 'Pending', date: '2024-07-14', isAnomaly: true },
-    { id: 'TRN003', project: 'Interstate Bridge', category: 'Equipment', wbs: '2.3.1', amount: 25000, status: 'Approved', date: '2024-07-13', isAnomaly: false },
-    { id: 'TRN004', project: 'Hospital Wing', category: 'Subcontractor', wbs: '5.5.4', amount: 200000, status: 'Rejected', date: '2024-07-12', isAnomaly: false },
-    { id: 'TRN005', project: 'Downtown Skyscraper', category: 'Labor', wbs: '4.1.1', amount: 35000, status: 'Approved', date: '2024-07-11', isAnomaly: false },
-    { id: 'TRN006', project: 'Suburban Housing', category: 'Materials', wbs: '3.1.1', amount: 55000, status: 'Approved', date: '2024-07-10', isAnomaly: true },
+    { id: 'TRN001', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Materials', wbs: '3.2.1', amount: 75000, status: 'Approved', date: '2024-07-15', isAnomaly: false },
+    { id: 'TRN002', project: 'Suburban Housing', projectId: 'proj-002', category: 'Labor', wbs: '4.1.2', amount: 120000, status: 'Pending', date: '2024-07-14', isAnomaly: true, anomalyReason: 'Amount is 50% higher than category average for this project.' },
+    { id: 'TRN003', project: 'Interstate Bridge', projectId: 'proj-003', category: 'Equipment', wbs: '2.3.1', amount: 25000, status: 'Approved', date: '2024-07-13', isAnomaly: false },
+    { id: 'TRN004', project: 'Hospital Wing', projectId: 'proj-004', category: 'Subcontractor', wbs: '5.5.4', amount: 200000, status: 'Rejected', date: '2024-07-12', isAnomaly: false },
+    { id: 'TRN005', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Labor', wbs: '4.1.1', amount: 35000, status: 'Approved', date: '2024-07-11', isAnomaly: false },
+    { id: 'TRN006', project: 'Suburban Housing', projectId: 'proj-002', category: 'Materials', wbs: '3.1.1', amount: 55000, status: 'Approved', date: '2024-07-10', isAnomaly: true, anomalyReason: 'This purchase deviates from the typical procurement cycle.' },
+    { id: 'TRN007', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Equipment', wbs: '2.4.1', amount: 15000, status: 'Approved', date: '2024-06-25', isAnomaly: false },
+    { id: 'TRN008', project: 'Coastal Wind Farm', projectId: 'proj-005', category: 'Subcontractor', wbs: '6.1.1', amount: 550000, status: 'Approved', date: '2024-06-20', isAnomaly: false },
 ];
 
 export default function CostTrackingPage() {
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [projectFilter, setProjectFilter] = useState<string>('All');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [wbsFilter, setWbsFilter] = useState('');
   const [showAnomalies, setShowAnomalies] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -80,17 +95,20 @@ export default function CostTrackingPage() {
 
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(t => {
+      const transactionDate = new Date(t.date);
       const matchesSearch = searchTerm === '' || 
         Object.values(t).some(val => 
           String(val).toLowerCase().includes(searchTerm.toLowerCase())
         );
       const matchesCategory = categoryFilter === 'All' || t.category === categoryFilter;
+      const matchesProject = projectFilter === 'All' || t.projectId === projectFilter;
+      const matchesDate = !dateRange || !dateRange.from || !dateRange.to || (transactionDate >= dateRange.from && transactionDate <= dateRange.to);
       const matchesWbs = wbsFilter === '' || t.wbs.startsWith(wbsFilter);
       const matchesAnomaly = !showAnomalies || t.isAnomaly;
 
-      return matchesSearch && matchesCategory && matchesWbs && matchesAnomaly;
+      return matchesSearch && matchesCategory && matchesProject && matchesDate && matchesWbs && matchesAnomaly;
     });
-  }, [searchTerm, categoryFilter, wbsFilter, showAnomalies]);
+  }, [searchTerm, categoryFilter, projectFilter, dateRange, wbsFilter, showAnomalies]);
 
   const analysisData = useMemo(() => {
     const totalAmount = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -104,15 +122,20 @@ export default function CostTrackingPage() {
         return acc;
     }, [] as { name: string; value: number, fill: string }[]);
     
-    // Assign colors
     const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
     categoryBreakdown.forEach((item, index) => {
       item.fill = colors[index % colors.length];
     });
 
+    const transactionCount = filteredTransactions.length;
+    const averageTransactionValue = transactionCount > 0 ? totalAmount / transactionCount : 0;
+    const anomalyCount = filteredTransactions.filter(t => t.isAnomaly).length;
+
     return {
         totalAmount,
-        transactionCount: filteredTransactions.length,
+        transactionCount,
+        averageTransactionValue,
+        anomalyCount,
         categoryBreakdown,
     }
   }, [filteredTransactions]);
@@ -137,90 +160,80 @@ export default function CostTrackingPage() {
 
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === filteredTransactions.length;
 
-
   const formatCurrency = (value: number) => {
     if (!isClient) {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-        }).format(value);
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
     }
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      compactDisplay: 'short',
-    }).format(value);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(value);
   }
 
   const formatCurrencyFull = (value: number) => {
-    if (!isClient) {
-         return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-        }).format(value);
-    }
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(value);
+    if (!isClient) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
   };
   
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Approved':
-        return 'secondary';
-      case 'Pending':
-        return 'outline';
-      default:
-        return 'destructive';
+      case 'Approved': return 'secondary';
+      case 'Pending': return 'outline';
+      default: return 'destructive';
     }
   };
 
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-headline">Cost Tracking</h1>
-          <p className="text-muted-foreground">
-            Detailed cost analysis across all projects.
-          </p>
+          <p className="text-muted-foreground">Detailed cost analysis across all projects.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" disabled={selectedRows.size === 0}>
-            <Download className="mr-2 h-4 w-4" /> Export ({selectedRows.size})
-          </Button>
-          <Button variant="secondary" disabled={selectedRows.size === 0}>
-            <Edit className="mr-2 h-4 w-4" /> Bulk Edit ({selectedRows.size})
-          </Button>
+          <Button variant="outline" disabled={selectedRows.size === 0}><Download className="mr-2 h-4 w-4" /> Export ({selectedRows.size})</Button>
+          <Button variant="secondary" disabled={selectedRows.size === 0}><Edit className="mr-2 h-4 w-4" /> Bulk Edit ({selectedRows.size})</Button>
         </div>
       </div>
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
-        {/* Filters Panel */}
         <div className="col-span-12 lg:col-span-3 space-y-4 overflow-y-auto">
           <Card>
-            <CardHeader>
-              <CardTitle>Filters</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Filters</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <Button variant="outline" className="w-full justify-start">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  <span>All time</span>
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange.to ? `${format(dateRange.from, "LLL dd, y")} - ${format(dateRange.to, "LLL dd, y")}` : format(dateRange.from, "LLL dd, y")
+                      ) : ( <span>Pick a date range</span> )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={2} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>Project</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      <span>{projectFilter === 'All' ? 'All Projects' : projects.find(p => p.id === projectFilter)?.name}</span><ChevronDown />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem onClick={() => setProjectFilter('All')}>All Projects</DropdownMenuItem>
+                    {projects.map(p => <DropdownMenuItem key={p.id} onClick={() => setProjectFilter(p.id)}>{p.name}</DropdownMenuItem>)}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <div className="space-y-2">
                 <Label>Cost Category</Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
-                      <span>{categoryFilter}</span>
-                      <ChevronDown />
-                    </Button>
+                    <Button variant="outline" className="w-full justify-between"><span>{categoryFilter}</span><ChevronDown /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     <DropdownMenuItem onClick={() => setCategoryFilter('All')}>All Categories</DropdownMenuItem>
@@ -243,123 +256,102 @@ export default function CostTrackingPage() {
             </CardContent>
           </Card>
            <Card>
-            <CardHeader>
-              <CardTitle>Analysis Panel</CardTitle>
-               <CardDescription>
-                Summary of filtered transactions.
-              </CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle>Analysis Panel</CardTitle><CardDescription>Summary of filtered transactions.</CardDescription></CardHeader>
             <CardContent className="space-y-4">
-                <div className="rounded-lg border bg-muted p-4">
-                    <p className="text-sm text-muted-foreground">Total Cost</p>
-                    <p className="text-2xl font-bold font-headline">{formatCurrency(analysisData.totalAmount)}</p>
-                    <p className="text-xs text-muted-foreground">{analysisData.transactionCount} transactions</p>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="rounded-lg border bg-muted p-2">
+                        <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
+                        <p className="text-xl font-bold">{formatCurrency(analysisData.totalAmount)}</p>
+                    </div>
+                     <div className="rounded-lg border bg-muted p-2">
+                        <p className="text-sm font-medium text-muted-foreground">Transactions</p>
+                        <p className="text-xl font-bold">{analysisData.transactionCount}</p>
+                    </div>
+                     <div className="rounded-lg border bg-muted p-2">
+                        <p className="text-sm font-medium text-muted-foreground">Avg. Value</p>
+                        <p className="text-xl font-bold">{formatCurrency(analysisData.averageTransactionValue)}</p>
+                    </div>
+                     <div className="rounded-lg border bg-muted p-2">
+                        <p className="text-sm font-medium text-muted-foreground">Anomalies</p>
+                        <p className="text-xl font-bold text-destructive">{analysisData.anomalyCount}</p>
+                    </div>
                 </div>
                  <div>
                     <h4 className="text-sm font-medium mb-2">Cost by Category</h4>
                     {analysisData.categoryBreakdown.length > 0 ? (
-                        <ChartContainer
-                        config={{}}
-                        className="mx-auto aspect-square h-48"
-                        >
-                        <PieChart>
-                            <ChartTooltip
-                            content={
-                                <ChartTooltipContent
-                                nameKey="name"
-                                hideLabel
-                                formatter={(value) => formatCurrencyFull(value as number)}
-                                />
-                            }
-                            />
-                            <Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >
-                                {analysisData.categoryBreakdown.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                ))}
-                            </Pie>
-                        </PieChart>
+                        <ChartContainer config={{}} className="mx-auto aspect-square h-40">
+                        <PieChart><ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel formatter={(value) => formatCurrencyFull(value as number)} />} /><Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >{analysisData.categoryBreakdown.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill} /> ))}</Pie></PieChart>
                         </ChartContainer>
-                    ) : (
-                         <p className="text-sm text-muted-foreground text-center py-8">No data to display.</p>
-                    )}
+                    ) : ( <p className="text-sm text-muted-foreground text-center py-8">No data to display.</p> )}
                  </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Grid */}
         <div className="col-span-12 lg:col-span-9 flex flex-col gap-4">
-          <Card>
-            <CardContent className="flex items-center justify-between p-3">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search transactions..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
-            </CardContent>
-          </Card>
+          <Card><CardContent className="flex items-center justify-between p-3"><div className="relative w-full max-w-sm"><Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" /><Input placeholder="Search transactions..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div></CardContent></Card>
           <div className="flex-1 overflow-auto rounded-md border">
+            <TooltipProvider>
             <Table>
-              <TableHeader className="sticky top-0 bg-card">
-                <TableRow>
-                    <TableHead className="w-12">
-                        <Checkbox 
-                            onCheckedChange={handleSelectAll}
-                            checked={isAllSelected}
-                            aria-label="Select all rows"
-                        />
-                    </TableHead>
-                  <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Category</TableHead>
-                   <TableHead>WBS</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader className="sticky top-0 bg-card"><TableRow><TableHead className="w-12"><Checkbox onCheckedChange={handleSelectAll} checked={isAllSelected} aria-label="Select all rows" /></TableHead><TableHead className="w-[100px]">ID</TableHead><TableHead>Project</TableHead><TableHead>Category</TableHead><TableHead>WBS</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader>
               <TableBody>
                 {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id} data-state={selectedRows.has(transaction.id) && "selected"} className={transaction.isAnomaly ? 'bg-yellow-500/10' : ''}>
-                    <TableCell>
-                        <Checkbox 
-                            onCheckedChange={(checked) => handleRowSelect(transaction.id, !!checked)}
-                            checked={selectedRows.has(transaction.id)}
-                            aria-label={`Select row ${transaction.id}`}
-                        />
-                    </TableCell>
+                  <TableRow key={transaction.id} data-state={selectedRows.has(transaction.id) && "selected"} className={`cursor-pointer ${transaction.isAnomaly ? 'bg-yellow-500/10' : ''}`} onClick={() => setSelectedTransaction(transaction)}>
+                    <TableCell onClick={(e) => e.stopPropagation()}><Checkbox onCheckedChange={(checked) => handleRowSelect(transaction.id, !!checked)} checked={selectedRows.has(transaction.id)} aria-label={`Select row ${transaction.id}`} /></TableCell>
                     <TableCell className="font-medium font-code">
                       {transaction.id}
-                      {transaction.isAnomaly && <Wand2 className="h-3 w-3 inline-block ml-1 text-ai-accent" />}
+                      {transaction.isAnomaly && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1"><Wand2 className="h-3 w-3 inline-block text-ai-accent" /></span>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{transaction.anomalyReason}</p></TooltipContent>
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell>{transaction.project}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {transaction.category}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell font-code">
-                      {transaction.wbs}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {transaction.date}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadge(transaction.status)}>
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-code">
-                      {formatCurrencyFull(transaction.amount)}
-                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{transaction.category}</TableCell>
+                    <TableCell className="hidden md:table-cell font-code">{transaction.wbs}</TableCell>
+                    <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
+                    <TableCell><Badge variant={getStatusBadge(transaction.status)}>{transaction.status}</Badge></TableCell>
+                    <TableCell className="text-right font-code">{formatCurrencyFull(transaction.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            </TooltipProvider>
           </div>
         </div>
       </div>
+      <Drawer open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-2xl">
+            <DrawerHeader>
+              <DrawerTitle>Transaction Details: {selectedTransaction?.id}</DrawerTitle>
+              <DrawerDescription>Comprehensive details for the selected cost item.</DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 space-y-4">
+               {selectedTransaction?.isAnomaly && (
+                 <Card className="border-yellow-500/50 bg-yellow-500/10">
+                   <CardHeader className="flex-row gap-2 space-y-0"><Wand2 className="h-5 w-5 text-ai-accent" /><CardTitle>AI Anomaly Detected</CardTitle></CardHeader>
+                   <CardContent><p>{selectedTransaction.anomalyReason}</p></CardContent>
+                 </Card>
+               )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="space-y-1"><p className="text-muted-foreground">Project</p><p className="font-medium">{selectedTransaction?.project}</p></div>
+                    <div className="space-y-1"><p className="text-muted-foreground">Category</p><p className="font-medium">{selectedTransaction?.category}</p></div>
+                    <div className="space-y-1"><p className="text-muted-foreground">WBS Code</p><p className="font-medium font-code">{selectedTransaction?.wbs}</p></div>
+                    <div className="space-y-1"><p className="text-muted-foreground">Status</p><p><Badge variant={getStatusBadge(selectedTransaction?.status || '')}>{selectedTransaction?.status}</Badge></p></div>
+                </div>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="space-y-1"><p className="text-muted-foreground">Date</p><p className="font-medium">{selectedTransaction?.date}</p></div>
+                    <div className="space-y-1 col-span-2"><p className="text-muted-foreground">Amount</p><p className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</p></div>
+                </div>
+                <Button variant="outline" size="sm">View Related Documents</Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
-
-    
-
-    
