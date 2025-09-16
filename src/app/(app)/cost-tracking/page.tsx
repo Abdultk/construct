@@ -39,6 +39,12 @@ import {
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState, useEffect, useMemo } from 'react';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import { Pie, PieChart, Cell } from 'recharts';
 
 type Transaction = {
   id: string;
@@ -85,6 +91,31 @@ export default function CostTrackingPage() {
       return matchesSearch && matchesCategory && matchesWbs && matchesAnomaly;
     });
   }, [searchTerm, categoryFilter, wbsFilter, showAnomalies]);
+
+  const analysisData = useMemo(() => {
+    const totalAmount = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const categoryBreakdown = filteredTransactions.reduce((acc, t) => {
+        const category = acc.find(item => item.name === t.category);
+        if (category) {
+            category.value += t.amount;
+        } else {
+            acc.push({ name: t.category, value: t.amount, fill: '' });
+        }
+        return acc;
+    }, [] as { name: string; value: number, fill: string }[]);
+    
+    // Assign colors
+    const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+    categoryBreakdown.forEach((item, index) => {
+      item.fill = colors[index % colors.length];
+    });
+
+    return {
+        totalAmount,
+        transactionCount: filteredTransactions.length,
+        categoryBreakdown,
+    }
+  }, [filteredTransactions]);
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -105,15 +136,14 @@ export default function CostTrackingPage() {
   };
 
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === filteredTransactions.length;
-  const isPartiallySelected = selectedRows.size > 0 && selectedRows.size < filteredTransactions.length;
 
 
   const formatCurrency = (value: number) => {
     if (!isClient) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(value);
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+        }).format(value);
     }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -122,6 +152,19 @@ export default function CostTrackingPage() {
       compactDisplay: 'short',
     }).format(value);
   }
+
+  const formatCurrencyFull = (value: number) => {
+    if (!isClient) {
+         return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+        }).format(value);
+    }
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+    }).format(value);
+  };
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -157,7 +200,7 @@ export default function CostTrackingPage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Filters Panel */}
-        <div className="col-span-12 lg:col-span-3 space-y-4">
+        <div className="col-span-12 lg:col-span-3 space-y-4 overflow-y-auto">
           <Card>
             <CardHeader>
               <CardTitle>Filters</CardTitle>
@@ -202,9 +245,44 @@ export default function CostTrackingPage() {
            <Card>
             <CardHeader>
               <CardTitle>Analysis Panel</CardTitle>
+               <CardDescription>
+                Summary of filtered transactions.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Coming Soon</p>
+            <CardContent className="space-y-4">
+                <div className="rounded-lg border bg-muted p-4">
+                    <p className="text-sm text-muted-foreground">Total Cost</p>
+                    <p className="text-2xl font-bold font-headline">{formatCurrency(analysisData.totalAmount)}</p>
+                    <p className="text-xs text-muted-foreground">{analysisData.transactionCount} transactions</p>
+                </div>
+                 <div>
+                    <h4 className="text-sm font-medium mb-2">Cost by Category</h4>
+                    {analysisData.categoryBreakdown.length > 0 ? (
+                        <ChartContainer
+                        config={{}}
+                        className="mx-auto aspect-square h-48"
+                        >
+                        <PieChart>
+                            <ChartTooltip
+                            content={
+                                <ChartTooltipContent
+                                nameKey="name"
+                                hideLabel
+                                formatter={(value) => formatCurrencyFull(value as number)}
+                                />
+                            }
+                            />
+                            <Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >
+                                {analysisData.categoryBreakdown.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                        </ChartContainer>
+                    ) : (
+                         <p className="text-sm text-muted-foreground text-center py-8">No data to display.</p>
+                    )}
+                 </div>
             </CardContent>
           </Card>
         </div>
@@ -269,7 +347,7 @@ export default function CostTrackingPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-code">
-                      {formatCurrency(transaction.amount)}
+                      {formatCurrencyFull(transaction.amount)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -281,5 +359,7 @@ export default function CostTrackingPage() {
     </div>
   );
 }
+
+    
 
     
