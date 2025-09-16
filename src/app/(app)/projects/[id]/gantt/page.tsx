@@ -41,6 +41,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { projects } from '@/lib/data';
@@ -497,5 +498,3 @@ export default function GanttChartPage() {
     </div>
   );
 }
-
-    
