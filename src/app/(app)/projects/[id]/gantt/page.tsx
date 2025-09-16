@@ -14,7 +14,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -48,11 +48,9 @@ import {
   type OptimizeProjectScheduleOutput,
 } from '@/ai/flows/optimize-project-schedule';
 
-export default function GanttChartPage({
-  params: { id },
-}: {
-  params: { id: string };
-}) {
+export default function GanttChartPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const project = projects.find((p) => p.id === id);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] =

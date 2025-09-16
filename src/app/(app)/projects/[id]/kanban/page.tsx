@@ -15,7 +15,7 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -41,12 +41,9 @@ import {
   type BalanceTeamWorkloadOutput,
 } from '@/ai/flows/balance-team-workload';
 
-export default function KanbanBoardPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+export default function KanbanBoardPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const project = projects.find((p) => p.id === id);
   const [isBalancing, setIsBalancing] = useState(false);
   const [balanceResult, setBalanceResult] =
