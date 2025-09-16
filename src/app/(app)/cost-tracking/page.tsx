@@ -54,6 +54,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import Link from 'next/link';
 
 type Transaction = {
   id: string;
@@ -348,7 +349,13 @@ export default function CostTrackingPage() {
                     <div className="space-y-1"><p className="text-muted-foreground">Date</p><p className="font-medium">{selectedTransaction?.date}</p></div>
                     <div className="space-y-1 col-span-2"><p className="text-muted-foreground">Amount</p><p className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</p></div>
                 </div>
-                <Button variant="outline" size="sm">View Related Documents</Button>
+                {selectedTransaction && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/projects/${selectedTransaction.projectId}/documents`}>
+                      View Related Documents
+                    </Link>
+                  </Button>
+                )}
             </div>
           </div>
         </DrawerContent>
