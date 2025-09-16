@@ -52,8 +52,10 @@ export default function PaymentCertificatePage() {
     const { toast } = useToast();
     const [currentDate, setCurrentDate] = useState('');
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        setIsClient(true);
         setCurrentDate(new Date().toLocaleDateString(undefined, {
           year: 'numeric',
           month: 'long',
@@ -145,8 +147,10 @@ export default function PaymentCertificatePage() {
 
   const formatNumber = (num: number) => {
     if (typeof num !== 'number') return num;
-    // This function will run on the client, so we can use toLocaleString
-    return num.toLocaleString();
+    if (isClient) {
+      return num.toLocaleString();
+    }
+    return String(num);
   };
 
   return (
