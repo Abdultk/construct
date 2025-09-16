@@ -386,5 +386,3 @@ export default function PaymentCertificatePage() {
     </div>
   );
 }
-
-    
