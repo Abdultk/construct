@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -27,6 +28,29 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
+const costProjectionData = [
+    { name: 'Apr', actual: 4000, projected: 4000 },
+    { name: 'May', actual: 3000, projected: 3000 },
+    { name: 'Jun', actual: 2000, projected: 2000 },
+    { name: 'Jul', actual: 2780, projected: 2780 },
+    { name: 'Aug', projected: 2900 },
+    { name: 'Sep', projected: 3100 },
+    { name: 'Oct', projected: 3300 },
+];
+
+const chartConfig = {
+  actual: {
+    label: "Actual Cost",
+    color: "hsl(var(--primary))",
+  },
+  projected: {
+    label: "Projected Cost",
+    color: "hsl(var(--ai-accent))",
+  },
+}
 
 export default function AiInsightsPage() {
   return (
@@ -125,9 +149,51 @@ export default function AiInsightsPage() {
               <CardTitle>Cost Projection</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Chart Coming Soon.
-              </p>
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                    <LineChart
+                        accessibilityLayer
+                        data={costProjectionData}
+                        margin={{
+                            top: 5,
+                            right: 20,
+                            left: -10,
+                            bottom: 5,
+                        }}
+                    >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                        dataKey="name"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(value) => `$${value / 1000}k`}
+                        />
+                         <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <Legend />
+                        <Line
+                            dataKey="actual"
+                            type="monotone"
+                            stroke={chartConfig.actual.color}
+                            strokeWidth={2}
+                            dot={false}
+                        />
+                         <Line
+                            dataKey="projected"
+                            type="monotone"
+                            stroke={chartConfig.projected.color}
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                        />
+                    </LineChart>
+                </ChartContainer>
             </CardContent>
           </Card>
         </div>
