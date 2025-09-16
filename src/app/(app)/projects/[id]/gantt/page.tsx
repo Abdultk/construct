@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { projects } from '@/lib/data';
@@ -51,6 +55,19 @@ import { useToast } from '@/hooks/use-toast';
 
 type View = 'Day' | 'Week' | 'Month' | 'Year';
 
+const allWbsItems = [
+    { id: '1', name: 'Project Initiation', progress: 100, resource: 'A.J.', dep: '', start: new Date('2024-07-01'), end: new Date('2024-07-10') },
+    { id: '1.1', name: 'Feasibility Study', progress: 100, resource: 'A.J.', dep: '', isChild: true, start: new Date('2024-07-01'), end: new Date('2024-07-10') },
+    { id: '2', name: 'Design & Planning', progress: 75, resource: 'B.K.', dep: '1', start: new Date('2024-07-11'), end: new Date('2024-08-20') },
+    { id: '2.1', name: 'Schematic Design', progress: 90, resource: 'B.K.', dep: '1.1', isChild: true, start: new Date('2024-07-11'), end: new Date('2024-08-05') },
+    { id: '2.2', name: 'Permit Application', progress: 60, resource: 'C.L.', dep: '2.1', isChild: true, start: new Date('2024-08-06'), end: new Date('2024-08-20') },
+    { id: '3', name: 'Construction', progress: 10, resource: 'D.M.', dep: '2.2', start: new Date('2024-08-21'), end: new Date('2024-10-30') },
+    { id: '3.1', name: 'Foundation', progress: 20, resource: 'D.M.', dep: '2.2', isChild: true, isCritical: true, start: new Date('2024-08-21'), end: new Date('2024-09-10') },
+    { id: '3.2', name: 'Superstructure', progress: 5, resource: 'E.N.', dep: '3.1', isChild: true, isCritical: true, start: new Date('2024-09-11'), end: new Date('2024-10-30') },
+];
+  
+const resources = ['A.J.', 'B.K.', 'C.L.', 'D.M.', 'E.N.'];
+
 export default function GanttChartPage() {
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -60,32 +77,24 @@ export default function GanttChartPage() {
     useState<OptimizeProjectScheduleOutput | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [view, setView] = useState<View>('Month');
+  const [wbsItems, setWbsItems] = useState(allWbsItems);
   const { toast } = useToast();
 
   if (!project) {
     notFound();
   }
 
-  const wbsItems = [
-    { id: '1', name: 'Project Initiation', progress: 100, resource: 'A.J.', dep: '', start: new Date('2024-07-01'), end: new Date('2024-07-10') },
-    { id: '1.1', name: 'Feasibility Study', progress: 100, resource: 'A.J.', dep: '', isChild: true, start: new Date('2024-07-01'), end: new Date('2024-07-10') },
-    { id: '2', name: 'Design & Planning', progress: 75, resource: 'B.K.', dep: '1', start: new Date('2024-07-11'), end: new Date('2024-08-20') },
-    { id: '2.1', name: 'Schematic Design', progress: 90, resource: 'B.K.', dep: '1.1', isChild: true, start: new Date('2024-07-11'), end: new Date('2024-08-05') },
-    { id: '2.2', name: 'Permit Application', progress: 60, resource: 'C.L.', dep: '2.1', isChild: true, start: new Date('2024-08-06'), end: new Date('2024-08-20') },
-    { id: '3', name: 'Construction', progress: 10, resource: 'D.M.', dep: '2.2', start: new Date('2024-08-21'), end: new Date('2024-10-30') },
-    { id: '3.1', name: 'Foundation', progress: 20, resource: 'D.M.', dep: '2.2', isChild: true, isCritical: true, start: new Date('2024-08-21'), end: new Date('2024-09-10') },
-    { id: '3.2', name: 'Superstructure', progress: 5, resource: 'E.N.', dep: '3.1', isChild: true, isCritical: true, start: new Date('2024-09-11'), end: new Date('2024-10-30') },
-  ];
-
-  const startDate = wbsItems.reduce(
+  const startDate = useMemo(() => wbsItems.reduce(
     (min, item) => (item.start < min ? item.start : min),
-    wbsItems[0].start
-  );
-  const endDate = wbsItems.reduce(
+    wbsItems[0]?.start || new Date()
+  ), [wbsItems]);
+
+  const endDate = useMemo(() => wbsItems.reduce(
     (max, item) => (item.end > max ? item.end : max),
-    wbsItems[0].end
-  );
-  const totalDays = differenceInDays(endDate, startDate) + 1;
+    wbsItems[0]?.end || new Date()
+  ), [wbsItems]);
+  
+  const totalDays = useMemo(() => differenceInDays(endDate, startDate) + 1, [startDate, endDate]);
   
   const getDayWidth = () => {
     switch (view) {
@@ -98,46 +107,51 @@ export default function GanttChartPage() {
   }
   const dayWidth = getDayWidth();
 
-  const months = [];
-  let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-  while (currentMonth <= endDate) {
-    const daysInMonth = new Date(
-      currentMonth.getFullYear(),
-      currentMonth.getMonth() + 1,
-      0
-    ).getDate();
-    let startDayOfMonth = 1;
-    let daysToShow = daysInMonth;
+  const months = useMemo(() => {
+    const monthArr = [];
+    if (!wbsItems.length) return [];
+    let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    while (currentMonth <= endDate) {
+        const daysInMonth = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + 1,
+        0
+        ).getDate();
+        let startDayOfMonth = 1;
+        let daysToShow = daysInMonth;
 
-    if (
-      currentMonth.getMonth() === startDate.getMonth() &&
-      currentMonth.getFullYear() === startDate.getFullYear()
-    ) {
-      startDayOfMonth = startDate.getDate();
-      daysToShow = daysInMonth - startDate.getDate() + 1;
+        if (
+        currentMonth.getMonth() === startDate.getMonth() &&
+        currentMonth.getFullYear() === startDate.getFullYear()
+        ) {
+        startDayOfMonth = startDate.getDate();
+        daysToShow = daysInMonth - startDate.getDate() + 1;
+        }
+
+        if (
+        currentMonth.getMonth() === endDate.getMonth() &&
+        currentMonth.getFullYear() === endDate.getFullYear()
+        ) {
+        daysToShow = endDate.getDate() - startDayOfMonth + 1;
+        if (
+            startDate.getMonth() === endDate.getMonth() &&
+            startDate.getFullYear() === endDate.getFullYear()
+        ) {
+            daysToShow = endDate.getDate() - startDate.getDate() + 1;
+        }
+        }
+
+        monthArr.push({
+        name: format(currentMonth, 'MMMM yyyy'),
+        days: daysToShow,
+        });
+        currentMonth = addDays(currentMonth, daysInMonth);
     }
+    return monthArr;
+  }, [startDate, endDate, wbsItems]);
 
-    if (
-      currentMonth.getMonth() === endDate.getMonth() &&
-      currentMonth.getFullYear() === endDate.getFullYear()
-    ) {
-      daysToShow = endDate.getDate() - startDayOfMonth + 1;
-      if (
-        startDate.getMonth() === endDate.getMonth() &&
-        startDate.getFullYear() === endDate.getFullYear()
-      ) {
-        daysToShow = endDate.getDate() - startDate.getDate() + 1;
-      }
-    }
 
-    months.push({
-      name: format(currentMonth, 'MMMM yyyy'),
-      days: daysToShow,
-    });
-    currentMonth = addDays(currentMonth, daysInMonth);
-  }
-
-  const days = Array.from({ length: totalDays }, (_, i) => addDays(startDate, i));
+  const days = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(startDate, i)), [totalDays, startDate]);
 
   const handleAiOptimize = async () => {
     setIsOptimizing(true);
@@ -206,14 +220,18 @@ export default function GanttChartPage() {
     }
   };
   
-  const handleFilter = () => {
-    // Placeholder for filter functionality
-    console.log('Filter button clicked');
-    toast({
-        title: 'Filter Not Implemented',
-        description: 'This feature is coming soon!',
-    });
-  }
+  const handleFilterCriticalPath = () => {
+    setWbsItems(allWbsItems.filter(item => item.isCritical || !item.isChild));
+  };
+
+  const handleFilterResource = (resource: string) => {
+    setWbsItems(allWbsItems.filter(item => item.resource === resource || !item.isChild));
+  };
+  
+  const clearFilters = () => {
+    setWbsItems(allWbsItems);
+  };
+
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -246,16 +264,39 @@ export default function GanttChartPage() {
               <DropdownMenuItem onClick={() => setView('Year')}>Year</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" onClick={handleFilter}>
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleFilterCriticalPath}>
+                Show Critical Path Only
+              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Filter by Resource</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {resources.map(res => (
+                    <DropdownMenuItem key={res} onClick={() => handleFilterResource(res)}>
+                      {res}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={clearFilters}>
+                Clear Filters
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" onClick={handleShare}>
             <Share className="mr-2 h-4 w-4" />
             Share
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
+             <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
               {isOptimizing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -448,5 +489,3 @@ export default function GanttChartPage() {
     </div>
   );
 }
-
-    
