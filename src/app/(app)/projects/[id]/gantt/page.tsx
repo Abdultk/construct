@@ -143,8 +143,11 @@ export default function GanttChartPage({
         null,
         2
       );
+      // Simulate fetching live risk data from AI Insights
+      const liveRiskData = "Current predictive alerts indicate a 78% probability of concrete pump maintenance issues and a projected 4% drop in steel prices next month.";
       const result = await optimizeProjectSchedule({
         projectScheduleData: scheduleData,
+        historicalData: liveRiskData
       });
       setOptimizationResult(result);
       setIsDialogOpen(true);
@@ -391,7 +394,3 @@ export default function GanttChartPage({
     </div>
   );
 }
-
-    
-
-    

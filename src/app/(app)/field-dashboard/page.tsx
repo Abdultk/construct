@@ -13,6 +13,7 @@ import {
   UserCheck,
   Wrench,
   ClipboardCheck,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function FieldDashboardPage() {
   const [isOnline, setIsOnline] = useState(true);
@@ -155,11 +157,19 @@ export default function FieldDashboardPage() {
                 <Textarea placeholder="Enter a quick progress update..." />
                 <Button className="mt-2 w-full">Submit Update</Button>
               </div>
-              <Button variant="outline" className="w-full">
-                <Camera className="mr-2 h-4 w-4" />
-                Upload Site Photo
-              </Button>
-               <p className="text-xs text-center text-muted-foreground">AI Analysis Preview Coming Soon</p>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full">
+                    <Camera className="mr-2 h-4 w-4" />
+                    Upload Site Photo
+                </Button>
+                <Button variant="secondary" asChild className="w-full">
+                    <Link href="/quality-control">
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Submit for Quality Review
+                    </Link>
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">AI Analysis Preview Coming Soon</p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -197,5 +207,3 @@ export default function FieldDashboardPage() {
     </div>
   );
 }
-
-    

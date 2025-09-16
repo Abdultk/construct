@@ -10,7 +10,9 @@ import {
   Mic,
   Video,
   Pen,
-  Paperclip
+  Paperclip,
+  FileCheck,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +35,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 type WorkPackage = {
   id: string;
@@ -52,6 +56,8 @@ const initialWorkPackages: WorkPackage[] = [
 export default function ProgressEntryPage() {
   const [isOnline, setIsOnline] = useState(true);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>(initialWorkPackages);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
   const handleProgressChange = (id: string, newProgress: number[]) => {
     setWorkPackages(prev => 
@@ -64,6 +70,14 @@ export default function ProgressEntryPage() {
       prev.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg)
     );
   };
+
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+    toast({
+        title: 'Progress Report Submitted',
+        description: 'The daily progress has been logged and synced.',
+    });
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4 max-w-2xl mx-auto">
@@ -168,33 +182,53 @@ export default function ProgressEntryPage() {
         </CardContent>
       </Card>
 
-      {/* Submit Panel */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Finalize & Submit</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="check-safety" />
-              <Label htmlFor="check-safety">Safety checks completed</Label>
+      {isSubmitted ? (
+         <Card className="bg-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileCheck className="h-5 w-5 text-primary" />
+                Next Step: Financials
+              </CardTitle>
+              <CardDescription>
+                Based on the reported progress, a new interim payment certificate can be generated.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button asChild className="w-full">
+                    <Link href="/payment-certificate">
+                        Generate Interim Payment Certificate <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </CardContent>
+          </Card>
+      ) : (
+         <Card>
+            <CardHeader>
+            <CardTitle>Finalize & Submit</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+            <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                <Checkbox id="check-safety" />
+                <Label htmlFor="check-safety">Safety checks completed</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                <Checkbox id="check-quality" />
+                <Label htmlFor="check-quality">Quality standards met</Label>
+                </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="check-quality" />
-              <Label htmlFor="check-quality">Quality standards met</Label>
+            <div className="space-y-2">
+                <Label>Foreman Signature</Label>
+                <div className='p-8 rounded-lg border-dashed border-2 text-center bg-muted'>
+                    <Pen className='mx-auto h-8 w-8 text-muted-foreground' />
+                    <p className="text-sm text-muted-foreground mt-2">Digital signature pad coming soon.</p>
+                </div>
             </div>
-          </div>
-           <div className="space-y-2">
-            <Label>Foreman Signature</Label>
-            <div className='p-8 rounded-lg border-dashed border-2 text-center bg-muted'>
-                 <Pen className='mx-auto h-8 w-8 text-muted-foreground' />
-                <p className="text-sm text-muted-foreground mt-2">Digital signature pad coming soon.</p>
-            </div>
-          </div>
-          <Button className="w-full" size="lg">Submit Daily Report</Button>
-          <p className='text-center text-sm text-muted-foreground'>{isOnline ? 'Report will be submitted and synced.' : 'Report will be saved locally and synced when online.'}</p>
-        </CardContent>
-      </Card>
+            <Button className="w-full" size="lg" onClick={handleSubmit}>Submit Daily Report</Button>
+            <p className='text-center text-sm text-muted-foreground'>{isOnline ? 'Report will be submitted and synced.' : 'Report will be saved locally and synced when online.'}</p>
+            </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
