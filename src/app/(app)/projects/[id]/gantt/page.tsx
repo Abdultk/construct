@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
@@ -79,6 +78,11 @@ export default function GanttChartPage() {
   const [view, setView] = useState<View>('Month');
   const [wbsItems, setWbsItems] = useState(allWbsItems);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   if (!project) {
     notFound();
@@ -94,7 +98,7 @@ export default function GanttChartPage() {
     wbsItems[0]?.end || new Date()
   ), [wbsItems]);
   
-  const totalDays = useMemo(() => differenceInDays(endDate, startDate) + 1, [startDate, endDate]);
+  const totalDays = useMemo(() => isClient ? differenceInDays(endDate, startDate) + 1 : 0, [startDate, endDate, isClient]);
   
   const getDayWidth = () => {
     switch (view) {
@@ -109,7 +113,7 @@ export default function GanttChartPage() {
 
   const months = useMemo(() => {
     const monthArr = [];
-    if (!wbsItems.length) return [];
+    if (!wbsItems.length || !isClient) return [];
     let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     while (currentMonth <= endDate) {
         const daysInMonth = new Date(
@@ -148,7 +152,7 @@ export default function GanttChartPage() {
         currentMonth = addDays(currentMonth, daysInMonth);
     }
     return monthArr;
-  }, [startDate, endDate, wbsItems]);
+  }, [startDate, endDate, wbsItems, isClient]);
 
 
   const days = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(startDate, i)), [totalDays, startDate]);
@@ -296,16 +300,18 @@ export default function GanttChartPage() {
             Share
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-             <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
-              {isOptimizing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Optimizing...
-                </>
-              ) : (
-                'AI Optimize'
-              )}
-            </Button>
+            <DialogTrigger asChild>
+               <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
+                {isOptimizing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Optimizing...
+                  </>
+                ) : (
+                  'AI Optimize'
+                )}
+              </Button>
+            </DialogTrigger>
             {optimizationResult && (
               <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
@@ -406,82 +412,84 @@ export default function GanttChartPage() {
               <CardTitle>Project Timeline</CardTitle>
             </CardHeader>
             <CardContent className="relative">
-              <div
-                className="relative"
-                style={{ width: `${totalDays * dayWidth}px` }}
-              >
-                {/* Header */}
-                <div className="sticky top-0 z-10 bg-card">
-                  <div className="flex h-10">
-                    {months.map((month, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-center border-b border-r"
-                        style={{ width: `${month.days * dayWidth}px` }}
-                      >
-                        <span className="text-sm font-semibold">
-                          {month.name}
-                        </span>
-                      </div>
-                    ))}
+              {isClient && (
+                <div
+                  className="relative"
+                  style={{ width: `${totalDays * dayWidth}px` }}
+                >
+                  {/* Header */}
+                  <div className="sticky top-0 z-10 bg-card">
+                    <div className="flex h-10">
+                      {months.map((month, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-center border-b border-r"
+                          style={{ width: `${month.days * dayWidth}px` }}
+                        >
+                          <span className="text-sm font-semibold">
+                            {month.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex h-8">
+                      {days.map((day, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-center border-r"
+                          style={{ width: `${dayWidth}px` }}
+                        >
+                          <span className="text-xs text-muted-foreground">
+                            {format(day, 'd')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex h-8">
+                  {/* Rows */}
+                  <div className="relative">
+                    {wbsItems.map((item, index) => {
+                      const left =
+                        differenceInDays(item.start, startDate) * dayWidth;
+                      const width =
+                        differenceInDays(item.end, item.start) * dayWidth;
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex h-12 items-center border-b border-dashed"
+                        >
+                          <div
+                            style={{ left: `${left}px`, width: `${width}px` }}
+                            className={`absolute flex h-8 items-center rounded-md ${
+                              item.isCritical
+                                ? 'bg-destructive/70'
+                                : 'bg-primary/80'
+                            }`}
+                          >
+                            <div
+                              style={{ width: `${item.progress}%` }}
+                              className={`h-full rounded-md ${
+                                item.isCritical ? 'bg-destructive' : 'bg-primary'
+                              }`}
+                            ></div>
+                            <span className="absolute left-2 truncate pr-2 text-xs text-white">
+                              {item.name}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* Grid lines */}
                     {days.map((day, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-center border-r"
-                        style={{ width: `${dayWidth}px` }}
-                      >
-                        <span className="text-xs text-muted-foreground">
-                          {format(day, 'd')}
-                        </span>
-                      </div>
+                        className="absolute top-0 h-full border-r"
+                        style={{ left: `${index * dayWidth}px`, zIndex: -1 }}
+                      ></div>
                     ))}
                   </div>
                 </div>
-                {/* Rows */}
-                <div className="relative">
-                  {wbsItems.map((item, index) => {
-                    const left =
-                      differenceInDays(item.start, startDate) * dayWidth;
-                    const width =
-                      differenceInDays(item.end, item.start) * dayWidth;
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex h-12 items-center border-b border-dashed"
-                      >
-                        <div
-                          style={{ left: `${left}px`, width: `${width}px` }}
-                          className={`absolute flex h-8 items-center rounded-md ${
-                            item.isCritical
-                              ? 'bg-destructive/70'
-                              : 'bg-primary/80'
-                          }`}
-                        >
-                          <div
-                            style={{ width: `${item.progress}%` }}
-                            className={`h-full rounded-md ${
-                              item.isCritical ? 'bg-destructive' : 'bg-primary'
-                            }`}
-                          ></div>
-                          <span className="absolute left-2 truncate pr-2 text-xs text-white">
-                            {item.name}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {/* Grid lines */}
-                  {days.map((day, index) => (
-                    <div
-                      key={index}
-                      className="absolute top-0 h-full border-r"
-                      style={{ left: `${index * dayWidth}px`, zIndex: -1 }}
-                    ></div>
-                  ))}
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -489,3 +497,5 @@ export default function GanttChartPage() {
     </div>
   );
 }
+
+    
