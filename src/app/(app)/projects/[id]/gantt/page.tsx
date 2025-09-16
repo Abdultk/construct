@@ -47,15 +47,20 @@ import {
   optimizeProjectSchedule,
   type OptimizeProjectScheduleOutput,
 } from '@/ai/flows/optimize-project-schedule';
+import { useToast } from '@/hooks/use-toast';
+
+type View = 'Day' | 'Week' | 'Month' | 'Year';
 
 export default function GanttChartPage() {
   const params = useParams<{ id: string }>();
-  const id = params.id;
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const project = projects.find((p) => p.id === id);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizeProjectScheduleOutput | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [view, setView] = useState<View>('Month');
+  const { toast } = useToast();
 
   if (!project) {
     notFound();
@@ -81,7 +86,17 @@ export default function GanttChartPage() {
     wbsItems[0].end
   );
   const totalDays = differenceInDays(endDate, startDate) + 1;
-  const dayWidth = 40;
+  
+  const getDayWidth = () => {
+    switch (view) {
+        case 'Day': return 80;
+        case 'Week': return 60;
+        case 'Month': return 40;
+        case 'Year': return 20;
+        default: return 40;
+    }
+  }
+  const dayWidth = getDayWidth();
 
   const months = [];
   let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
@@ -151,11 +166,54 @@ export default function GanttChartPage() {
       setIsDialogOpen(true);
     } catch (error) {
       console.error('Error optimizing schedule:', error);
-      // You could show a toast notification here for the error
+       toast({
+        variant: 'destructive',
+        title: 'AI Optimization Failed',
+        description: 'Could not optimize the schedule at this time.',
+      });
     } finally {
       setIsOptimizing(false);
     }
   };
+
+  const handleShare = async () => {
+    const shareData = {
+        title: `Gantt Chart: ${project.name}`,
+        text: `Check out the project schedule for ${project.name}.`,
+        url: window.location.href,
+    };
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            toast({
+                title: 'Shared Successfully',
+                description: 'The Gantt chart has been shared.',
+            });
+        } else {
+             await navigator.clipboard.writeText(window.location.href);
+            toast({
+                title: 'Link Copied',
+                description: 'The link to the Gantt chart has been copied to your clipboard.',
+            });
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Sharing Failed',
+            description: 'Could not share the Gantt chart at this time.',
+        });
+    }
+  };
+  
+  const handleFilter = () => {
+    // Placeholder for filter functionality
+    console.log('Filter button clicked');
+    toast({
+        title: 'Filter Not Implemented',
+        description: 'This feature is coming soon!',
+    });
+  }
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -177,38 +235,36 @@ export default function GanttChartPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
                 <Calendar className="mr-2 h-4 w-4" />
-                Month View
+                {view} View
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Day</DropdownMenuItem>
-              <DropdownMenuItem>Week</DropdownMenuItem>
-              <DropdownMenuItem>Month</DropdownMenuItem>
-              <DropdownMenuItem>Year</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('Day')}>Day</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('Week')}>Week</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('Month')}>Month</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('Year')}>Year</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleFilter}>
             <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleShare}>
             <Share className="mr-2 h-4 w-4" />
             Share
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
-                {isOptimizing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Optimizing...
-                  </>
-                ) : (
-                  'AI Optimize'
-                )}
-              </Button>
-            </DialogTrigger>
+            <Button variant="secondary" onClick={handleAiOptimize} disabled={isOptimizing}>
+              {isOptimizing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Optimizing...
+                </>
+              ) : (
+                'AI Optimize'
+              )}
+            </Button>
             {optimizationResult && (
               <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
@@ -392,3 +448,5 @@ export default function GanttChartPage() {
     </div>
   );
 }
+
+    
