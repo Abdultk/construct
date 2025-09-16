@@ -27,13 +27,15 @@ import {
   Filter,
 } from 'lucide-react';
 import Link from 'next/link';
-import { projects, portfolioPerformance } from '@/lib/data';
+import { projects, portfolioPerformance, benchmarkData } from '@/lib/data';
 import {
   Bar,
   BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
+  Legend,
+  Tooltip,
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
@@ -185,9 +187,17 @@ export default function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Chart coming soon.
-            </p>
+            <ChartContainer config={{}} className="min-h-[250px] w-full">
+              <BarChart data={benchmarkData} layout="vertical" barSize={20}>
+                <CartesianGrid horizontal={false} />
+                <YAxis dataKey="category" type="category" tickLine={false} axisLine={false} />
+                <XAxis type="number" hide />
+                <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
+                <Legend />
+                <Bar dataKey="user" name="Your Portfolio" fill="hsl(var(--primary))" radius={4} />
+                <Bar dataKey="benchmark" name="Industry Benchmark" fill="hsl(var(--secondary))" radius={4} />
+              </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>

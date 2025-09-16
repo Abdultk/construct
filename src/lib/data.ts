@@ -76,6 +76,13 @@ export const portfolioPerformance = [
     { month: "May", budget: 209, actual: 200 },
     { month: "Jun", budget: 214, actual: 220 },
 ];
+
+export const benchmarkData = [
+  { category: 'CPI', user: 0.98, benchmark: 0.95 },
+  { category: 'SPI', user: 1.01, benchmark: 1.0 },
+  { category: 'Safety', user: 98, benchmark: 95 },
+  { category: 'Rework', user: 2.5, benchmark: 4.0 },
+];
   
 export const kpiData = {
     totalPortfolioValue: projects.reduce((acc, p) => acc + p.portfolioValue, 0),
