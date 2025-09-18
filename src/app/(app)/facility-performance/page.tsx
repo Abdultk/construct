@@ -18,6 +18,54 @@ import {
   Wand2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  LineChart as RechartsLineChart,
+  AreaChart as RechartsAreaChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+
+const historicalData = [
+  { month: 'Jan', consumption: 18.5 },
+  { month: 'Feb', consumption: 17.2 },
+  { month: 'Mar', consumption: 16.8 },
+  { month: 'Apr', consumption: 16.5 },
+  { month: 'May', consumption: 15.8 },
+  { month: 'Jun', consumption: 15.1 },
+  { month: 'Jul', consumption: 15.0 },
+];
+
+const seasonalData = [
+  { month: 'Jan', heating: 400, cooling: 10 },
+  { month: 'Feb', heating: 350, cooling: 15 },
+  { month: 'Mar', heating: 250, cooling: 50 },
+  { month: 'Apr', heating: 100, cooling: 150 },
+  { month: 'May', heating: 20, cooling: 300 },
+  { month: 'Jun', heating: 5, cooling: 400 },
+  { month: 'Jul', heating: 0, cooling: 450 },
+]
+
+const chartConfig = {
+    consumption: {
+        label: "kWh/m²",
+        color: "hsl(var(--primary))",
+    },
+    heating: {
+        label: "Heating Days",
+        color: "hsl(var(--chart-1))",
+    },
+    cooling: {
+        label: "Cooling Days",
+        color: "hsl(var(--chart-2))",
+    },
+}
 
 export default function FacilityPerformancePage() {
   return (
@@ -94,13 +142,25 @@ export default function FacilityPerformancePage() {
               <LineChart className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardDescription>
-              Energy consumption over the last 12 months.
+              Energy consumption over the last 7 months.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Chart coming soon.
-            </p>
+            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+              <RechartsLineChart data={historicalData}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Line
+                  dataKey="consumption"
+                  type="monotone"
+                  stroke={chartConfig.consumption.color}
+                  strokeWidth={2}
+                  dot={true}
+                />
+              </RechartsLineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
         <Card>
@@ -114,9 +174,17 @@ export default function FacilityPerformancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Chart coming soon.
-            </p>
+            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+              <RechartsAreaChart data={seasonalData}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Legend />
+                <Area type="monotone" dataKey="heating" stackId="1" stroke={chartConfig.heating.color} fill={chartConfig.heating.color} />
+                <Area type="monotone" dataKey="cooling" stackId="1" stroke={chartConfig.cooling.color} fill={chartConfig.cooling.color} />
+              </RechartsAreaChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
@@ -151,7 +219,7 @@ export default function FacilityPerformancePage() {
           </Card>
            <Card className="bg-muted/50">
             <CardHeader>
-              <CardTitle className='text-base'>Cost Projections</CardTitle>
+              <CardTitle className='text-base'>Optimization Recommendations</CardTitle>
             </CardHeader>
             <CardContent>
                 <p className="text-sm">Adjusting thermostat by 1°C could result in an estimated annual saving of $15,000.</p>
