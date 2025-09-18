@@ -7,6 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +18,9 @@ import {
   Wrench,
   FileText,
   MoreVertical,
+  ChevronDown,
+  Paperclip,
+  TrendingUp,
 } from 'lucide-react';
 import {
   Table,
@@ -33,35 +37,109 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem
 } from '@/components/ui/dropdown-menu';
+import { useState, useMemo } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
-export default function AssetRegistryPage() {
-  const assets = [
+type Asset = {
+  id: string;
+  name: string;
+  category: 'HVAC' | 'Plumbing' | 'Mechanical' | 'Electrical';
+  location: string;
+  status: 'Operational' | 'Needs Repair' | 'Under Maintenance' | 'Decommissioned';
+  nextMaintenance: string;
+  manufacturer: string;
+  installDate: string;
+  performance: number;
+};
+
+const initialAssets: Asset[] = [
     {
       id: 'AHU-01',
       name: 'Air Handling Unit',
       category: 'HVAC',
-      location: 'Roof',
+      location: 'Roof - Zone A',
       status: 'Operational',
       nextMaintenance: '2024-09-15',
+      manufacturer: 'Carrier',
+      installDate: '2023-01-20',
+      performance: 98,
     },
     {
       id: 'PMP-03',
       name: 'Water Pump',
       category: 'Plumbing',
-      location: 'Basement',
+      location: 'Basement - Mech Room',
       status: 'Needs Repair',
       nextMaintenance: '2024-08-01',
+      manufacturer: 'Grundfos',
+      installDate: '2023-02-10',
+      performance: 65,
     },
     {
       id: 'ELEV-02',
-      name: 'Elevator',
+      name: 'Elevator Car #2',
       category: 'Mechanical',
-      location: 'Core',
-      status: 'Operational',
-      nextMaintenance: '2024-10-01',
+      location: 'Core Shaft B',
+      status: 'Under Maintenance',
+      nextMaintenance: '2024-08-10',
+      manufacturer: 'Otis',
+      installDate: '2023-03-05',
+      performance: 85,
     },
-  ];
+    {
+      id: 'SWGR-01',
+      name: 'Main Switchgear',
+      category: 'Electrical',
+      location: 'Basement - Elec Room',
+      status: 'Operational',
+      nextMaintenance: '2025-01-15',
+      manufacturer: 'Siemens',
+      installDate: '2023-01-15',
+      performance: 99,
+    },
+];
+
+export default function AssetRegistryPage() {
+  const [assets, setAssets] = useState<Asset[]>(initialAssets);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(assets[0]);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const { toast } = useToast();
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter(asset => {
+        const matchesSearch = searchTerm === '' || 
+            Object.values(asset).some(val => 
+                String(val).toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(asset.category);
+        return matchesSearch && matchesCategory;
+    });
+  }, [assets, searchTerm, categoryFilter]);
+
+  const handleCategoryFilterChange = (category: string) => {
+    setCategoryFilter(prev => 
+        prev.includes(category) 
+            ? prev.filter(c => c !== category) 
+            : [...prev, category]
+    );
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -69,10 +147,101 @@ export default function AssetRegistryPage() {
         return 'secondary';
       case 'Needs Repair':
         return 'destructive';
+       case 'Under Maintenance':
+        return 'default';
       default:
         return 'outline';
     }
   };
+  
+  const handleAddAsset = (newAsset: Omit<Asset, 'performance'>) => {
+    setAssets(prev => [...prev, { ...newAsset, performance: 100 }]);
+    setIsAddOpen(false);
+     toast({
+      title: 'Asset Added',
+      description: `Asset "${newAsset.name}" has been successfully registered.`,
+    });
+  };
+
+  const AddItemForm = () => {
+    const [id, setId] = useState('');
+    const [name, setName] = useState('');
+    const [category, setCategory] = useState<Asset['category'] | ''>('');
+    const [location, setLocation] = useState('');
+    const [nextMaintenance, setNextMaintenance] = useState('');
+    const [manufacturer, setManufacturer] = useState('');
+    const [installDate, setInstallDate] = useState('');
+
+    const handleSubmit = () => {
+        if (!id || !name || !category) {
+            toast({ variant: 'destructive', title: 'Missing Information', description: 'Please fill out all required fields.' });
+            return;
+        }
+        handleAddAsset({
+            id,
+            name,
+            category,
+            location,
+            status: 'Operational',
+            nextMaintenance,
+            manufacturer,
+            installDate
+        });
+    }
+
+    return (
+         <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Add New Asset</DialogTitle>
+                <DialogDescription>Enter the details for the new asset.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="asset-id">Asset ID</Label>
+                        <Input id="asset-id" value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g., PMP-04"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="asset-name">Asset Name</Label>
+                        <Input id="asset-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Chiller Pump"/>
+                    </div>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="asset-category">Category</Label>
+                     <select id="asset-category" value={category} onChange={(e) => setCategory(e.target.value as Asset['category'])} className="w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background ring-offset-background">
+                        <option value="" disabled>Select a category</option>
+                        <option value="HVAC">HVAC</option>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Electrical">Electrical</option>
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="asset-location">Location</Label>
+                    <Input id="asset-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Penthouse Mech Room"/>
+                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="asset-manufacturer">Manufacturer</Label>
+                        <Input id="asset-manufacturer" value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} placeholder="e.g., Trane"/>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="asset-installDate">Installation Date</Label>
+                        <Input id="asset-installDate" type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)}/>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="asset-nextMaintenance">Next Maintenance Date</Label>
+                    <Input id="asset-nextMaintenance" type="date" value={nextMaintenance} onChange={(e) => setNextMaintenance(e.target.value)}/>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                <Button onClick={handleSubmit}>Add Asset</Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -88,25 +257,46 @@ export default function AssetRegistryPage() {
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" /> Export Data
           </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Add Asset
-          </Button>
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <Plus className="mr-2 h-4 w-4" /> Add Asset
+                </Button>
+            </DialogTrigger>
+            <AddItemForm />
+          </Dialog>
         </div>
       </div>
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Main Grid */}
-        <div className="col-span-8 flex flex-col gap-4">
+        <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
           <Card>
             <CardContent className="flex items-center justify-between p-3">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search assets..." className="pl-8" />
+                  <Input placeholder="Search assets..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
-                <Button variant="outline">
-                  <Filter className="mr-2 h-4 w-4" /> Filter by Category
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                        <Filter className="mr-2 h-4 w-4" /> 
+                        Category
+                        {categoryFilter.length > 0 && <Badge variant="secondary" className="ml-2">{categoryFilter.length}</Badge>}
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        {['HVAC', 'Plumbing', 'Mechanical', 'Electrical'].map(cat => (
+                            <DropdownMenuCheckboxItem key={cat} checked={categoryFilter.includes(cat)} onCheckedChange={() => handleCategoryFilterChange(cat)}>
+                                {cat}
+                            </DropdownMenuCheckboxItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setCategoryFilter([])}>Clear Filters</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>
@@ -125,8 +315,12 @@ export default function AssetRegistryPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assets.map((asset) => (
-                  <TableRow key={asset.id} className="cursor-pointer">
+                {filteredAssets.map((asset) => (
+                  <TableRow 
+                    key={asset.id} 
+                    className={`cursor-pointer ${selectedAsset?.id === asset.id ? 'bg-muted' : ''}`}
+                    onClick={() => setSelectedAsset(asset)}
+                  >
                     <TableCell className="font-medium font-code">
                       {asset.id}
                     </TableCell>
@@ -161,25 +355,56 @@ export default function AssetRegistryPage() {
         </div>
 
         {/* Details Panel */}
-        <div className="col-span-4 space-y-4 overflow-y-auto">
+        <div className="col-span-12 lg:col-span-4 space-y-4 overflow-y-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Asset Details</CardTitle>
-              <CardDescription>Select an asset to view details</CardDescription>
+              <CardTitle>{selectedAsset ? selectedAsset.name : 'Asset Details'}</CardTitle>
+              <CardDescription>{selectedAsset ? selectedAsset.id : 'Select an asset to view details'}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Select an asset to see comprehensive information, maintenance history, performance metrics, and cost tracking.
-              </p>
+              {selectedAsset ? (
+                <div className="space-y-4 text-sm">
+                    <div className='flex justify-between items-center p-3 rounded-md bg-muted'>
+                        <span className='font-semibold'>Status</span>
+                        <Badge variant={getStatusBadge(selectedAsset.status)}>{selectedAsset.status}</Badge>
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1"><p className="text-muted-foreground">Category</p><p className="font-medium">{selectedAsset.category}</p></div>
+                        <div className="space-y-1"><p className="text-muted-foreground">Location</p><p className="font-medium">{selectedAsset.location}</p></div>
+                        <div className="space-y-1"><p className="text-muted-foreground">Manufacturer</p><p className="font-medium">{selectedAsset.manufacturer}</p></div>
+                        <div className="space-y-1"><p className="text-muted-foreground">Install Date</p><p className="font-medium">{selectedAsset.installDate}</p></div>
+                    </div>
+                    <Card>
+                        <CardHeader className='pb-2'>
+                            <CardTitle className='text-base flex items-center gap-2'><TrendingUp /> Performance</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                             <div className="flex justify-between items-baseline">
+                                <span className="text-sm text-muted-foreground">Health Score</span>
+                                <span className="text-xl font-bold">{selectedAsset.performance}%</span>
+                            </div>
+                            <Progress value={selectedAsset.performance} className="h-2 mt-1" />
+                        </CardContent>
+                    </Card>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Select an asset to see comprehensive information, maintenance history, performance metrics, and cost tracking.
+                </p>
+              )}
             </CardContent>
+             <CardFooter>
+                <Button variant="outline" className="w-full justify-start"><Wrench className="mr-2 h-4 w-4" /> Schedule Maintenance</Button>
+            </CardFooter>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>Documentation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start"><Wrench className="mr-2 h-4 w-4" /> Schedule Maintenance</Button>
-                <Button variant="outline" className="w-full justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
+                 <Button variant="outline" className="w-full justify-start"><Paperclip className="mr-2 h-4 w-4" /> Operation_Manual.pdf</Button>
+                 <Button variant="outline" className="w-full justify-start"><Paperclip className="mr-2 h-4 w-4" /> Warranty_Certificate.pdf</Button>
+                 <Button variant="secondary" className="w-full justify-start"><Plus className="mr-2 h-4 w-4" /> Attach Document</Button>
             </CardContent>
           </Card>
         </div>
@@ -187,3 +412,5 @@ export default function AssetRegistryPage() {
     </div>
   );
 }
+
+    
