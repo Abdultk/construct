@@ -35,7 +35,7 @@ type TeamMember = {
 const boqStandards = {
   "International": ["NRM", "CESMM4", "POMI", "SMM7", "UNIFORMAT II", "MasterFormat", "Uniclass"],
   "Regional": ["ASTM E1557 (US)", "DIN 276 (Germany)", "IS 1200 (India)", "AS 3846 (Australia)", "SANS 1921 (South Africa)", "MMHW (Malaysia)", "Nigerian Building Code"],
-  "Custom": ["Enterprise Standard", "Project Specific"]
+  "Custom": ["Enterprise Standard", "Project Specific", "Hybrid Model"]
 }
 
 
@@ -415,6 +415,15 @@ export default function ProjectSetupPage() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
+                            {selectedStandard === 'Hybrid Model' && (
+                                <Card className="bg-muted/50">
+                                    <CardContent className="p-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            You've selected a Hybrid Model. The AI will analyze your BOQ to identify sections corresponding to different standards and apply the appropriate validation rules for each part.
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </CardContent>
                     </Card>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
