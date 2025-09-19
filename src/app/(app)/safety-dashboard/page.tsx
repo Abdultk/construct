@@ -21,8 +21,8 @@ import {
   MapPin,
   Send,
   Calendar as CalendarIcon,
-  Triangle,
   AlertTriangle,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +32,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import {
@@ -69,6 +77,25 @@ export default function SafetyDashboardPage() {
   const [trainingDate, setTrainingDate] = useState<Date>();
   const { toast } = useToast();
   const sitePlanImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
+
+  const nearMisses = [
+    { id: 'NMR-001', area: 'Sector B - Scaffolding', description: 'Tool dropped from height, landed near worker.', date: '2024-07-28' },
+    { id: 'NMR-002', area: 'Loading Bay 1', description: 'Forklift operated too close to excavation edge.', date: '2024-07-25' },
+  ];
+
+  const openIssues = [
+      { id: 'NCF-001', description: 'Leaking pipe joint at column C4.', severity: 'High', assignee: 'Bob Miller' },
+      { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', severity: 'Medium', assignee: 'Diana Green' },
+  ];
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'High': return 'destructive';
+      case 'Medium': return 'default';
+      default: return 'secondary';
+    }
+  };
+
 
   const handleSubmit = (title: string, description: string) => {
     toast({
@@ -651,17 +678,68 @@ export default function SafetyDashboardPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Near-Miss Reports</CardTitle>
+                <CardDescription>A log of reported near-miss incidents.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Table or list coming soon.</p>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {nearMisses.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell className="font-medium">{item.id}</TableCell>
+                                <TableCell>
+                                    <p>{item.description}</p>
+                                    <p className="text-xs text-muted-foreground">{item.area}</p>
+                                </TableCell>
+                                <TableCell>{item.date}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="outline" size="sm">Review <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                 </Table>
             </CardContent>
         </Card>
         <Card>
             <CardHeader>
                 <CardTitle>Open Safety Issues</CardTitle>
+                <CardDescription>Unresolved safety non-conformances.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">List of unresolved issues coming soon.</p>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Issue</TableHead>
+                            <TableHead>Severity</TableHead>
+                            <TableHead>Assignee</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {openIssues.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell className="font-medium">{item.id}</TableCell>
+                                <TableCell>{item.description}</TableCell>
+                                <TableCell>
+                                    <Badge variant={getSeverityBadge(item.severity)}>{item.severity}</Badge>
+                                </TableCell>
+                                <TableCell>{item.assignee}</TableCell>
+                                <TableCell className="text-right">
+                                     <Button variant="destructive" size="sm">Resolve</Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                 </Table>
             </CardContent>
         </Card>
       </div>
