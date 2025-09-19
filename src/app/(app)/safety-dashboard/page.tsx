@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -20,6 +19,7 @@ import {
   Mic,
   MapPin,
   Send,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,8 +52,24 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SafetyDashboardPage() {
+  const [trainingDate, setTrainingDate] = useState<Date>();
+  const { toast } = useToast();
+
+  const handleSubmit = (title: string, description: string) => {
+    toast({
+      title,
+      description,
+    });
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
@@ -143,9 +161,79 @@ export default function SafetyDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start">
-              <Plus className="mr-2 h-4 w-4" /> Schedule Safety Inspection
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-full justify-start">
+                  <Plus className="mr-2 h-4 w-4" /> Schedule Safety Inspection
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Schedule Safety Inspection</DialogTitle>
+                  <DialogDescription>
+                    Fill out the details to schedule a new safety inspection.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="inspection-type">Inspection Type</Label>
+                    <Select>
+                      <SelectTrigger id="inspection-type">
+                        <SelectValue placeholder="Select type..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="site-walkthrough">Site Walkthrough</SelectItem>
+                        <SelectItem value="ppe-check">PPE Compliance Check</SelectItem>
+                        <SelectItem value="equipment-inspection">Equipment Inspection</SelectItem>
+                        <SelectItem value="hazard-assessment">Hazard Assessment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inspector">Assigned Inspector</Label>
+                    <Select>
+                      <SelectTrigger id="inspector">
+                        <SelectValue placeholder="Select inspector..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="diana-green">Diana Green (Safety Officer)</SelectItem>
+                        <SelectItem value="charlie-davis">Charlie Davis (Architect)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inspection Date</Label>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !trainingDate && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {trainingDate ? format(trainingDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={trainingDate}
+                            onSelect={setTrainingDate}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button onClick={() => handleSubmit('Inspection Scheduled', 'The safety inspection has been added to the schedule.')}>Confirm Schedule</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary" className="w-full justify-start">
@@ -358,15 +446,164 @@ export default function SafetyDashboardPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button variant="secondary" className="w-full justify-start">
-              <UserCheck className="mr-2 h-4 w-4" /> Assign Training
-            </Button>
-            <Button variant="secondary" className="w-full justify-start">
-              <CheckCircle className="mr-2 h-4 w-4" /> Log Equipment Check
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Bell className="mr-2 h-4 w-4" /> Create Hazard Alert
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="w-full justify-start">
+                  <UserCheck className="mr-2 h-4 w-4" /> Assign Training
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Assign Safety Training</DialogTitle>
+                  <DialogDescription>
+                    Select a topic and assign it to a team member or crew.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="training-topic">Training Topic</Label>
+                    <Select>
+                      <SelectTrigger id="training-topic">
+                        <SelectValue placeholder="Select a topic..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fall-protection">Fall Protection</SelectItem>
+                        <SelectItem value="electrical-safety">Electrical Safety</SelectItem>
+                        <SelectItem value="confined-space">Confined Space Entry</SelectItem>
+                        <SelectItem value="first-aid">First Aid & CPR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assignee">Assign To</Label>
+                    <Select>
+                      <SelectTrigger id="assignee">
+                        <SelectValue placeholder="Select member or crew..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="crew-a">Crew A (All Members)</SelectItem>
+                        <SelectItem value="crew-b">Crew B (All Members)</SelectItem>
+                        <SelectItem value="bob-miller">Bob Miller (Site Engineer)</SelectItem>
+                        <SelectItem value="charlie-davis">Charlie Davis (Architect)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Completion Due Date</Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !trainingDate && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {trainingDate ? format(trainingDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={trainingDate}
+                            onSelect={setTrainingDate}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                <DialogFooter>
+                   <DialogClose asChild>
+                    <Button onClick={() => handleSubmit('Training Assigned', 'The safety training has been assigned and notified.')}>Confirm Assignment</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="w-full justify-start">
+                  <CheckCircle className="mr-2 h-4 w-4" /> Log Equipment Check
+                </Button>
+              </DialogTrigger>
+               <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Log Equipment Safety Check</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="equipment-id">Equipment ID / Name</Label>
+                    <Input id="equipment-id" placeholder="e.g., Crane C-02, Excavator EX-01" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="check-status">Status</Label>
+                    <Select>
+                      <SelectTrigger id="check-status">
+                        <SelectValue placeholder="Select check status..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pass">Pass</SelectItem>
+                        <SelectItem value="fail">Fail</SelectItem>
+                        <SelectItem value="maintenance">Needs Maintenance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="check-notes">Notes / Comments</Label>
+                    <Textarea id="check-notes" placeholder="Add any observations or notes..." />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button onClick={() => handleSubmit('Check Logged', 'The equipment check has been recorded.')}>Log Check</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                  <Bell className="mr-2 h-4 w-4" /> Create Hazard Alert
+                </Button>
+              </DialogTrigger>
+               <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Hazard Alert</DialogTitle>
+                  <DialogDescription>
+                    Notify relevant personnel of a potential hazard on site.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                   <div className="space-y-2">
+                    <Label htmlFor="hazard-description">Hazard Description</Label>
+                    <Textarea id="hazard-description" placeholder="e.g., Water spill in Sector B, unsecured scaffolding..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hazard-location">Location</Label>
+                    <Input id="hazard-location" placeholder="e.g., Floor 5, near column G-8" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hazard-severity">Severity Level</Label>
+                     <Select>
+                      <SelectTrigger id="hazard-severity">
+                        <SelectValue placeholder="Select severity..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="destructive" onClick={() => handleSubmit('Hazard Alert Sent', 'The alert has been broadcast to all relevant site personnel.')}>Send Alert</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>
