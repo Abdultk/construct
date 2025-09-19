@@ -24,6 +24,12 @@
       "description": "A wireframe 3D model of a building, giving a more technical and interactive feel.",
       "imageUrl": "https://picsum.photos/seed/43/1200/900",
       "imageHint": "wireframe building"
+    },
+    {
+      "id": "site-plan-map",
+      "description": "A blueprint-style site plan showing building layout, used for incident mapping.",
+      "imageUrl": "https://picsum.photos/seed/50/800/600",
+      "imageHint": "blueprint site"
     }
   ]
 }

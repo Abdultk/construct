@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -20,6 +21,8 @@ import {
   MapPin,
   Send,
   Calendar as CalendarIcon,
+  Triangle,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,10 +61,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function SafetyDashboardPage() {
   const [trainingDate, setTrainingDate] = useState<Date>();
   const { toast } = useToast();
+  const sitePlanImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
 
   const handleSubmit = (title: string, description: string) => {
     toast({
@@ -149,8 +156,40 @@ export default function SafetyDashboardPage() {
               Site layout with risk zones and incident locations.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex h-[300px] items-center justify-center rounded-lg bg-muted">
-            <p className="text-muted-foreground">Map visualization coming soon.</p>
+          <CardContent className="h-[300px] rounded-lg bg-muted p-0 relative overflow-hidden">
+            {sitePlanImage && (
+              <Image 
+                src={sitePlanImage.imageUrl}
+                alt="Site Plan"
+                layout="fill"
+                objectFit="cover"
+                data-ai-hint={sitePlanImage.imageHint}
+              />
+            )}
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="absolute top-[40%] left-[60%]">
+                            <Siren className="h-6 w-6 text-red-500 animate-pulse" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="font-bold">Open Safety Issue: NCF-001</p>
+                        <p>Leaking pipe joint at column C4.</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="absolute top-[65%] left-[30%]">
+                            <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="font-bold">Near-Miss Reported</p>
+                        <p>Forklift operated too close to excavation edge.</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
           </CardContent>
         </Card>
         <Card>
