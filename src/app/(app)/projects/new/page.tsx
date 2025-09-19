@@ -424,6 +424,15 @@ export default function ProjectSetupPage() {
                                     </CardContent>
                                 </Card>
                             )}
+                             {selectedStandard === 'Enterprise Standard' && (
+                                <Card className="bg-muted/50">
+                                    <CardContent className="p-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            Your organization's custom "Enterprise Standard" will be applied. The AI has been trained on your specific format and vocabulary.
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </CardContent>
                     </Card>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
