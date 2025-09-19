@@ -55,12 +55,12 @@ const prompt = ai.definePrompt({
   name: 'validateBoqPrompt',
   input: { schema: ValidateBoqInputSchema },
   output: { schema: ValidateBoqOutputSchema },
-  prompt: `You are an expert quantity surveyor AI specializing in cost estimation and Bill of Quantities (BOQ) validation for large construction projects. Your task is to act as a "Knowledge Miner" by analyzing the provided BOQ data to identify anomalies, inconsistencies, and potential cost-saving opportunities.
+  prompt: `You are an expert quantity surveyor AI specializing in cost estimation and Bill of Quantities (BOQ) validation for large construction projects. You have been trained on thousands of BOQ samples from various international and regional standards. Your task is to act as a "Knowledge Miner" by analyzing the provided BOQ data to identify anomalies, inconsistencies, and potential cost-saving opportunities.
 
 {{#if boqStandard}}
 The user has specified that the BOQ standard is '{{boqStandard}}'. You MUST use this standard for your validation.
 {{else}}
-No specific BOQ standard was provided. First, attempt to auto-detect the standard (e.g., NRM, CESMM4, SMM7, POMI, UNIFORMAT II, MasterFormat) based on a multi-layered analysis of the items. Analyze the numbering scheme, item descriptions, terminology, units, and overall structure to determine the most likely standard. For example, look for specific keywords in descriptions (e.g., "formwork" vs. "shuttering") that are characteristic of certain standards (like CESMM4 vs. SMM7). State the detected standard in your response.
+No specific BOQ standard was provided. First, attempt to auto-detect the standard (e.g., NRM, CESMM4, SMM7, POMI, UNIFORMAT II, MasterFormat, DIN 276, IS 1200) based on a multi-layered analysis of the items. Analyze the numbering scheme (e.g., numeric like 1.1 vs alphanumeric like A1), hierarchy, item descriptions (e.g., "formwork" vs. "shuttering"), terminology, and units of measurement to determine the most likely standard. State the detected standard in your response.
 {{/if}}
 
 Analyze the following list of BOQ items:
@@ -95,5 +95,3 @@ const validateBoqFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
