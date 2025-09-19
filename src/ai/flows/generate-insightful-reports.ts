@@ -11,7 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const DocumentSchema = z.object({
-  content: z.string().describe('The text content of the document.'),
+  content: z.string().describe('The text content of a single document or data chunk to be used as context.'),
 });
 
 const UserContextSchema = z.object({
@@ -30,7 +30,7 @@ const GenerateInsightfulReportInputSchema = z.object({
     .describe(
       'The user query for the report, specifying the type of report (project performance, cost analysis, or risk assessment) and any specific details or filters.'
     ),
-  documents: z.array(DocumentSchema).describe('A list of relevant documents to be used as context for generating the report.'),
+  documents: z.array(DocumentSchema).describe('An array of documents representing the knowledge base for this query. The AI will only use this information to answer.'),
   userContext: UserContextSchema.optional().describe('Information about the user making the request.'),
   projectContext: ProjectContextSchema.optional().describe('Information about the project in question.'),
 });
@@ -70,7 +70,7 @@ const prompt = ai.definePrompt({
   ---
   {{/each}}
 
-  Based on the query and the documents, generate a comprehensive report. The report should be clear, concise, and data-driven, providing actionable insights for decision-making.
+  Based on the query and the provided documents, generate a comprehensive and data-driven report. The report must be clear, concise, and provide actionable insights for decision-making.
 
   Report:
   `,
