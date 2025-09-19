@@ -4,7 +4,9 @@
  * @fileOverview A Genkit flow for validating a Bill of Quantities (BOQ).
  *
  * This flow analyzes a list of BOQ items, identifies potential anomalies,
- * and provides a summary and a list of suggestions for improvement.
+ * and provides a summary and a list of suggestions for improvement. This serves
+ * as an example of AI-powered Knowledge Expansion, where the system mines
+ * actionable insights from raw project data.
  *
  * It exports:
  * - `validateBoq`: The main function to trigger the BOQ validation.
@@ -25,19 +27,19 @@ const BoqItemSchema = z.object({
 });
 
 const ValidateBoqInputSchema = z.object({
-  items: z.array(BoqItemSchema).describe('The list of all items in the Bill of Quantities.'),
+  items: z.array(BoqItemSchema).describe('The list of all items in the Bill of Quantities, representing the raw data to be mined for knowledge.'),
 });
 export type ValidateBoqInput = z.infer<typeof ValidateBoqInputSchema>;
 
 const AnomalySchema = z.object({
     itemId: z.string().describe('The ID of the BOQ item with the anomaly.'),
-    anomaly: z.string().describe('A brief description of the identified anomaly (e.g., "Unusually High Rate", "Mismatched Unit").'),
-    suggestion: z.string().describe('A concise, actionable suggestion to correct the anomaly or for further investigation.'),
+    anomaly: z.string().describe('A brief description of the identified anomaly (e.g., "Unusually High Rate", "Mismatched Unit"). This represents a piece of mined knowledge.'),
+    suggestion: z.string().describe('A concise, actionable suggestion to correct the anomaly or for further investigation. This is the extracted, actionable insight.'),
 });
 
 const ValidateBoqOutputSchema = z.object({
   summary: z.string().describe('A high-level summary of the validation findings, including the number of anomalies found and general observations.'),
-  anomalies: z.array(AnomalySchema).describe('A list of identified anomalies with specific suggestions.'),
+  anomalies: z.array(AnomalySchema).describe('A list of identified anomalies with specific suggestions, representing the full set of expanded knowledge.'),
 });
 export type ValidateBoqOutput = z.infer<typeof ValidateBoqOutputSchema>;
 
@@ -49,7 +51,7 @@ const prompt = ai.definePrompt({
   name: 'validateBoqPrompt',
   input: { schema: ValidateBoqInputSchema },
   output: { schema: ValidateBoqOutputSchema },
-  prompt: `You are an expert quantity surveyor AI specializing in cost estimation and Bill of Quantities (BOQ) validation for large construction projects. Your task is to analyze the provided BOQ data and identify any anomalies, inconsistencies, or potential cost-saving opportunities.
+  prompt: `You are an expert quantity surveyor AI specializing in cost estimation and Bill of Quantities (BOQ) validation for large construction projects. Your task is to act as a "Knowledge Miner" by analyzing the provided BOQ data to identify anomalies, inconsistencies, and potential cost-saving opportunities.
 
 Analyze the following list of BOQ items:
 {{#each items}}
@@ -61,14 +63,14 @@ Analyze the following list of BOQ items:
   - Is Parent: {{isParent}}
 {{/each}}
 
-Review the items based on the following criteria:
+Review the items based on the following criteria to extract new knowledge:
 1.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
 2.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
 3.  **Completeness:** Are there any obvious items missing for a standard construction project of this type? (This is a secondary check, focus on the provided data first).
 4.  **Mathematical Accuracy:** While the amounts are pre-calculated, quickly scan for any glaring issues.
 5.  **Cost Optimization:** Identify any items where the rate seems high and could be a candidate for negotiation or value engineering.
 
-Based on your analysis, provide a high-level summary and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do.
+Based on your analysis, provide a high-level summary and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do. This output will represent the new, validated knowledge extracted from the data.
 `,
 });
 

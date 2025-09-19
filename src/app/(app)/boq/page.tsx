@@ -637,7 +637,3 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
-
-    
-
-    
