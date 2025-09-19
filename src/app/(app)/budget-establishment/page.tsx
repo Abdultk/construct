@@ -31,7 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 
-export default function FinancialDashboardPage() {
+export default function BudgetEstablishmentPage() {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -242,3 +242,5 @@ export default function FinancialDashboardPage() {
     </div>
   );
 }
+
+    
