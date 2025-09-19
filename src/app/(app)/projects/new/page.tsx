@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { projects } from '@/lib/data';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+
 
 type TeamMember = {
     email: string;
@@ -29,6 +31,13 @@ type TeamMember = {
     name: string;
     avatar: string;
 };
+
+const boqStandards = {
+  "International": ["NRM", "CESMM4", "POMI", "SMM7", "UNIFORMAT II", "MasterFormat", "Uniclass"],
+  "Regional": ["ASTM E1557 (US)", "DIN 276 (Germany)", "IS 1200 (India)", "AS 3846 (Australia)", "SANS 1921 (South Africa)", "MMHW (Malaysia)", "Nigerian Building Code"],
+  "Custom": ["Enterprise Standard", "Project Specific"]
+}
+
 
 export default function ProjectSetupPage() {
   const [step, setStep] = React.useState(1);
@@ -54,6 +63,7 @@ export default function ProjectSetupPage() {
   // Step 3 State
   const [boqFile, setBoqFile] = React.useState<File | null>(null);
   const [wbsFile, setWbsFile] = React.useState<File | null>(null);
+  const [selectedStandard, setSelectedStandard] = React.useState<string>('Auto-Detect');
 
   const nextStep = () => setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
@@ -118,19 +128,17 @@ export default function ProjectSetupPage() {
   const renderFileUpload = (fileType: 'boq' | 'wbs') => {
     const file = fileType === 'boq' ? boqFile : wbsFile;
     const acceptedFiles = fileType === 'boq' ? 'XLSX, CSV (MAX. 10MB)' : 'MPP, XER, XML (MAX. 5MB)';
-    const title = fileType === 'boq' ? 'Import Bill of Quantities' : 'Import Work Breakdown Structure';
-    const description = fileType === 'boq' ? 'Upload your BOQ file (e.g., Excel, CSV) to get started.' : 'Upload your WBS file (e.g., MS Project, Primavera) to build your schedule.';
-
+    const title = fileType === 'boq' ? 'Bill of Quantities' : 'Work Breakdown Structure';
+    
     if (file) {
       return (
         <Card className="border-solid">
-          <CardHeader className="items-center text-center">
+          <CardHeader>
             <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg bg-muted">
-              <FileIcon className="w-12 h-12 text-green-500" />
+            <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg bg-muted">
+              <FileIcon className="w-10 h-10 text-green-500" />
               <p className="mt-2 font-semibold text-foreground">{file.name}</p>
               <Badge variant="secondary" className="mt-2">Validated</Badge>
             </div>
@@ -140,23 +148,21 @@ export default function ProjectSetupPage() {
     }
 
     return (
-      <Card className="border-dashed">
-        <CardHeader className="items-center text-center">
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+      <Card className="border-dashed h-full">
+        <CardHeader>
+            <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center w-full">
-            <Label htmlFor={`${fileType}-file`} className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+            <Label htmlFor={`${fileType}-file`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
                 <p className="text-xs text-muted-foreground">{acceptedFiles}</p>
               </div>
               <Input id={`${fileType}-file`} type="file" className="hidden" onChange={(e) => handleFileChange(e, fileType)} />
             </Label>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 text-center">Our AI will automatically validate your {fileType.toUpperCase()} for inconsistencies and potential cost-saving opportunities.</p>
         </CardContent>
       </Card>
     );
@@ -362,25 +368,60 @@ export default function ProjectSetupPage() {
               </div>
             )}
              {step === 3 && (
-                 <div className="space-y-6">
-                    <Tabs defaultValue="boq" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="boq">
-                                <List className="mr-2 h-4 w-4" />
-                                Import BOQ
-                            </TabsTrigger>
-                            <TabsTrigger value="wbs">
-                                <GanttChartSquare className="mr-2 h-4 w-4" />
-                                Import WBS
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="boq">
-                            {renderFileUpload('boq')}
-                        </TabsContent>
-                         <TabsContent value="wbs">
-                            {renderFileUpload('wbs')}
-                        </TabsContent>
-                    </Tabs>
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>BOQ Configuration</CardTitle>
+                            <CardDescription>Select your BOQ standard to ensure accurate AI validation.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Card className="bg-primary/5 border-primary/20">
+                                <CardContent className="p-4 flex items-center gap-4">
+                                    <Lightbulb className="h-6 w-6 text-primary" />
+                                    <div>
+                                        <h4 className="font-semibold">AI Recommended: NRM</h4>
+                                        <p className="text-sm text-muted-foreground">Based on your project type (Commercial) and region, NRM is the suggested standard.</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">Quick Select:</span>
+                                <Button variant={selectedStandard === 'NRM' ? 'secondary' : 'outline'} size="sm" onClick={() => setSelectedStandard('NRM')}>NRM</Button>
+                                <Button variant={selectedStandard === 'MasterFormat' ? 'secondary' : 'outline'} size="sm" onClick={() => setSelectedStandard('MasterFormat')}>MasterFormat</Button>
+                                <Button variant={selectedStandard === 'CESMM4' ? 'secondary' : 'outline'} size="sm" onClick={() => setSelectedStandard('CESMM4')}>CESMM4</Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                            <BookCheck className="mr-2 h-4 w-4" />
+                                            {selectedStandard === 'Auto-Detect' ? 'Browse All' : selectedStandard}
+                                            <ChevronDown className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setSelectedStandard('Auto-Detect')}>Auto-Detect</DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        {Object.entries(boqStandards).map(([groupName, standards]) => (
+                                            <DropdownMenuSub key={groupName}>
+                                                <DropdownMenuSubTrigger>{groupName}</DropdownMenuSubTrigger>
+                                                <DropdownMenuSubContent>
+                                                    {standards.map(standard => (
+                                                        <DropdownMenuItem key={standard} onClick={() => setSelectedStandard(standard)}>
+                                                            {standard}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuSub>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </CardContent>
+                    </Card>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {renderFileUpload('boq')}
+                        {renderFileUpload('wbs')}
+                    </div>
+                     <p className="text-xs text-muted-foreground text-center">Our AI will automatically validate your documents for inconsistencies and potential cost-saving opportunities.</p>
                 </div>
             )}
             {step === 4 && (
