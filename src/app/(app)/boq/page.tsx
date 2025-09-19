@@ -559,7 +559,7 @@ export default function BoqDataGridPage() {
                         {formatNumber(item.rate)}
                       </TableCell>
                       <TableCell className="text-right font-bold font-code">
-                        {formatNumber(item.amount)}
+                        ${formatNumber(item.amount)}
                       </TableCell>
                       <TableCell className="text-center hidden sm:table-cell">
                         <Badge variant={getStatusBadge(item.status)}>
@@ -681,3 +681,5 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    
