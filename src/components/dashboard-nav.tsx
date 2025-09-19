@@ -26,7 +26,6 @@ export function DashboardNav() {
     { href: "/progress-entry", label: "Progress Entry", icon: Edit },
     { href: "/payment-certificate", label: "Payments", icon: FileCheck },
     { href: "/safety-dashboard", label: "Safety", icon: Shield },
-    { href: "/incident-reporting", label: "Incident Reporting", icon: Siren },
     { href: "/quality-control", label: "Quality", icon: ClipboardCheck },
     { href: "/digital-twin", label: "Digital Twin", icon: Orbit },
     { href: "/iot-dashboard", label: "IoT Dashboard", icon: Signal },

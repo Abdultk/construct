@@ -13,6 +13,13 @@ import {
   BarChart,
   CheckCircle,
   Siren,
+  BriefcaseMedical,
+  DoorOpen,
+  Camera,
+  Video,
+  Mic,
+  MapPin,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +31,24 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function SafetyDashboardPage() {
   return (
@@ -120,11 +145,156 @@ export default function SafetyDashboardPage() {
             <Button className="w-full justify-start">
               <Plus className="mr-2 h-4 w-4" /> Schedule Safety Inspection
             </Button>
-            <Button asChild variant="secondary" className="w-full justify-start">
-              <Link href="/incident-reporting">
-                <Siren className="mr-2 h-4 w-4" /> Report New Incident
-              </Link>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="w-full justify-start">
+                  <Siren className="mr-2 h-4 w-4" /> Report New Incident
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Siren className="h-6 w-6 text-destructive" /> New Incident
+                    Report
+                  </DialogTitle>
+                  <DialogDescription>
+                    Project: Downtown Skyscraper - {new Date().toLocaleString()}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[70vh] overflow-y-auto pr-4 space-y-4">
+                  <Card className="bg-destructive/10 border-destructive">
+                    <CardHeader>
+                      <CardTitle className="text-destructive">
+                        Immediate Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant="destructive"
+                        className="flex-col h-16 text-xs"
+                      >
+                        <Phone className="h-5 w-5 mb-1" />
+                        <span>Emergency Contact</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-col h-16 text-xs border-destructive text-destructive hover:bg-destructive/20"
+                      >
+                        <BriefcaseMedical className="h-5 w-5 mb-1" />
+                        <span>First Aid Guide</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-col h-16 text-xs border-destructive text-destructive hover:bg-destructive/20"
+                      >
+                        <DoorOpen className="h-5 w-5 mb-1" />
+                        <span>Evacuation Plan</span>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Incident Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="incident-type">Incident Type</Label>
+                          <Select>
+                            <SelectTrigger id="incident-type">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="injury">Injury</SelectItem>
+                              <SelectItem value="near-miss">
+                                Near Miss
+                              </SelectItem>
+                              <SelectItem value="property-damage">
+                                Property Damage
+                              </SelectItem>
+                              <SelectItem value="environmental">
+                                Environmental
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="severity">Severity</Label>
+                          <Select>
+                            <SelectTrigger id="severity">
+                              <SelectValue placeholder="Select severity" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low (Minor)</SelectItem>
+                              <SelectItem value="medium">
+                                Medium (Moderate)
+                              </SelectItem>
+                              <SelectItem value="high">High (Serious)</SelectItem>
+                              <SelectItem value="critical">
+                                Critical (Severe)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="personnel">Personnel Involved</Label>
+                        <Input
+                          id="personnel"
+                          placeholder="Names and roles of people involved"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description">
+                          Description & Timeline
+                        </Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Describe what happened, when, and where. Include sequence of events."
+                          rows={3}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Evidence Collection</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 rounded-lg border-dashed border-2 text-center">
+                        <Camera className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          <span className="font-semibold">Click to upload</span>{' '}
+                          or drag and drop files
+                        </p>
+                      </div>
+                      <div className="flex justify-center gap-2">
+                        <Button variant="outline">
+                          <Camera className="mr-2 h-4 w-4" />
+                          Photo
+                        </Button>
+                        <Button variant="outline">
+                          <Video className="mr-2 h-4 w-4" />
+                          Video
+                        </Button>
+                        <Button variant="outline">
+                          <Mic className="mr-2 h-4 w-4" />
+                          Statement
+                        </Button>
+                        <Button variant="outline">
+                          <MapPin className="mr-2 h-4 w-4" />
+                          Mark Location
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Button className="w-full" size="lg">
+                    <Send className="mr-2 h-4 w-4" />
+                    Submit Incident Report
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="secondary" className="w-full justify-start">
               <UserCheck className="mr-2 h-4 w-4" /> Assign Training
             </Button>
