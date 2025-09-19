@@ -51,28 +51,28 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateInsightfulReportOutputSchema},
   prompt: `You are an AI assistant specialized in generating insightful reports for construction executives.
 
-  Your primary task is to answer the user's query based *only* on the information provided in the documents below. Do not use any external knowledge. If the documents do not contain the answer, state that the information is not available.
+Your primary task is to answer the user's query based *only* on the information provided in the documents below. Do not use any external knowledge. If the documents do not contain the answer, state that the information is not available.
 
-  {{#if userContext}}
-  The user '{{userContext.name}}' has the role of '{{userContext.role}}'. Tailor the report's tone and level of detail for this audience.
-  {{/if}}
+{{#if userContext}}
+The user '{{userContext.name}}' has the role of '{{userContext.role}}'. Tailor the report's tone and level of detail for this audience.
+{{/if}}
 
-  {{#if projectContext}}
-  The query is regarding the project '{{projectContext.name}}', which is currently '{{projectContext.status}}'.
-  {{/if}}
+{{#if projectContext}}
+The query is regarding the project '{{projectContext.name}}', which is currently '{{projectContext.status}}'.
+{{/if}}
 
-  User Query: {{{query}}}
+User Query: {{{query}}}
 
-  Documents:
-  {{#each documents}}
-  ---
-  {{{this.content}}}
-  ---
-  {{/each}}
+Documents:
+{{#each documents}}
+---
+{{{this.content}}}
+---
+{{/each}}
 
-  Based on the query and the provided documents, generate a comprehensive and data-driven report. The report must be clear, concise, and provide actionable insights for decision-making.
+Based on the query and the provided documents, generate a comprehensive and data-driven report. The report must be clear, concise, and provide actionable insights for decision-making.
 
-  Report:
+Report:
   `,
 });
 
