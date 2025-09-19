@@ -14,6 +14,16 @@ const DocumentSchema = z.object({
   content: z.string().describe('The text content of the document.'),
 });
 
+const UserContextSchema = z.object({
+  role: z.string().describe("The user's role (e.g., 'Project Manager', 'Executive')."),
+  name: z.string().describe("The user's name."),
+});
+
+const ProjectContextSchema = z.object({
+    name: z.string().describe("The name of the project being discussed."),
+    status: z.string().describe("The current status of the project (e.g., 'On Track', 'At Risk')."),
+});
+
 const GenerateInsightfulReportInputSchema = z.object({
   query: z
     .string()
@@ -21,6 +31,8 @@ const GenerateInsightfulReportInputSchema = z.object({
       'The user query for the report, specifying the type of report (project performance, cost analysis, or risk assessment) and any specific details or filters.'
     ),
   documents: z.array(DocumentSchema).describe('A list of relevant documents to be used as context for generating the report.'),
+  userContext: UserContextSchema.optional().describe('Information about the user making the request.'),
+  projectContext: ProjectContextSchema.optional().describe('Information about the project in question.'),
 });
 export type GenerateInsightfulReportInput = z.infer<typeof GenerateInsightfulReportInputSchema>;
 
@@ -40,6 +52,14 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI assistant specialized in generating insightful reports for construction executives.
 
   Your primary task is to answer the user's query based *only* on the information provided in the documents below. Do not use any external knowledge. If the documents do not contain the answer, state that the information is not available.
+
+  {{#if userContext}}
+  The user '{{userContext.name}}' has the role of '{{userContext.role}}'. Tailor the report's tone and level of detail for this audience.
+  {{/if}}
+
+  {{#if projectContext}}
+  The query is regarding the project '{{projectContext.name}}', which is currently '{{projectContext.status}}'.
+  {{/if}}
 
   User Query: {{{query}}}
 
