@@ -15,6 +15,8 @@ import {
   Loader2,
   ShieldAlert,
   X,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,6 +45,9 @@ import {
   type AnalyzeChangeImpactOutput,
 } from '@/ai/flows/analyze-change-impact';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+type FeedbackStatus = 'positive' | 'negative' | 'none';
 
 export default function ChangeRequestFormPage() {
   const [changeTitle, setChangeTitle] = useState('Substitute roofing material');
@@ -59,10 +64,16 @@ export default function ChangeRequestFormPage() {
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [costFeedback, setCostFeedback] = useState<FeedbackStatus>('none');
+  const [scheduleFeedback, setScheduleFeedback] = useState<FeedbackStatus>('none');
+  const [riskFeedback, setRiskFeedback] = useState<FeedbackStatus>('none');
 
   const handleAnalyzeImpact = async () => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
+    setCostFeedback('none');
+    setScheduleFeedback('none');
+    setRiskFeedback('none');
     try {
       const result = await analyzeChangeImpact({
         changeTitle,
@@ -92,6 +103,24 @@ export default function ChangeRequestFormPage() {
 
   const handleRemoveFile = (fileName: string) => {
     setAttachments(prev => prev.filter(file => file.name !== fileName));
+  };
+  
+  const handleFeedback = (type: 'cost' | 'schedule' | 'risk', feedback: FeedbackStatus) => {
+    switch (type) {
+      case 'cost':
+        setCostFeedback(costFeedback === feedback ? 'none' : feedback);
+        break;
+      case 'schedule':
+        setScheduleFeedback(scheduleFeedback === feedback ? 'none' : feedback);
+        break;
+      case 'risk':
+        setRiskFeedback(riskFeedback === feedback ? 'none' : feedback);
+        break;
+    }
+    toast({
+        title: "Feedback Submitted",
+        description: "Thank you for helping us improve our AI.",
+    });
   };
 
 
@@ -276,9 +305,17 @@ export default function ChangeRequestFormPage() {
                     {analysisResult?.estimatedCostImpact ? (
                       <>
                         <DollarSign className="h-5 w-5" />
-                        <span className="font-semibold text-base font-code">
+                        <span className="font-semibold text-base font-code flex-1">
                           {analysisResult.estimatedCostImpact}
                         </span>
+                         <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('cost', 'positive')}>
+                                <ThumbsUp className={cn("h-4 w-4", costFeedback === 'positive' && "text-primary fill-primary/20")} />
+                            </Button>
+                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('cost', 'negative')}>
+                                <ThumbsDown className={cn("h-4 w-4", costFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                            </Button>
+                        </div>
                       </>
                     ) : (
                       isAnalyzing ? (
@@ -295,9 +332,17 @@ export default function ChangeRequestFormPage() {
                     {analysisResult?.estimatedScheduleImpact ? (
                        <>
                         <Calendar className="h-5 w-5" />
-                        <span className="font-semibold text-base">
+                        <span className="font-semibold text-base flex-1">
                           {analysisResult.estimatedScheduleImpact}
                         </span>
+                        <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('schedule', 'positive')}>
+                                <ThumbsUp className={cn("h-4 w-4", scheduleFeedback === 'positive' && "text-primary fill-primary/20")} />
+                            </Button>
+                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('schedule', 'negative')}>
+                                <ThumbsDown className={cn("h-4 w-4", scheduleFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                            </Button>
+                        </div>
                        </>
                     ) : (
                        isAnalyzing ? (
@@ -313,12 +358,24 @@ export default function ChangeRequestFormPage() {
                    <div className="p-2 bg-muted rounded-md min-h-[44px]">
                     {analysisResult?.potentialRisks ? (
                        <div className="space-y-1">
-                        {analysisResult.potentialRisks.split('\n').map((risk, index) => risk.trim() && (
-                          <div key={index} className="flex items-start gap-2">
-                            <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />
-                            <span className='text-xs'>{risk.replace('-', '').trim()}</span>
-                          </div>
-                        ))}
+                        <div className="flex items-start">
+                            <div className="flex-1">
+                            {analysisResult.potentialRisks.split('\n').map((risk, index) => risk.trim() && (
+                            <div key={index} className="flex items-start gap-2">
+                                <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />
+                                <span className='text-xs'>{risk.replace('-', '').trim()}</span>
+                            </div>
+                            ))}
+                            </div>
+                             <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('risk', 'positive')}>
+                                    <ThumbsUp className={cn("h-4 w-4", riskFeedback === 'positive' && "text-primary fill-primary/20")} />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('risk', 'negative')}>
+                                    <ThumbsDown className={cn("h-4 w-4", riskFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                                </Button>
+                            </div>
+                        </div>
                        </div>
                     ) : (
                        isAnalyzing ? (
