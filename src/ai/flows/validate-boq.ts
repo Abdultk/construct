@@ -74,7 +74,7 @@ Analyze the following list of BOQ items:
 {{/each}}
 
 Review the items based on the specified (or detected) standard and the following criteria to extract new knowledge:
-1.  **Structural & Vocabulary Compliance:** Analyze the numbering scheme, hierarchy, and terminology. Does the itemization and vocabulary comply with the rules and common language of the BOQ standard? For example, NRM uses numeric subsections (1.1, 1.2), whereas CESMM4 might use alphanumeric (A1, A2). Similarly, check if the technical terms used in descriptions are consistent with the chosen standard.
+1.  **Structural & Vocabulary Compliance:** Analyze the numbering scheme, hierarchy, and terminology. Does the itemization and vocabulary comply with the rules and common language of the BOO standard? For example, NRM uses numeric subsections (1.1, 1.2), whereas CESMM4 might use alphanumeric (A1, A2). Similarly, check if the technical terms used in descriptions are consistent with the chosen standard.
 2.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
 3.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
 4.  **Completeness:** Are there any obvious items missing for a standard construction project of this type according to the chosen standard?

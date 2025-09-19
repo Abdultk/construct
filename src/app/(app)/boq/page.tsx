@@ -242,7 +242,7 @@ export default function BoqDataGridPage() {
         if (result.detectedStandard && selectedStandard === 'Auto-Detect') {
           toast({
             title: 'BOQ Standard Detected',
-            description: `AI identified the standard as ${result.detectedStandard}.`,
+            description: `AI identified the standard as ${result.detectedStandard}. You can override this via the Standards dropdown.`,
           });
         }
       } catch (error) {
@@ -296,11 +296,12 @@ export default function BoqDataGridPage() {
     const file = event.target.files?.[0];
     if (file) {
       // In a real app, you would parse the CSV/XLSX file here
-      // For this demo, we'll just show a toast message
+      // For this demo, we'll just show a toast message and enable validation
       toast({
-        title: 'Import Started',
-        description: `"${file.name}" is being processed. This is a demo and data will not be imported.`,
+        title: 'Import Successful',
+        description: `"${file.name}" has been loaded. You can now run AI Validation.`,
       });
+      handleAiValidationToggle(true);
     }
     // Reset file input
     if (event.target) {
@@ -541,13 +542,13 @@ export default function BoqDataGridPage() {
                         {item.id}
                       </TableCell>
                       <TableCell
-                        className={`font-semibold ${item.isParent ? '' : 'font-normal'}`}
+                        className={`${item.isParent ? 'font-semibold' : 'font-normal'}`}
                       >
                         {item.description}
                         {anomaly && (
-                          <p className="text-xs text-yellow-600">
+                          <p className="text-xs text-yellow-600 mt-1">
                             <Wand2 className="inline-block h-3 w-3 mr-1" />
-                            {anomaly.suggestion}
+                            <span className="font-semibold">AI Suggestion:</span> {anomaly.suggestion}
                           </p>
                         )}
                       </TableCell>
