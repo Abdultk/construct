@@ -242,8 +242,13 @@ export default function BoqDataGridPage() {
         if (result.detectedStandard && selectedStandard === 'Auto-Detect') {
           toast({
             title: 'BOQ Standard Detected',
-            description: `AI identified the standard as ${result.detectedStandard}. You can override this via the Standards dropdown.`,
+            description: `AI identified the standard as ${result.detectedStandard}. If this is incorrect, please select the right standard and re-run validation to help our AI learn.`,
           });
+        } else if (selectedStandard !== 'Auto-Detect') {
+             toast({
+                title: "Preference Logged",
+                description: `Your preference for ${selectedStandard} has been noted and will improve future recommendations.`
+            });
         }
       } catch (error) {
         console.error("AI Validation failed", error);
@@ -682,5 +687,3 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
-
-    
