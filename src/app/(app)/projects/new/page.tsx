@@ -51,7 +51,7 @@ export default function ProjectSetupPage() {
   const [projectDescription, setProjectDescription] = React.useState('');
   const [clientInfo, setClientInfo] = React.useState('');
   const [contractValue, setContractValue] = React.useState('');
-  const [currency, setCurrency] = React.useState('NGN');
+  const [currency, setCurrency] = React.useState('USD');
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
 
@@ -229,18 +229,10 @@ export default function ProjectSetupPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="NGN">NGN</SelectItem>
                                     <SelectItem value="USD">USD</SelectItem>
+                                    <SelectItem value="NGN">NGN</SelectItem>
                                     <SelectItem value="EUR">EUR</SelectItem>
                                     <SelectItem value="GBP">GBP</SelectItem>
-                                    <SelectItem value="JPY">JPY</SelectItem>
-                                    <SelectItem value="CAD">CAD</SelectItem>
-                                    <SelectItem value="AUD">AUD</SelectItem>
-                                    <SelectItem value="CHF">CHF</SelectItem>
-                                    <SelectItem value="CNY">CNY</SelectItem>
-                                    <SelectItem value="INR">INR</SelectItem>
-                                    <SelectItem value="BRL">BRL</SelectItem>
-                                    <SelectItem value="ZAR">ZAR</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -375,12 +367,12 @@ export default function ProjectSetupPage() {
                             <CardDescription>Select your BOQ standard to ensure accurate AI validation.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Card className="bg-primary/5 border-primary/20">
+                            <Card className="border-ai-accent/50 bg-ai-accent/10">
                                 <CardContent className="p-4 flex items-center gap-4">
-                                    <Lightbulb className="h-6 w-6 text-primary" />
+                                    <Lightbulb className="h-6 w-6 text-ai-accent" />
                                     <div>
                                         <h4 className="font-semibold">AI Recommended: NRM</h4>
-                                        <p className="text-sm text-muted-foreground">Based on your project type (Commercial) and region, NRM is the suggested standard.</p>
+                                        <p className="text-sm text-muted-foreground">Based on your project type ({projectType || 'Commercial'}) and region, NRM is the suggested standard for highest accuracy.</p>
                                     </div>
                                 </CardContent>
                             </Card>

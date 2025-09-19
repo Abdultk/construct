@@ -126,7 +126,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Select the theme for the dashboard.</p>
               </div>
               <div className="flex gap-4">
-                 <div className="w-full rounded-md border-2 p-1 hover:border-primary" onClick={() => setTheme('light')}>
+                 <div className="w-full rounded-md border-2 p-1 hover:border-primary cursor-pointer" onClick={() => setTheme('light')}>
                   <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
                     <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
                       <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
@@ -139,7 +139,7 @@ export default function SettingsPage() {
                   </div>
                    <span className="block w-full p-2 text-center font-normal">Light</span>
                 </div>
-                <div className="w-full rounded-md border-2 p-1 hover:border-primary" onClick={() => setTheme('dark')}>
+                <div className="w-full rounded-md border-2 p-1 hover:border-primary cursor-pointer" onClick={() => setTheme('dark')}>
                   <div className="space-y-2 rounded-sm bg-slate-950 p-2">
                     <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
                       <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
@@ -265,6 +265,7 @@ export default function SettingsPage() {
                                     <SelectItem value="uk">United Kingdom</SelectItem>
                                     <SelectItem value="europe">Europe</SelectItem>
                                     <SelectItem value="asia">Asia</SelectItem>
+                                    <SelectItem value="africa">Africa</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -288,5 +289,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
