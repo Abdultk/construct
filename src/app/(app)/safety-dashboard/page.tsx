@@ -23,6 +23,7 @@ import {
   Calendar as CalendarIcon,
   AlertTriangle,
   ArrowRight,
+  ListChecks,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,19 +74,32 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+type Inspection = {
+  type: string;
+  inspector: string;
+  date: Date;
+};
+
+type OpenIssue = {
+    id: string;
+    description: string;
+    severity: 'High' | 'Medium' | 'Low';
+    assignee: string;
+};
+
 export default function SafetyDashboardPage() {
   const [trainingDate, setTrainingDate] = useState<Date>();
   const { toast } = useToast();
   const sitePlanImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [openIssues, setOpenIssues] = useState<OpenIssue[]>([
+      { id: 'NCF-001', description: 'Leaking pipe joint at column C4.', severity: 'High', assignee: 'Bob Miller' },
+      { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', severity: 'Medium', assignee: 'Diana Green' },
+  ]);
 
   const nearMisses = [
     { id: 'NMR-001', area: 'Sector B - Scaffolding', description: 'Tool dropped from height, landed near worker.', date: '2024-07-28' },
     { id: 'NMR-002', area: 'Loading Bay 1', description: 'Forklift operated too close to excavation edge.', date: '2024-07-25' },
-  ];
-
-  const openIssues = [
-      { id: 'NCF-001', description: 'Leaking pipe joint at column C4.', severity: 'High', assignee: 'Bob Miller' },
-      { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', severity: 'Medium', assignee: 'Diana Green' },
   ];
 
   const getSeverityBadge = (severity: string) => {
@@ -96,12 +110,104 @@ export default function SafetyDashboardPage() {
     }
   };
 
+  const handleScheduleInspection = (type: string, inspector: string, date: Date | undefined) => {
+    if (type && inspector && date) {
+      setInspections(prev => [...prev, { type, inspector, date }]);
+      toast({
+        title: 'Inspection Scheduled',
+        description: `The ${type} for ${format(date, 'PPP')} has been scheduled.`,
+      });
+    }
+  };
+
+  const handleResolveIssue = (id: string) => {
+    setOpenIssues(prev => prev.filter(issue => issue.id !== id));
+    toast({
+        title: 'Issue Resolved',
+        description: `Issue ${id} has been marked as resolved.`,
+    });
+  }
 
   const handleSubmit = (title: string, description: string) => {
     toast({
       title,
       description,
     });
+  }
+
+  const InspectionDialogContent = () => {
+    const [inspectionType, setInspectionType] = useState('');
+    const [inspector, setInspector] = useState('');
+    const [inspectionDate, setInspectionDate] = useState<Date>();
+
+    return (
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Schedule Safety Inspection</DialogTitle>
+              <DialogDescription>
+                Fill out the details to schedule a new safety inspection.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="inspection-type">Inspection Type</Label>
+                <Select value={inspectionType} onValueChange={setInspectionType}>
+                  <SelectTrigger id="inspection-type">
+                    <SelectValue placeholder="Select type..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Site Walkthrough">Site Walkthrough</SelectItem>
+                    <SelectItem value="PPE Compliance Check">PPE Compliance Check</SelectItem>
+                    <SelectItem value="Equipment Inspection">Equipment Inspection</SelectItem>
+                    <SelectItem value="Hazard Assessment">Hazard Assessment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="inspector">Assigned Inspector</Label>
+                <Select value={inspector} onValueChange={setInspector}>
+                  <SelectTrigger id="inspector">
+                    <SelectValue placeholder="Select inspector..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Diana Green (Safety Officer)">Diana Green (Safety Officer)</SelectItem>
+                    <SelectItem value="Charlie Davis (Architect)">Charlie Davis (Architect)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Inspection Date</Label>
+                 <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !inspectionDate && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {inspectionDate ? format(inspectionDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={inspectionDate}
+                        onSelect={setInspectionDate}
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button onClick={() => handleScheduleInspection(inspectionType, inspector, inspectionDate)}>Confirm Schedule</Button>
+              </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    );
   }
 
   return (
@@ -142,13 +248,13 @@ export default function SafetyDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Incidents (Last 30d)
+              Open Safety Issues
             </CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-headline">0</div>
-            <p className="text-xs text-muted-foreground">1 Minor, 0 Major</p>
+            <div className="text-2xl font-bold font-headline">{openIssues.length}</div>
+            <p className="text-xs text-muted-foreground">{openIssues.filter(i => i.severity === 'High').length} High, {openIssues.filter(i => i.severity === 'Medium').length} Medium</p>
           </CardContent>
         </Card>
         <Card>
@@ -163,13 +269,13 @@ export default function SafetyDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">PPE Compliance</CardTitle>
-            <HardHat className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Overdue Inspections</CardTitle>
+            <ListChecks className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-headline">99%</div>
+            <div className="text-2xl font-bold font-headline">{inspections.filter(i => i.date < new Date()).length}</div>
             <p className="text-xs text-muted-foreground">
-              Based on recent inspections
+              Out of {inspections.length} total
             </p>
           </CardContent>
         </Card>
@@ -233,72 +339,7 @@ export default function SafetyDashboardPage() {
                   <Plus className="mr-2 h-4 w-4" /> Schedule Safety Inspection
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Schedule Safety Inspection</DialogTitle>
-                  <DialogDescription>
-                    Fill out the details to schedule a new safety inspection.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="inspection-type">Inspection Type</Label>
-                    <Select>
-                      <SelectTrigger id="inspection-type">
-                        <SelectValue placeholder="Select type..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="site-walkthrough">Site Walkthrough</SelectItem>
-                        <SelectItem value="ppe-check">PPE Compliance Check</SelectItem>
-                        <SelectItem value="equipment-inspection">Equipment Inspection</SelectItem>
-                        <SelectItem value="hazard-assessment">Hazard Assessment</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="inspector">Assigned Inspector</Label>
-                    <Select>
-                      <SelectTrigger id="inspector">
-                        <SelectValue placeholder="Select inspector..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="diana-green">Diana Green (Safety Officer)</SelectItem>
-                        <SelectItem value="charlie-davis">Charlie Davis (Architect)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Inspection Date</Label>
-                     <Popover>
-                        <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !trainingDate && "text-muted-foreground"
-                            )}
-                        >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {trainingDate ? format(trainingDate, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                        <Calendar
-                            mode="single"
-                            selected={trainingDate}
-                            onSelect={setTrainingDate}
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button onClick={() => handleSubmit('Inspection Scheduled', 'The safety inspection has been added to the schedule.')}>Confirm Schedule</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
+              <InspectionDialogContent />
             </Dialog>
             <Dialog>
               <DialogTrigger asChild>
@@ -675,6 +716,70 @@ export default function SafetyDashboardPage() {
       </div>
 
        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+         <Card>
+            <CardHeader>
+                <CardTitle>Upcoming Inspections</CardTitle>
+                <CardDescription>Scheduled safety walkthroughs and checks.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {inspections.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Type</TableHead>
+                                <TableHead>Date</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {inspections.map((inspection, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">{inspection.type}</TableCell>
+                                    <TableCell>{format(inspection.date, 'PPP')}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No upcoming inspections scheduled.</p>
+                )}
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Open Safety Issues</CardTitle>
+                <CardDescription>Unresolved safety non-conformances.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Issue</TableHead>
+                            <TableHead>Severity</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {openIssues.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell>
+                                    <p className="font-semibold">{item.id}</p>
+                                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={getSeverityBadge(item.severity)}>{item.severity}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                     <Button variant="destructive" size="sm" onClick={() => handleResolveIssue(item.id)}>Resolve</Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                 </Table>
+            </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid grid-cols-1">
         <Card>
             <CardHeader>
                 <CardTitle>Near-Miss Reports</CardTitle>
@@ -708,41 +813,9 @@ export default function SafetyDashboardPage() {
                  </Table>
             </CardContent>
         </Card>
-        <Card>
-            <CardHeader>
-                <CardTitle>Open Safety Issues</CardTitle>
-                <CardDescription>Unresolved safety non-conformances.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Issue</TableHead>
-                            <TableHead>Severity</TableHead>
-                            <TableHead>Assignee</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {openIssues.map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell className="font-medium">{item.id}</TableCell>
-                                <TableCell>{item.description}</TableCell>
-                                <TableCell>
-                                    <Badge variant={getSeverityBadge(item.severity)}>{item.severity}</Badge>
-                                </TableCell>
-                                <TableCell>{item.assignee}</TableCell>
-                                <TableCell className="text-right">
-                                     <Button variant="destructive" size="sm">Resolve</Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
-            </CardContent>
-        </Card>
       </div>
     </div>
   );
 }
+
+    
