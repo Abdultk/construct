@@ -22,12 +22,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload } from 'lucide-react';
+import { Upload, ChevronDown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const boqStandards = {
+  "International": ["NRM", "CESMM4", "POMI", "SMM7", "UNIFORMAT II", "MasterFormat", "Uniclass"],
+  "Regional": ["ASTM E1557 (US)", "DIN 276 (Germany)", "IS 1200 (India)", "AS 3846 (Australia)", "SANS 1921 (South Africa)", "MMHW (Malaysia)", "Nigerian Building Code"],
+  "Custom": ["Enterprise Standard", "Project Specific", "Hybrid Model"]
+}
+
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'user-avatar-1');
+  const [selectedStandard, setSelectedStandard] = useState('NRM');
 
   return (
     <div className="flex-1 space-y-4">
@@ -206,8 +217,76 @@ export default function SettingsPage() {
                     <Button>Save Organization</Button>
                 </CardFooter>
             </Card>
+            <Card>
+                 <CardHeader>
+                    <CardTitle>BOQ Preferences</CardTitle>
+                    <CardDescription>
+                        Set default standards and behaviors for Bill of Quantities workflows.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>Default BOQ Standard</Label>
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-between">
+                                        {selectedStandard}
+                                        <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56">
+                                    <DropdownMenuItem onClick={() => setSelectedStandard('Auto-Detect')}>Auto-Detect</DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    {Object.entries(boqStandards).map(([groupName, standards]) => (
+                                        <DropdownMenuSub key={groupName}>
+                                            <DropdownMenuSubTrigger>{groupName}</DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent>
+                                                {standards.map(standard => (
+                                                    <DropdownMenuItem key={standard} onClick={() => setSelectedStandard(standard)}>
+                                                        {standard}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuSubContent>
+                                        </DropdownMenuSub>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Region Preference</Label>
+                            <Select defaultValue="international">
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="international">International</SelectItem>
+                                    <SelectItem value="north-america">North America</SelectItem>
+                                    <SelectItem value="uk">United Kingdom</SelectItem>
+                                    <SelectItem value="europe">Europe</SelectItem>
+                                    <SelectItem value="asia">Asia</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label>Enable AI Auto-Detection</Label>
+                                <p className="text-sm text-muted-foreground">Allow AI to automatically detect the standard for uploaded BOQs.</p>
+                            </div>
+                            <Switch defaultChecked />
+                        </div>
+                    </div>
+                </CardContent>
+                 <CardFooter>
+                    <Button>Save BOQ Preferences</Button>
+                </CardFooter>
+            </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
+
+    
