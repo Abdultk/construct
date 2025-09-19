@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -59,7 +60,7 @@ const prompt = ai.definePrompt({
 {{#if boqStandard}}
 The user has specified that the BOQ standard is '{{boqStandard}}'. You MUST use this standard for your validation.
 {{else}}
-No specific BOQ standard was provided. First, attempt to auto-detect the standard (e.g., NRM, CESMM4, SMM7, POMI, UNIFORMAT II, MasterFormat) based on the structure, descriptions, and units of the items. Analyze the hierarchy depth, numbering scheme (e.g., 1.1, 1.2 vs. A1, A2), and section patterns to make your determination. State the detected standard in your response.
+No specific BOQ standard was provided. First, attempt to auto-detect the standard (e.g., NRM, CESMM4, SMM7, POMI, UNIFORMAT II, MasterFormat) based on a multi-layered analysis of the items. Analyze the numbering scheme, item descriptions, terminology, units, and overall structure to determine the most likely standard. For example, look for specific keywords in descriptions (e.g., "formwork" vs. "shuttering") that are characteristic of certain standards (like CESMM4 vs. SMM7). State the detected standard in your response.
 {{/if}}
 
 Analyze the following list of BOQ items:
@@ -73,7 +74,7 @@ Analyze the following list of BOQ items:
 {{/each}}
 
 Review the items based on the specified (or detected) standard and the following criteria to extract new knowledge:
-1.  **Structural Compliance:** Analyze the numbering scheme, hierarchy, and section patterns. Does the itemization and structure comply with the rules of the BOQ standard? For example, NRM uses numeric subsections (1.1, 1.2) whereas CESMM4 might use alphanumeric (A1, A2).
+1.  **Structural & Vocabulary Compliance:** Analyze the numbering scheme, hierarchy, and terminology. Does the itemization and vocabulary comply with the rules and common language of the BOQ standard? For example, NRM uses numeric subsections (1.1, 1.2), whereas CESMM4 might use alphanumeric (A1, A2). Similarly, check if the technical terms used in descriptions are consistent with the chosen standard.
 2.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
 3.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
 4.  **Completeness:** Are there any obvious items missing for a standard construction project of this type according to the chosen standard?
@@ -94,3 +95,4 @@ const validateBoqFlow = ai.defineFlow(
     return output!;
   }
 );
+
