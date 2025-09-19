@@ -19,6 +19,7 @@ import {
   TrendingDown,
   TrendingUp,
   ArrowRight,
+  BookCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +34,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
@@ -135,6 +141,12 @@ const changeHistory: ChangeLog[] = [
     { itemId: '2.0', date: '2024-07-25', user: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32', action: 'create', details: 'Item created.' },
 ];
 
+const boqStandards = {
+  "International": ["NRM", "CESMM4", "POMI", "SMM7", "UNIFORMAT II", "MasterFormat", "Uniclass"],
+  "Regional": ["ASTM E1557 (US)", "DIN 276 (Germany)", "IS 1200 (India)", "AS 3846 (Australia)", "SANS 1921 (South Africa)", "MMHW (Malaysia)", "Nigerian Building Code"],
+  "Custom": ["Enterprise Standard", "Project Specific"]
+}
+
 export default function BoqDataGridPage() {
   const [boqItems, setBoqItems] = useState<BoqItem[]>(initialBoqItems);
   const [selectedItem, setSelectedItem] = useState<BoqItem | null>(null);
@@ -142,6 +154,7 @@ export default function BoqDataGridPage() {
   const [aiValidationEnabled, setAiValidationEnabled] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidateBoqOutput | null>(null);
+  const [selectedStandard, setSelectedStandard] = useState<string>('Auto-Detect');
   const { toast } = useToast();
   const importInputRef = useRef<HTMLInputElement>(null);
   const [isClient, setIsClient] = useState(false);
@@ -222,9 +235,16 @@ export default function BoqDataGridPage() {
             quantity: typeof i.quantity === 'number' ? i.quantity : undefined,
             rate: typeof i.rate === 'number' ? i.rate : undefined,
             isParent: i.isParent,
-          }))
+          })),
+          boqStandard: selectedStandard !== 'Auto-Detect' ? selectedStandard : undefined,
         });
         setValidationResult(result);
+        if (result.detectedStandard && selectedStandard === 'Auto-Detect') {
+          toast({
+            title: 'BOQ Standard Detected',
+            description: `AI identified the standard as ${result.detectedStandard}.`,
+          });
+        }
       } catch (error) {
         console.error("AI Validation failed", error);
         toast({
@@ -430,9 +450,31 @@ export default function BoqDataGridPage() {
                 <Button variant="outline" size="sm">
                   <Filter className="mr-2 h-4 w-4" /> Filter
                 </Button>
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  <Edit className="mr-2 h-4 w-4" /> Bulk Edit
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            <BookCheck className="mr-2 h-4 w-4" />
+                            Standard: {selectedStandard}
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setSelectedStandard('Auto-Detect')}>Auto-Detect</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {Object.entries(boqStandards).map(([groupName, standards]) => (
+                            <DropdownMenuSub key={groupName}>
+                                <DropdownMenuSubTrigger>{groupName}</DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                    {standards.map(standard => (
+                                        <DropdownMenuItem key={standard} onClick={() => setSelectedStandard(standard)}>
+                                            {standard}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -459,7 +501,9 @@ export default function BoqDataGridPage() {
           {validationResult && (
             <Alert>
               <Lightbulb className="h-4 w-4" />
-              <AlertTitle>AI Validation Summary</AlertTitle>
+              <AlertTitle>
+                AI Validation Summary {validationResult.detectedStandard && `(Standard: ${validationResult.detectedStandard})`}
+              </AlertTitle>
               <AlertDescription>
                 {validationResult.summary}
               </AlertDescription>

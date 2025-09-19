@@ -3,10 +3,11 @@
 /**
  * @fileOverview A Genkit flow for validating a Bill of Quantities (BOQ).
  *
- * This flow analyzes a list of BOQ items, identifies potential anomalies,
- * and provides a summary and a list of suggestions for improvement. This serves
- * as an example of AI-powered Knowledge Expansion, where the system mines
- * actionable insights from raw project data.
+ * This flow analyzes a list of BOQ items against a specified or auto-detected
+ * standard, identifies potential anomalies, and provides a summary and a list
+ * of suggestions for improvement. This serves as an example of AI-powered
+ * Knowledge Expansion, where the system mines actionable insights from raw
+ * project data.
  *
  * It exports:
  * - `validateBoq`: The main function to trigger the BOQ validation.
@@ -28,6 +29,7 @@ const BoqItemSchema = z.object({
 
 const ValidateBoqInputSchema = z.object({
   items: z.array(BoqItemSchema).describe('The list of all items in the Bill of Quantities, representing the raw data to be mined for knowledge.'),
+  boqStandard: z.string().optional().describe('The selected BOQ standard to validate against (e.g., "NRM", "CESMM4"). If not provided, the AI will attempt to auto-detect the standard.'),
 });
 export type ValidateBoqInput = z.infer<typeof ValidateBoqInputSchema>;
 
@@ -40,6 +42,7 @@ const AnomalySchema = z.object({
 const ValidateBoqOutputSchema = z.object({
   summary: z.string().describe('A high-level summary of the validation findings, including the number of anomalies found and general observations.'),
   anomalies: z.array(AnomalySchema).describe('A list of identified anomalies with specific suggestions, representing the full set of expanded knowledge.'),
+  detectedStandard: z.string().optional().describe('The BOQ standard the AI detected or used for validation.'),
 });
 export type ValidateBoqOutput = z.infer<typeof ValidateBoqOutputSchema>;
 
@@ -53,6 +56,12 @@ const prompt = ai.definePrompt({
   output: { schema: ValidateBoqOutputSchema },
   prompt: `You are an expert quantity surveyor AI specializing in cost estimation and Bill of Quantities (BOQ) validation for large construction projects. Your task is to act as a "Knowledge Miner" by analyzing the provided BOQ data to identify anomalies, inconsistencies, and potential cost-saving opportunities.
 
+{{#if boqStandard}}
+The user has specified that the BOQ standard is '{{boqStandard}}'. You MUST use this standard for your validation.
+{{else}}
+No specific BOQ standard was provided. First, attempt to auto-detect the standard (e.g., NRM, CESMM4, SMM7, POMI, UNIFORMAT II, MasterFormat) based on the structure, descriptions, and units of the items. State the detected standard in your response.
+{{/if}}
+
 Analyze the following list of BOQ items:
 {{#each items}}
 - ID: {{id}}
@@ -63,14 +72,14 @@ Analyze the following list of BOQ items:
   - Is Parent: {{isParent}}
 {{/each}}
 
-Review the items based on the following criteria to extract new knowledge:
-1.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
-2.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
-3.  **Completeness:** Are there any obvious items missing for a standard construction project of this type? (This is a secondary check, focus on the provided data first).
-4.  **Mathematical Accuracy:** While the amounts are pre-calculated, quickly scan for any glaring issues.
+Review the items based on the specified (or detected) standard and the following criteria to extract new knowledge:
+1.  **Compliance with Standard:** Does the itemization, description, and unit of measurement comply with the rules of the BOQ standard?
+2.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
+3.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
+4.  **Completeness:** Are there any obvious items missing for a standard construction project of this type according to the chosen standard?
 5.  **Cost Optimization:** Identify any items where the rate seems high and could be a candidate for negotiation or value engineering.
 
-Based on your analysis, provide a high-level summary and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do. This output will represent the new, validated knowledge extracted from the data.
+Based on your analysis, provide a high-level summary, the detected standard (if applicable), and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do. This output will represent the new, validated knowledge extracted from the data.
 `,
 });
 
