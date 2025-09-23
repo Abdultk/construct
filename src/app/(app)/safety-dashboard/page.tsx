@@ -259,6 +259,57 @@ export default function SafetyDashboardPage() {
     )
   }
 
+  const FirstAidGuide = () => (
+    <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="item-1">
+        <AccordionTrigger>Cuts and Scrapes</AccordionTrigger>
+        <AccordionContent>
+            <ol className="list-decimal list-inside space-y-2">
+            <li>Stop the bleeding by applying gentle pressure with a clean cloth.</li>
+            <li>Clean the wound with water.</li>
+            <li>Apply an antibiotic ointment.</li>
+            <li>Cover the wound with a bandage.</li>
+            </ol>
+        </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+        <AccordionTrigger>Burns (Minor)</AccordionTrigger>
+        <AccordionContent>
+            <ol className="list-decimal list-inside space-y-2">
+            <li>Cool the burn. Hold under cool (not cold) running water for about 10 minutes.</li>
+            <li>Remove rings or other tight items from the burned area.</li>
+            <li>Don't break blisters.</li>
+            <li>Apply lotion, such as one with aloe vera.</li>
+            <li>Bandage the burn loosely.</li>
+            </ol>
+        </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-3">
+        <AccordionTrigger>Eye Injuries (Debris)</AccordionTrigger>
+        <AccordionContent>
+            <ol className="list-decimal list-inside space-y-2">
+            <li>Do NOT rub the eye.</li>
+            <li>Use an eyewash station or clean water to flush the eye.</li>
+            <li>Try to blink to allow tears to wash out the particle.</li>
+            <li>If the particle is still there, cover the eye and seek medical attention.</li>
+            </ol>
+        </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-4">
+        <AccordionTrigger>Sprains and Strains</AccordionTrigger>
+        <AccordionContent>
+            <p className="font-bold mb-2">Follow R.I.C.E. procedure:</p>
+            <ol className="list-decimal list-inside space-y-2">
+            <li><strong>Rest:</strong> Stop activity and rest the injured area.</li>
+            <li><strong>Ice:</strong> Apply an ice pack for 15-20 minutes every 2-3 hours.</li>
+            <li><strong>Compression:</strong> Use a compression bandage to reduce swelling.</li>
+            <li><strong>Elevation:</strong> Keep the injured limb elevated above heart level.</li>
+            </ol>
+        </AccordionContent>
+        </AccordionItem>
+    </Accordion>
+  );
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* Header */}
@@ -274,10 +325,66 @@ export default function SafetyDashboardPage() {
             <Shield className="mr-2 h-5 w-5 text-green-500" />
             Safety Score: 98/100
           </Badge>
-          <Button variant="destructive">
-            <Phone className="mr-2 h-4 w-4" />
-            Emergency
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="destructive">
+                    <Phone className="mr-2 h-4 w-4" />
+                    Emergency
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Siren className="h-6 w-6 text-destructive" /> Emergency Actions
+                    </DialogTitle>
+                    <DialogDescription>
+                        Immediate access to emergency resources.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-3 gap-4 py-4">
+                    <Button
+                        variant="destructive"
+                        className="flex-col h-20 text-sm"
+                        onClick={() => toast({ title: 'Contacting Emergency Services...', variant: 'destructive'})}
+                    >
+                        <Phone className="h-6 w-6 mb-1" />
+                        <span>Emergency Call</span>
+                    </Button>
+                     <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="flex-col h-20 text-sm"
+                            >
+                                <BriefcaseMedical className="h-6 w-6 mb-1" />
+                                <span>First Aid Guide</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                <BriefcaseMedical /> First Aid Guide
+                                </DialogTitle>
+                                <DialogDescription>
+                                Basic first aid for common construction site injuries. This is not a substitute for professional medical advice.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="max-h-[60vh] overflow-y-auto pr-4">
+                                <FirstAidGuide />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                    <Button
+                        variant="outline"
+                        className="flex-col h-20 text-sm"
+                         onClick={() => toast({ title: 'Viewing Evacuation Plan'})}
+                    >
+                        <DoorOpen className="h-6 w-6 mb-1" />
+                        <span>Evacuation Plan</span>
+                    </Button>
+                </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -440,54 +547,7 @@ export default function SafetyDashboardPage() {
                               Basic first aid for common construction site injuries. This is not a substitute for professional medical advice.
                             </DialogDescription>
                           </DialogHeader>
-                          <Accordion type="single" collapsible className="w-full">
-                            <AccordionItem value="item-1">
-                              <AccordionTrigger>Cuts and Scrapes</AccordionTrigger>
-                              <AccordionContent>
-                                <ol className="list-decimal list-inside space-y-2">
-                                  <li>Stop the bleeding by applying gentle pressure with a clean cloth.</li>
-                                  <li>Clean the wound with water.</li>
-                                  <li>Apply an antibiotic ointment.</li>
-                                  <li>Cover the wound with a bandage.</li>
-                                </ol>
-                              </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-2">
-                              <AccordionTrigger>Burns (Minor)</AccordionTrigger>
-                              <AccordionContent>
-                                <ol className="list-decimal list-inside space-y-2">
-                                  <li>Cool the burn. Hold under cool (not cold) running water for about 10 minutes.</li>
-                                  <li>Remove rings or other tight items from the burned area.</li>
-                                  <li>Don't break blisters.</li>
-                                  <li>Apply lotion, such as one with aloe vera.</li>
-                                  <li>Bandage the burn loosely.</li>
-                                </ol>
-                              </AccordionContent>
-                            </AccordionItem>
-                             <AccordionItem value="item-3">
-                              <AccordionTrigger>Eye Injuries (Debris)</AccordionTrigger>
-                              <AccordionContent>
-                                <ol className="list-decimal list-inside space-y-2">
-                                  <li>Do NOT rub the eye.</li>
-                                  <li>Use an eyewash station or clean water to flush the eye.</li>
-                                  <li>Try to blink to allow tears to wash out the particle.</li>
-                                  <li>If the particle is still there, cover the eye and seek medical attention.</li>
-                                </ol>
-                              </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-4">
-                              <AccordionTrigger>Sprains and Strains</AccordionTrigger>
-                              <AccordionContent>
-                                 <p className="font-bold mb-2">Follow R.I.C.E. procedure:</p>
-                                <ol className="list-decimal list-inside space-y-2">
-                                  <li><strong>Rest:</strong> Stop activity and rest the injured area.</li>
-                                  <li><strong>Ice:</strong> Apply an ice pack for 15-20 minutes every 2-3 hours.</li>
-                                  <li><strong>Compression:</strong> Use a compression bandage to reduce swelling.</li>
-                                  <li><strong>Elevation:</strong> Keep the injured limb elevated above heart level.</li>
-                                </ol>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
+                          <FirstAidGuide />
                         </DialogContent>
                       </Dialog>
                       <Button
