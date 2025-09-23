@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Image as ImageIcon,
   File as FileIcon,
-  X
+  X,
+  Undo2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +42,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { format } from 'date-fns';
 
 type WorkPackage = {
   id: string;
@@ -64,6 +66,8 @@ export default function ProgressEntryPage() {
   const { toast } = useToast();
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSigned, setIsSigned] = useState(false);
+  const [signatureDate, setSignatureDate] = useState<Date | null>(null);
 
 
   const handleProgressChange = (id: string, newProgress: number[]) => {
@@ -99,6 +103,16 @@ export default function ProgressEntryPage() {
         title: 'Progress Report Submitted',
         description: 'The daily progress has been logged and synced.',
     });
+  }
+  
+  const handleSign = () => {
+    setIsSigned(true);
+    setSignatureDate(new Date());
+  }
+
+  const handleClearSignature = () => {
+    setIsSigned(false);
+    setSignatureDate(null);
   }
 
   return (
@@ -284,12 +298,35 @@ export default function ProgressEntryPage() {
             </div>
             <div className="space-y-2">
                 <Label>Foreman Signature</Label>
-                <div className='p-8 rounded-lg border-dashed border-2 text-center bg-muted'>
-                    <Pen className='mx-auto h-8 w-8 text-muted-foreground' />
-                    <p className="text-sm text-muted-foreground mt-2">Digital signature pad coming soon.</p>
-                </div>
+                {isSigned ? (
+                  <div className='p-4 rounded-lg border-2 border-green-500 bg-green-500/10 relative'>
+                    <svg className="w-full h-16" viewBox="0 0 300 80">
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        d="M20,50 C40,70 60,30 80,50 S120,70 140,50 S180,30 200,50 S240,70 260,50"
+                      />
+                    </svg>
+                     <div className="text-center mt-2">
+                        <p className="font-semibold text-sm">John Smith (Foreman)</p>
+                        <p className="text-xs text-muted-foreground">Signed on {signatureDate ? format(signatureDate, 'PPP, p') : 'N/A'}</p>
+                    </div>
+                     <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={handleClearSignature}>
+                        <Undo2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                    <div 
+                        className='p-8 rounded-lg border-dashed border-2 text-center bg-muted cursor-pointer hover:border-primary'
+                        onClick={handleSign}
+                    >
+                        <Pen className='mx-auto h-8 w-8 text-muted-foreground' />
+                        <p className="text-sm text-muted-foreground mt-2">Click to sign</p>
+                    </div>
+                )}
             </div>
-            <Button className="w-full" size="lg" onClick={handleSubmit}>Submit Daily Report</Button>
+            <Button className="w-full" size="lg" onClick={handleSubmit} disabled={!isSigned}>Submit Daily Report</Button>
             <p className='text-center text-sm text-muted-foreground'>{isOnline ? 'Report will be submitted and synced.' : 'Report will be saved locally and synced when online.'}</p>
             </CardContent>
         </Card>
@@ -298,3 +335,7 @@ export default function ProgressEntryPage() {
   );
 }
 
+
+
+
+    
