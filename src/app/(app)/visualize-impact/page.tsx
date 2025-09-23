@@ -32,9 +32,11 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function ChangeImpactVisualizationPage() {
     const { toast } = useToast();
+    const [status, setStatus] = useState<'In Review' | 'Approved'>('In Review');
 
     const communicationPlan = {
         internal: [
@@ -57,6 +59,7 @@ export default function ChangeImpactVisualizationPage() {
     }
     
     const handleApprove = () => {
+        setStatus('Approved');
         toast({
             title: 'Change Order Approved',
             description: 'CR-0012 has been approved and the implementation plan is now active.',
@@ -82,10 +85,10 @@ export default function ChangeImpactVisualizationPage() {
               Substitute roofing material for Downtown Skyscraper
             </p>
           </div>
-          <Badge variant="outline">In Review</Badge>
+          <Badge variant={status === 'Approved' ? 'secondary' : 'outline'}>{status}</Badge>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={handleApprove}>Approve & Implement</Button>
+          <Button variant="secondary" onClick={handleApprove} disabled={status === 'Approved'}>Approve & Implement</Button>
         </div>
       </div>
 
@@ -364,7 +367,3 @@ export default function ChangeImpactVisualizationPage() {
     </div>
   );
 }
-
-  
-
-    
