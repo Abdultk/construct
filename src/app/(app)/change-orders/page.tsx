@@ -18,13 +18,15 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle, Send, DollarSign, Percent } from "lucide-react"
+import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle, Send, DollarSign, Percent, Search, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -66,6 +68,44 @@ export default function ChangeOrdersPage() {
 
     const router = useRouter();
     const [changeOrders, setChangeOrders] = React.useState<ChangeOrder[]>(initialChangeOrders);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [statusFilter, setStatusFilter] = React.useState<string[]>([]);
+    const [priorityFilter, setPriorityFilter] = React.useState<string[]>([]);
+
+    const filteredChangeOrders = React.useMemo(() => {
+        return changeOrders.filter(co => {
+            const matchesSearch = searchTerm === '' ||
+                Object.values(co).some(val =>
+                    String(val).toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            const matchesStatus = statusFilter.length === 0 || statusFilter.includes(co.status);
+            const matchesPriority = priorityFilter.length === 0 || priorityFilter.includes(co.priority);
+            return matchesSearch && matchesStatus && matchesPriority;
+        });
+    }, [changeOrders, searchTerm, statusFilter, priorityFilter]);
+
+    const handleStatusFilterChange = (status: string) => {
+        setStatusFilter(prev =>
+            prev.includes(status)
+                ? prev.filter(s => s !== status)
+                : [...prev, status]
+        );
+    };
+    
+    const handlePriorityFilterChange = (priority: string) => {
+        setPriorityFilter(prev =>
+            prev.includes(priority)
+                ? prev.filter(p => p !== priority)
+                : [...prev, priority]
+        );
+    };
+
+    const clearFilters = () => {
+        setStatusFilter([]);
+        setPriorityFilter([]);
+        setSearchTerm('');
+    };
+
 
     const commentsData: CommentsByChangeOrder = {
         'CR-0010': [
@@ -157,7 +197,44 @@ export default function ChangeOrdersPage() {
             <p className="text-muted-foreground">Review, approve, and track all change orders.</p>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
+            <div className="relative hidden md:block">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search orders..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <Filter className="mr-2 h-4 w-4" /> Filter <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem checked={statusFilter.includes('Pending Review')} onCheckedChange={() => handleStatusFilterChange('Pending Review')}>
+                        Pending Review
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem checked={statusFilter.includes('Approved')} onCheckedChange={() => handleStatusFilterChange('Approved')}>
+                        Approved
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem checked={statusFilter.includes('Rejected')} onCheckedChange={() => handleStatusFilterChange('Rejected')}>
+                        Rejected
+                    </DropdownMenuCheckboxItem>
+                     <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem checked={priorityFilter.includes('High')} onCheckedChange={() => handlePriorityFilterChange('High')}>
+                        High
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem checked={priorityFilter.includes('Medium')} onCheckedChange={() => handlePriorityFilterChange('Medium')}>
+                        Medium
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem checked={priorityFilter.includes('Low')} onCheckedChange={() => handlePriorityFilterChange('Low')}>
+                        Low
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={clearFilters}>Clear Filters</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
             <Button asChild>
                 <Link href="/change-orders/new">
                     <FilePlus className="mr-2 h-4 w-4" />
@@ -310,7 +387,7 @@ export default function ChangeOrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {changeOrders.map((co) => (
+            {filteredChangeOrders.map((co) => (
               <TableRow 
                 key={co.id} 
                 className={`cursor-pointer hover:bg-muted/50 ${selectedChangeOrder?.id === co.id ? 'bg-muted' : ''}`}
@@ -354,3 +431,5 @@ export default function ChangeOrdersPage() {
     </div>
   )
 }
+
+    
