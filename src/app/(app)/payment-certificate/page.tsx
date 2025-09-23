@@ -18,6 +18,7 @@ import {
   ThumbsDown,
   Send,
   Loader2,
+  Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -362,21 +363,31 @@ export default function PaymentCertificatePage() {
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                     <div className='flex gap-4'>
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
                         <div>
                             <p className="font-semibold">Foreman</p>
                             <p className="text-muted-foreground">Approved by J. Smith - 7/28/24</p>
                         </div>
                     </div>
+                     <Separator />
                      <div className='flex gap-4'>
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
                         <div>
                             <p className="font-semibold">Project Manager</p>
                             <p className="text-muted-foreground">Approved by A. Johnson - 7/29/24</p>
                         </div>
                     </div>
+                     <Separator />
                      <div className='flex gap-4'>
-                        <Clock className="h-5 w-5 text-yellow-500 mt-1" />
+                        <Eye className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
+                        <div>
+                            <p className="font-semibold">Quantity Surveyor</p>
+                            <p className="text-muted-foreground">In Review by K. Lee</p>
+                        </div>
+                    </div>
+                     <Separator />
+                     <div className='flex gap-4'>
+                        <Clock className="h-5 w-5 text-yellow-500 mt-1 flex-shrink-0" />
                         <div>
                             <p className="font-semibold">You (Client)</p>
                             <p className="text-muted-foreground">Pending Approval</p>
