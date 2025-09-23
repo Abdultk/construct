@@ -94,9 +94,9 @@ export default function ChangeImpactVisualizationPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">+$25,000</div>
+            <div className="text-2xl font-bold text-destructive">+$15,200</div>
             <p className="text-xs text-muted-foreground">
-              Estimated net value increase
+              Estimated direct cost increase
             </p>
           </CardContent>
         </Card>
