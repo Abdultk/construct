@@ -5,8 +5,6 @@ import {
     CircleDollarSign,
     CreditCard,
     Download,
-    LineChart,
-    Wallet,
     TrendingDown,
     Gauge,
     AlertTriangle
@@ -31,6 +29,28 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+
+const budgetVsActualData = [
+  { name: "Substructure", budget: 450000, actual: 475000 },
+  { name: "Superstructure", budget: 1250000, actual: 1200000 },
+  { name: "Facade", budget: 800000, actual: 850000 },
+  { name: "MEP", budget: 950000, actual: 925000 },
+  { name: "Finishes", budget: 600000, actual: 580000 },
+  { name: "Sitework", budget: 300000, actual: 310000 },
+];
+
+const chartConfig = {
+    budget: {
+      label: "Budget",
+      color: "hsl(var(--secondary))",
+    },
+    actual: {
+      label: "Actual",
+      color: "hsl(var(--primary))",
+    },
+};
 
 export default function BudgetEstablishmentPage() {
     const [isClient, setIsClient] = useState(false);
@@ -130,9 +150,20 @@ export default function BudgetEstablishmentPage() {
          <Card>
             <CardHeader>
                 <CardTitle>Budget vs. Actual</CardTitle>
+                 <CardDescription>Comparison of budgeted and actual costs by work category for Downtown Skyscraper.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <BarChart data={budgetVsActualData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} angle={-45} textAnchor="end" height={60} />
+                        <YAxis tickFormatter={(value) => `$${Number(value) / 1000}k`} />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Bar dataKey="budget" fill={chartConfig.budget.color} radius={4} />
+                        <Bar dataKey="actual" fill={chartConfig.actual.color} radius={4} />
+                    </BarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
         <Card>
@@ -245,5 +276,3 @@ export default function BudgetEstablishmentPage() {
     </div>
   );
 }
-
-    
