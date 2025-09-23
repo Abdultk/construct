@@ -23,6 +23,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, Bar as RechartsBar } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import * as React from 'react';
 
 export default function QualityControlPage() {
   
@@ -47,6 +50,28 @@ export default function QualityControlPage() {
       case 'Resolved': return 'secondary';
       default: return 'outline';
     }
+  };
+
+   const defectsBySeverity = React.useMemo(() => {
+    const data = defects.reduce((acc, defect) => {
+      if (!acc[defect.severity]) {
+        acc[defect.severity] = 0;
+      }
+      acc[defect.severity]++;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return [
+      { severity: 'High', count: data.High || 0, fill: 'hsl(var(--destructive))' },
+      { severity: 'Medium', count: data.Medium || 0, fill: 'hsl(var(--primary))' },
+      { severity: 'Low', count: data.Low || 0, fill: 'hsl(var(--secondary))' },
+    ];
+  }, [defects]);
+
+  const chartConfig = {
+    count: {
+      label: 'Defects',
+    },
   };
 
 
@@ -190,7 +215,7 @@ export default function QualityControlPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
                 <CardHeader>
-                    <CardTitle>Checklists & Standards</CardTitle>
+                    <CardTitle>Checklists &amp; Standards</CardTitle>
                     <CardDescription>Manage quality standards and inspection templates.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -200,13 +225,49 @@ export default function QualityControlPage() {
                 </CardContent>
             </Card>
             <Card>
-                <CardHeader>
-                    <CardTitle>Reporting & Analytics</CardTitle>
-                    <CardDescription>Visualize trends and generate reports.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Quality analytics charts coming soon.</p>
-                </CardContent>
+              <CardHeader>
+                <CardTitle>Reporting &amp; Analytics</CardTitle>
+                <CardDescription>
+                  Visualize defect trends by severity.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                  <RechartsBarChart
+                    accessibilityLayer
+                    data={defectsBySeverity}
+                    margin={{
+                      top: 5,
+                      right: 5,
+                      left: -20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="severity"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      allowDecimals={false}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <RechartsBar dataKey="count" radius={4}>
+                      {defectsBySeverity.map((item) => (
+                        <div key={item.severity} />
+                      ))}
+                    </RechartsBar>
+                  </RechartsBarChart>
+                </ChartContainer>
+              </CardContent>
             </Card>
         </div>
     </div>
