@@ -26,8 +26,29 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, Bar as RechartsBar } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import * as React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+
+type Checklist = {
+  title: string;
+  items: string[];
+};
+
+const checklists: Checklist[] = [
+    { title: 'Concrete Pour Checklist', items: ['Verify formwork is clean and oiled', 'Check rebar placement and cover', 'Confirm concrete mix design', 'Monitor slump test results', 'Ensure proper vibration'] },
+    { title: 'Electrical Rough-in Checklist', items: ['Check box placement against plans', 'Verify wire gauge is correct for circuit', 'Ensure proper grounding', 'Check for secure connections', 'Confirm circuit breaker ratings'] },
+];
+
 
 export default function QualityControlPage() {
+  const { toast } = useToast();
+  const [activeChecklist, setActiveChecklist] = React.useState<Checklist | null>(null);
+  const [isCreateChecklistOpen, setIsCreateChecklistOpen] = React.useState(false);
+  const [newChecklistTitle, setNewChecklistTitle] = React.useState("");
+  const [newChecklistItems, setNewChecklistItems] = React.useState("");
+
   
   const defects = [
     { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', severity: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, dueDate: '2024-08-05'},
@@ -72,6 +93,20 @@ export default function QualityControlPage() {
     count: {
       label: 'Defects',
     },
+  };
+
+  const handleCreateChecklist = () => {
+    if (newChecklistTitle && newChecklistItems) {
+      // In a real app, you'd save this to a backend.
+      // For now, we just show a toast.
+      toast({
+        title: 'Checklist Created',
+        description: `"${newChecklistTitle}" has been created successfully.`,
+      });
+      setIsCreateChecklistOpen(false);
+      setNewChecklistTitle('');
+      setNewChecklistItems('');
+    }
   };
 
 
@@ -219,9 +254,39 @@ export default function QualityControlPage() {
                     <CardDescription>Manage quality standards and inspection templates.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start"><ListChecks className="mr-2 h-4 w-4" /> Concrete Pour Checklist</Button>
-                    <Button variant="outline" className="w-full justify-start"><ListChecks className="mr-2 h-4 w-4" /> Electrical Rough-in Checklist</Button>
-                     <Button variant="secondary" className="w-full justify-start"><Plus className="mr-2 h-4 w-4" /> Create New Checklist</Button>
+                    {checklists.map(checklist => (
+                        <Button key={checklist.title} variant="outline" className="w-full justify-start" onClick={() => setActiveChecklist(checklist)}>
+                            <ListChecks className="mr-2 h-4 w-4" /> {checklist.title}
+                        </Button>
+                    ))}
+                    <Dialog open={isCreateChecklistOpen} onOpenChange={setIsCreateChecklistOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="secondary" className="w-full justify-start">
+                                <Plus className="mr-2 h-4 w-4" /> Create New Checklist
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create New Checklist</DialogTitle>
+                                <DialogDescription>
+                                    Define a new checklist for quality inspections.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="checklist-title">Checklist Title</Label>
+                                    <Input id="checklist-title" placeholder="e.g., HVAC Installation Checklist" value={newChecklistTitle} onChange={(e) => setNewChecklistTitle(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="checklist-items">Checklist Items</Label>
+                                    <Textarea id="checklist-items" placeholder="Enter one item per line..." rows={5} value={newChecklistItems} onChange={(e) => setNewChecklistItems(e.target.value)} />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handleCreateChecklist}>Save Checklist</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </CardContent>
             </Card>
             <Card>
@@ -270,6 +335,29 @@ export default function QualityControlPage() {
               </CardContent>
             </Card>
         </div>
+
+        {/* View Checklist Dialog */}
+        <Dialog open={!!activeChecklist} onOpenChange={(isOpen) => !isOpen && setActiveChecklist(null)}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{activeChecklist?.title}</DialogTitle>
+                    <DialogDescription>
+                        Review the items for this quality checklist.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-4 my-4">
+                    {activeChecklist?.items.map((item, index) => (
+                        <div key={index} className="flex items-center space-x-3">
+                            <Checkbox id={`item-${index}`} />
+                            <Label htmlFor={`item-${index}`} className="font-normal">{item}</Label>
+                        </div>
+                    ))}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setActiveChecklist(null)}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
