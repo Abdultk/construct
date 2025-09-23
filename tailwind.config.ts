@@ -89,15 +89,10 @@ export default {
             height: '0',
           },
         },
-        'toast-gradient': {
-            '0%': { 'border-color': 'hsl(var(--primary))' },
-            '100%': { 'border-color': 'hsl(var(--accent))' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'toast-gradient': 'toast-gradient 3s infinite alternate',
       },
     },
   },
