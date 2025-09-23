@@ -351,11 +351,11 @@ export default function ChangeRequestFormPage() {
                           {analysisResult.estimatedCostImpact}
                         </span>
                          <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('cost', 'positive')}>
-                                <ThumbsUp className={cn("h-4 w-4", costFeedback === 'positive' && "text-primary fill-primary/20")} />
+                            <Button variant={costFeedback === 'positive' ? 'secondary': 'ghost'} size="sm" className={cn(costFeedback === 'positive' && "border-primary border")} onClick={() => handleFeedback('cost', 'positive')}>
+                                <ThumbsUp className={cn("h-4 w-4 mr-1", costFeedback === 'positive' && "text-primary")} /> Accurate
                             </Button>
-                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('cost', 'negative')}>
-                                <ThumbsDown className={cn("h-4 w-4", costFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                             <Button variant={costFeedback === 'negative' ? 'destructive': 'ghost'} size="sm" onClick={() => handleFeedback('cost', 'negative')}>
+                                <ThumbsDown className={cn("h-4 w-4 mr-1")} /> Inaccurate
                             </Button>
                         </div>
                       </>
@@ -378,11 +378,11 @@ export default function ChangeRequestFormPage() {
                           {analysisResult.estimatedScheduleImpact}
                         </span>
                         <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('schedule', 'positive')}>
-                                <ThumbsUp className={cn("h-4 w-4", scheduleFeedback === 'positive' && "text-primary fill-primary/20")} />
+                            <Button variant={scheduleFeedback === 'positive' ? 'secondary': 'ghost'} size="sm" className={cn(scheduleFeedback === 'positive' && "border-primary border")} onClick={() => handleFeedback('schedule', 'positive')}>
+                                <ThumbsUp className={cn("h-4 w-4 mr-1", scheduleFeedback === 'positive' && "text-primary")} /> Accurate
                             </Button>
-                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('schedule', 'negative')}>
-                                <ThumbsDown className={cn("h-4 w-4", scheduleFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                             <Button variant={scheduleFeedback === 'negative' ? 'destructive': 'ghost'} size="sm" onClick={() => handleFeedback('schedule', 'negative')}>
+                                <ThumbsDown className={cn("h-4 w-4 mr-1")} /> Inaccurate
                             </Button>
                         </div>
                        </>
@@ -409,12 +409,12 @@ export default function ChangeRequestFormPage() {
                             </div>
                             ))}
                             </div>
-                             <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('risk', 'positive')}>
-                                    <ThumbsUp className={cn("h-4 w-4", riskFeedback === 'positive' && "text-primary fill-primary/20")} />
+                             <div className="flex flex-col gap-1">
+                                <Button variant={riskFeedback === 'positive' ? 'secondary': 'ghost'} size="sm" className={cn("h-7", riskFeedback === 'positive' && "border-primary border")} onClick={() => handleFeedback('risk', 'positive')}>
+                                    <ThumbsUp className={cn("h-4 w-4 mr-1", riskFeedback === 'positive' && "text-primary")} /> Accurate
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleFeedback('risk', 'negative')}>
-                                    <ThumbsDown className={cn("h-4 w-4", riskFeedback === 'negative' && "text-destructive fill-destructive/20")} />
+                                 <Button variant={riskFeedback === 'negative' ? 'destructive': 'ghost'} size="sm" className='h-7' onClick={() => handleFeedback('risk', 'negative')}>
+                                    <ThumbsDown className={cn("h-4 w-4 mr-1")} /> Inaccurate
                                 </Button>
                             </div>
                         </div>
@@ -463,3 +463,5 @@ export default function ChangeRequestFormPage() {
     </div>
   );
 }
+
+    
