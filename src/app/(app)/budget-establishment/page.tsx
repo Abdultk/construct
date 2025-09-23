@@ -7,7 +7,8 @@ import {
     Download,
     TrendingDown,
     Gauge,
-    AlertTriangle
+    AlertTriangle,
+    Wallet,
 } from 'lucide-react';
 import {
     Card,
@@ -29,8 +30,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 const budgetVsActualData = [
   { name: "Substructure", budget: 450000, actual: 475000 },
@@ -39,6 +40,16 @@ const budgetVsActualData = [
   { name: "MEP", budget: 950000, actual: 925000 },
   { name: "Finishes", budget: 600000, actual: 580000 },
   { name: "Sitework", budget: 300000, actual: 310000 },
+];
+
+const earnedValueData = [
+    { name: 'Jan', pv: 100, ev: 100, ac: 110 },
+    { name: 'Feb', pv: 200, ev: 210, ac: 220 },
+    { name: 'Mar', pv: 300, ev: 305, ac: 310 },
+    { name: 'Apr', pv: 400, ev: 380, ac: 410 },
+    { name: 'May', pv: 500, ev: 490, ac: 500 },
+    { name: 'Jun', pv: 600, ev: 580, ac: 610 },
+    { name: 'Jul', pv: 700, ev: 710, ac: 700 },
 ];
 
 const chartConfig = {
@@ -50,6 +61,18 @@ const chartConfig = {
       label: "Actual",
       color: "hsl(var(--primary))",
     },
+    pv: {
+        label: "Planned Value (PV)",
+        color: "hsl(var(--secondary))",
+    },
+    ev: {
+        label: "Earned Value (EV)",
+        color: "hsl(var(--primary))",
+    },
+    ac: {
+        label: "Actual Cost (AC)",
+        color: "hsl(var(--destructive))",
+    }
 };
 
 export default function BudgetEstablishmentPage() {
@@ -177,9 +200,21 @@ export default function BudgetEstablishmentPage() {
          <Card>
             <CardHeader>
                 <CardTitle>Earned Value Analysis</CardTitle>
+                <CardDescription>PV, EV, and AC for Downtown Skyscraper.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <LineChart data={earnedValueData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis tickFormatter={(value) => `$${value}k`} />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Line dataKey="pv" type="monotone" stroke={chartConfig.pv.color} strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                        <Line dataKey="ev" type="monotone" stroke={chartConfig.ev.color} strokeWidth={2} dot={false} />
+                        <Line dataKey="ac" type="monotone" stroke={chartConfig.ac.color} strokeWidth={2} dot={false} />
+                    </LineChart>
+                </ChartContainer>
             </CardContent>
         </Card>
          <Card>
