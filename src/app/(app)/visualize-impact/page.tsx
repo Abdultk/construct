@@ -13,6 +13,8 @@ import {
   TrendingDown,
   ThumbsUp,
   MessageSquare,
+  CheckSquare,
+  Repeat,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,7 +87,7 @@ export default function ChangeImpactVisualizationPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -125,6 +127,20 @@ export default function ChangeImpactVisualizationPage() {
             <div className="text-2xl font-bold text-yellow-500">Neutral</div>
             <p className="text-xs text-muted-foreground">
               No significant change in project risk
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Quality Impact
+            </CardTitle>
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">Minor Adjustments</div>
+            <p className="text-xs text-muted-foreground">
+              Requires updated inspection checklist
             </p>
           </CardContent>
         </Card>
@@ -207,37 +223,39 @@ export default function ChangeImpactVisualizationPage() {
               </div>
               {/* Resource Comparison */}
               <div>
-                <h3 className="mb-2 font-semibold">Resource Impact</h3>
+                <h3 className="mb-2 font-semibold">Resource & Quality Impact</h3>
                  <div className="grid grid-cols-2 gap-4">
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Affected Resources</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span className="text-sm">Roofing Subcontractor</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span className="text-sm">Crane Operator</span>
-                          </div>
-                      </CardContent>
-                    </Card>
-                     <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Workload Change</CardTitle>
+                        <CardTitle className="text-base">Resource Workload Change</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
                          <div className="flex items-center gap-2 text-sm">
                            <TrendingUp className="h-4 w-4 text-destructive" />
                            <span className="font-semibold">Roofing Team:</span>
-                           <span>+40 man-hours</span>
+                           <span>+40 man-hours ($8,000)</span>
                          </div>
                          <div className="flex items-center gap-2 text-sm">
                            <TrendingDown className="h-4 w-4 text-green-600" />
                            <span className="font-semibold">Logistics:</span>
-                           <span>-8 man-hours</span>
+                           <span>-8 man-hours (-$1,600)</span>
+                         </div>
+                      </CardContent>
+                    </Card>
+                     <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Quality & Compliance</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                         <div className="flex items-center gap-2 text-sm">
+                           <CheckSquare className="h-4 w-4 text-green-600" />
+                           <span className="font-semibold">Compliance:</span>
+                           <span>Meets all specs</span>
+                         </div>
+                         <div className="flex items-center gap-2 text-sm">
+                           <Repeat className="h-4 w-4 text-yellow-500" />
+                           <span className="font-semibold">Rework Risk:</span>
+                           <span>Low (15%)</span>
                          </div>
                       </CardContent>
                     </Card>
@@ -333,4 +351,5 @@ export default function ChangeImpactVisualizationPage() {
       </div>
     </div>
   );
-}
+
+    
