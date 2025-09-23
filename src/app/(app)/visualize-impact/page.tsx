@@ -15,6 +15,7 @@ import {
   MessageSquare,
   CheckSquare,
   Repeat,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -119,28 +120,28 @@ export default function ChangeImpactVisualizationPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Risk Profile Change
+              Quality Impact
             </CardTitle>
-            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">Neutral</div>
+            <p className="font-semibold">Compliance: Meets all specs</p>
             <p className="text-xs text-muted-foreground">
-              No significant change in project risk
+              Rework Risk: Low (15%)
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Quality Impact
+              Risk Profile Change
             </CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">Minor Adjustments</div>
+            <div className="text-2xl font-bold text-yellow-500">Medium</div>
             <p className="text-xs text-muted-foreground">
-              Requires updated inspection checklist
+              Increased material lead time risk
             </p>
           </CardContent>
         </Card>
@@ -269,32 +270,24 @@ export default function ChangeImpactVisualizationPage() {
         <div className="col-span-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Implementation Plan</CardTitle>
+              <CardTitle>Risk Impact Evaluation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <div className="flex items-start gap-3">
-                <Check className="h-4 w-4 mt-1 flex-shrink-0 text-primary" />
-                <div>
-                  <p className="font-semibold">Procure New Materials</p>
-                  <p className="text-xs text-muted-foreground">Est. 2 days</p>
+                 <div className="flex justify-between items-center">
+                    <span className="font-semibold">Overall Risk Level</span>
+                    <Badge variant="default" className="bg-yellow-500">Medium</Badge>
                 </div>
-              </div>
-              <Separator />
-               <div className="flex items-start gap-3">
-                <Check className="h-4 w-4 mt-1 flex-shrink-0 text-primary" />
+                <Separator />
                 <div>
-                  <p className="font-semibold">Update Site Logistics</p>
-                  <p className="text-xs text-muted-foreground">Est. 1 day</p>
+                    <h4 className="font-semibold mb-2">Key Risk Drivers:</h4>
+                    <p><strong>Technical:</strong> New material requires different installation technique.</p>
+                    <p><strong>Commercial:</strong> Potential for subcontractor price variation.</p>
                 </div>
-              </div>
-               <Separator />
-               <div className="flex items-start gap-3">
-                <Check className="h-4 w-4 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Execute Work</p>
-                  <p className="text-xs text-muted-foreground">Est. 2 days</p>
+                <Separator />
+                 <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2"><Lightbulb className="text-ai-accent" /> AI Mitigation Strategy:</h4>
+                    <p>Allocate a 5% contingency on the new material cost. Schedule a mandatory pre-installation training session with the subcontractor to minimize workmanship risk.</p>
                 </div>
-              </div>
             </CardContent>
           </Card>
            <Card>
@@ -351,5 +344,7 @@ export default function ChangeImpactVisualizationPage() {
       </div>
     </div>
   );
+
+    
 
     
