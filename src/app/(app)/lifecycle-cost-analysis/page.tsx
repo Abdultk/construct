@@ -16,6 +16,8 @@ import {
   LineChart,
   Repeat,
   Calculator,
+  FileText,
+  FilePlus,
 } from 'lucide-react';
 import {
   Dialog,
@@ -27,6 +29,7 @@ import {
 import { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart as RechartsLineChart, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line as RechartsLine } from 'recharts';
+import Link from 'next/link';
 
 type AnalysisTool = 'Cost Modeling' | 'ROI Calculation' | 'Replacement Analysis' | 'Budget Planning' | null;
 
@@ -155,7 +158,7 @@ export default function LifecycleCostAnalysisPage() {
                     <RechartsLineChart data={costTrendData} accessibilityLayer>
                         <CartesianGrid vertical={false} />
                         <XAxis dataKey="year" tickLine={false} tickMargin={10} axisLine={false} />
-                        <YAxis tickFormatter={(value) => `$${value}k`} />
+                        <YAxis tickFormatter={(value) => `$${'${value}'}k`} />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                         <Legend />
                         <RechartsLine dataKey="capex" type="monotone" stroke={chartConfig.capex.color} strokeWidth={2} dot={true} />
@@ -213,8 +216,18 @@ export default function LifecycleCostAnalysisPage() {
             <CardHeader>
                 <CardTitle>Reporting</CardTitle>
             </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">Reporting tools coming soon.</p>
+            <CardContent className='space-y-3'>
+                <Button className="w-full justify-start">
+                  <FileText className="mr-2 h-4 w-4" /> Generate TCO Report
+                </Button>
+                <Button variant="secondary" className="w-full justify-start">
+                  <Download className="mr-2 h-4 w-4" /> Export Benchmark Data
+                </Button>
+                 <Button variant="outline" className="w-full justify-start" asChild>
+                    <Link href="/reports/builder">
+                        <FilePlus className="mr-2 h-4 w-4" /> Create Custom Report
+                    </Link>
+                </Button>
             </CardContent>
         </Card>
       </div>
