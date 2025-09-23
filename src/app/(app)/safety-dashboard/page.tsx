@@ -387,15 +387,15 @@ export default function SafetyDashboardPage() {
                     </Button>
                      <Dialog>
                         <DialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className="flex-col h-20 text-sm"
-                            >
-                                <BriefcaseMedical className="h-6 w-6 mb-1" />
-                                <span>First Aid Guide</span>
-                            </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-col h-20 text-sm"
+                          >
+                            <BriefcaseMedical className="h-6 w-6 mb-1" />
+                            <span>First Aid Guide</span>
+                          </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
                                 <Wand2 className='text-ai-accent' /> AI-Powered First Aid Guide
@@ -408,15 +408,36 @@ export default function SafetyDashboardPage() {
                                 <FirstAidGuide />
                             </div>
                         </DialogContent>
-                    </Dialog>
-                    <Button
-                        variant="outline"
-                        className="flex-col h-20 text-sm"
-                         onClick={() => toast({ title: 'Viewing Evacuation Plan'})}
-                    >
-                        <DoorOpen className="h-6 w-6 mb-1" />
-                        <span>Evacuation Plan</span>
-                    </Button>
+                      </Dialog>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="flex-col h-20 text-sm"
+                            >
+                                <DoorOpen className="h-6 w-6 mb-1" />
+                                <span>Evacuation Plan</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl">
+                            <DialogHeader>
+                                <DialogTitle>Site Evacuation Plan</DialogTitle>
+                                <DialogDescription>Review muster points and egress routes.</DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                {sitePlanImage && (
+                                    <Image
+                                        src={sitePlanImage.imageUrl}
+                                        alt="Evacuation Plan"
+                                        width={800}
+                                        height={600}
+                                        data-ai-hint={sitePlanImage.imageHint}
+                                        className="rounded-lg border"
+                                    />
+                                )}
+                            </div>
+                        </DialogContent>
+                      </Dialog>
                 </div>
             </DialogContent>
           </Dialog>
@@ -587,13 +608,35 @@ export default function SafetyDashboardPage() {
                             </div>
                         </DialogContent>
                       </Dialog>
-                      <Button
-                        variant="outline"
-                        className="flex-col h-16 text-xs border-destructive text-destructive hover:bg-destructive/20"
-                      >
-                        <DoorOpen className="h-5 w-5 mb-1" />
-                        <span>Evacuation Plan</span>
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="flex-col h-16 text-xs border-destructive text-destructive hover:bg-destructive/20"
+                            >
+                                <DoorOpen className="h-5 w-5 mb-1" />
+                                <span>Evacuation Plan</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl">
+                            <DialogHeader>
+                                <DialogTitle>Site Evacuation Plan</DialogTitle>
+                                <DialogDescription>Review muster points and egress routes.</DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                {sitePlanImage && (
+                                    <Image
+                                        src={sitePlanImage.imageUrl}
+                                        alt="Evacuation Plan"
+                                        width={800}
+                                        height={600}
+                                        data-ai-hint={sitePlanImage.imageHint}
+                                        className="rounded-lg border"
+                                    />
+                                )}
+                            </div>
+                        </DialogContent>
+                      </Dialog>
                     </CardContent>
                   </Card>
                   <Card>
