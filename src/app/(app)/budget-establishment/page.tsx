@@ -30,7 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 const budgetVsActualData = [
@@ -50,6 +50,16 @@ const earnedValueData = [
     { name: 'May', pv: 500, ev: 490, ac: 500 },
     { name: 'Jun', pv: 600, ev: 580, ac: 610 },
     { name: 'Jul', pv: 700, ev: 710, ac: 700 },
+];
+
+const cashFlowData = [
+    { name: 'Jan', inflow: 400, outflow: 240, net: 160 },
+    { name: 'Feb', inflow: 300, outflow: 140, net: 160 },
+    { name: 'Mar', inflow: 200, outflow: 580, net: -380 },
+    { name: 'Apr', inflow: 278, outflow: 390, net: -112 },
+    { name: 'May', inflow: 189, outflow: 480, net: -291 },
+    { name: 'Jun', inflow: 239, outflow: 380, net: -141 },
+    { name: 'Jul', inflow: 349, outflow: 430, net: -81 },
 ];
 
 const chartConfig = {
@@ -72,6 +82,18 @@ const chartConfig = {
     ac: {
         label: "Actual Cost (AC)",
         color: "hsl(var(--destructive))",
+    },
+    inflow: {
+        label: "Cash Inflow",
+        color: "hsl(var(--chart-2))",
+    },
+    outflow: {
+        label: "Cash Outflow",
+        color: "hsl(var(--chart-1))",
+    },
+    net: {
+        label: "Net Cash Flow",
+        color: "hsl(var(--primary))",
     }
 };
 
@@ -220,9 +242,21 @@ export default function BudgetEstablishmentPage() {
          <Card>
             <CardHeader>
                 <CardTitle>Cash Flow Projection</CardTitle>
+                 <CardDescription>Monthly cash inflow, outflow, and net balance.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <AreaChart data={cashFlowData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis tickFormatter={(value) => `$${value}k`} />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Area type="monotone" dataKey="inflow" stackId="1" stroke={chartConfig.inflow.color} fill={chartConfig.inflow.color} />
+                        <Area type="monotone" dataKey="outflow" stackId="1" stroke={chartConfig.outflow.color} fill={chartConfig.outflow.color} />
+                        <Line type="monotone" dataKey="net" stroke={chartConfig.net.color} strokeWidth={2} dot={true} />
+                    </AreaChart>
+                </ChartContainer>
             </CardContent>
         </Card>
       </div>
