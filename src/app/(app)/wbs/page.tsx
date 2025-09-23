@@ -109,6 +109,12 @@ export default function WbsHierarchyPage() {
     '3': true,
   });
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
@@ -385,7 +391,7 @@ export default function WbsHierarchyPage() {
                 <CardDescription>Detailed information for the selected work package.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {selectedItem ? (
+                {selectedItem && isClient ? (
                     <>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                             <div className="space-y-1">
@@ -635,3 +641,5 @@ export default function WbsHierarchyPage() {
     </div>
   );
 }
+
+    
