@@ -16,7 +16,10 @@ import {
   TrendingUp,
   Wand2,
   AlertTriangle,
-  FileText
+  FileText,
+  DollarSign,
+  Calendar,
+  Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -31,6 +34,18 @@ import { Slider } from '@/components/ui/slider';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const costProjectionData = [
     { name: 'Apr', actual: 4000, projected: 4000 },
@@ -54,6 +69,26 @@ const chartConfig = {
 }
 
 export default function AiInsightsPage() {
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<{ cost: string; schedule: string } | null>(null);
+    const { toast } = useToast();
+
+    const handleAnalyzeScenario = () => {
+        setIsAnalyzing(true);
+        setAnalysisResult(null);
+        setTimeout(() => {
+            setAnalysisResult({
+                cost: '+$85,000',
+                schedule: '+7 days',
+            });
+            setIsAnalyzing(false);
+            toast({
+                title: 'Analysis Complete',
+                description: 'The what-if scenario has been analyzed.',
+            });
+        }, 1500);
+    };
+
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Header */}
@@ -79,10 +114,60 @@ export default function AiInsightsPage() {
               <DropdownMenuItem>Gemini 2.0</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="secondary">
-            <TestTube2 className="mr-2 h-4 w-4" />
-            What-If Scenarios
-          </Button>
+           <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="secondary">
+                        <TestTube2 className="mr-2 h-4 w-4" />
+                        What-If Scenarios
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>What-If Scenario Analysis</DialogTitle>
+                        <DialogDescription>
+                            Describe a potential event and let the AI predict its impact on your project's cost and schedule.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="scenario-description">Scenario Description</Label>
+                            <Textarea
+                                id="scenario-description"
+                                placeholder="e.g., '2-week delay in steel supply', '10% increase in concrete price', 'Unexpected labor shortage'"
+                                rows={3}
+                            />
+                        </div>
+                        <Button className="w-full" onClick={handleAnalyzeScenario} disabled={isAnalyzing}>
+                            {isAnalyzing ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Analyzing...
+                                </>
+                            ) : (
+                                'Analyze Scenario'
+                            )}
+                        </Button>
+
+                        {analysisResult && (
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Predicted Impact</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1 rounded-md border p-3">
+                                        <p className="text-sm font-medium text-muted-foreground flex items-center gap-2"><DollarSign className="h-4 w-4"/> Cost Impact</p>
+                                        <p className="text-lg font-bold text-destructive">{analysisResult.cost}</p>
+                                    </div>
+                                    <div className="space-y-1 rounded-md border p-3">
+                                        <p className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Calendar className="h-4 w-4"/> Schedule Impact</p>
+                                        <p className="text-lg font-bold text-destructive">{analysisResult.schedule}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
       </div>
 
