@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle, Send } from "lucide-react"
+import { FilePlus, Filter, MoreHorizontal, ArrowUpDown, Clock, Hourglass, CheckCircle, Send, DollarSign, Percent } from "lucide-react"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -167,7 +167,7 @@ export default function ChangeOrdersPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
@@ -190,12 +190,22 @@ export default function ChangeOrdersPage() {
           </Card>
            <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Recently Approved</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Total Cost Impact</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{changeOrders.filter(co => co.status === 'Approved').length}</div>
-                <p className="text-xs text-muted-foreground">In the last 7 days</p>
+                <div className="text-2xl font-bold text-destructive">+$23,700</div>
+                <p className="text-xs text-muted-foreground">Net impact of all changes</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
+                <Percent className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">75%</div>
+                <p className="text-xs text-muted-foreground">Of all processed changes</p>
             </CardContent>
           </Card>
       </div>
