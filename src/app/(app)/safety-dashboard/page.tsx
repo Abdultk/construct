@@ -24,6 +24,8 @@ import {
   AlertTriangle,
   ArrowRight,
   ListChecks,
+  Loader2,
+  Wand2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,6 +75,7 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getFirstAidAdvice, GetFirstAidAdviceOutput } from '@/ai/flows/get-first-aid-advice';
 
 type Inspection = {
   type: string;
@@ -259,56 +262,88 @@ export default function SafetyDashboardPage() {
     )
   }
 
-  const FirstAidGuide = () => (
-    <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="item-1">
-        <AccordionTrigger>Cuts and Scrapes</AccordionTrigger>
-        <AccordionContent>
-            <ol className="list-decimal list-inside space-y-2">
-            <li>Stop the bleeding by applying gentle pressure with a clean cloth.</li>
-            <li>Clean the wound with water.</li>
-            <li>Apply an antibiotic ointment.</li>
-            <li>Cover the wound with a bandage.</li>
-            </ol>
-        </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="item-2">
-        <AccordionTrigger>Burns (Minor)</AccordionTrigger>
-        <AccordionContent>
-            <ol className="list-decimal list-inside space-y-2">
-            <li>Cool the burn. Hold under cool (not cold) running water for about 10 minutes.</li>
-            <li>Remove rings or other tight items from the burned area.</li>
-            <li>Don't break blisters.</li>
-            <li>Apply lotion, such as one with aloe vera.</li>
-            <li>Bandage the burn loosely.</li>
-            </ol>
-        </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="item-3">
-        <AccordionTrigger>Eye Injuries (Debris)</AccordionTrigger>
-        <AccordionContent>
-            <ol className="list-decimal list-inside space-y-2">
-            <li>Do NOT rub the eye.</li>
-            <li>Use an eyewash station or clean water to flush the eye.</li>
-            <li>Try to blink to allow tears to wash out the particle.</li>
-            <li>If the particle is still there, cover the eye and seek medical attention.</li>
-            </ol>
-        </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="item-4">
-        <AccordionTrigger>Sprains and Strains</AccordionTrigger>
-        <AccordionContent>
-            <p className="font-bold mb-2">Follow R.I.C.E. procedure:</p>
-            <ol className="list-decimal list-inside space-y-2">
-            <li><strong>Rest:</strong> Stop activity and rest the injured area.</li>
-            <li><strong>Ice:</strong> Apply an ice pack for 15-20 minutes every 2-3 hours.</li>
-            <li><strong>Compression:</strong> Use a compression bandage to reduce swelling.</li>
-            <li><strong>Elevation:</strong> Keep the injured limb elevated above heart level.</li>
-            </ol>
-        </AccordionContent>
-        </AccordionItem>
-    </Accordion>
-  );
+  const FirstAidGuide = () => {
+    const [query, setQuery] = useState('');
+    const [result, setResult] = useState<GetFirstAidAdviceOutput | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const examples = ["Minor cut", "Small burn", "Eye debris"];
+
+    const handleGetAdvice = async (searchQuery: string) => {
+      if (!searchQuery.trim()) return;
+      setIsLoading(true);
+      setResult(null);
+      try {
+        const adviceResult = await getFirstAidAdvice({ query: searchQuery });
+        setResult(adviceResult);
+      } catch (error) {
+        console.error("AI First Aid Error:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error getting advice',
+          description: 'The AI service could not be reached. Please try again.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleGetAdvice(query);
+    }
+
+    return (
+        <div className="space-y-4">
+          <form onSubmit={handleFormSubmit} className="relative">
+            <Input
+              placeholder="Ask for advice, e.g., 'what to do for a minor burn'"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              disabled={isLoading}
+              className="pr-10"
+            />
+            <Button type="submit" size="icon" variant="ghost" className="absolute right-0 top-0 h-full w-10" disabled={isLoading || !query.trim()}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+
+          <div className="flex flex-wrap gap-2">
+            {examples.map(ex => (
+                <Button key={ex} variant="outline" size="sm" onClick={() => { setQuery(ex); handleGetAdvice(ex); }} disabled={isLoading}>
+                    {ex}
+                </Button>
+            ))}
+          </div>
+
+          <div className="min-h-[150px] rounded-md border bg-muted p-4">
+             {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+            ) : result ? (
+                 <div className="space-y-4">
+                    <div className="prose prose-sm max-w-none text-foreground">
+                        <ol className="list-decimal list-inside space-y-2">
+                            {result.advice.split(/\d+\.\s/).filter(item => item.trim()).map((item, index) => (
+                                <li key={index}>{item.trim()}</li>
+                            ))}
+                        </ol>
+                    </div>
+                    <Card className="border-destructive bg-destructive/10">
+                        <CardContent className="p-3 text-destructive text-sm font-medium">
+                            <p><strong>Disclaimer:</strong> {result.disclaimer}</p>
+                        </CardContent>
+                    </Card>
+                 </div>
+            ) : (
+                <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-muted-foreground">Ask the AI for first aid guidance.</p>
+                </div>
+            )}
+          </div>
+        </div>
+    );
+};
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -363,10 +398,10 @@ export default function SafetyDashboardPage() {
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
-                                <BriefcaseMedical /> First Aid Guide
+                                <Wand2 className='text-ai-accent' /> AI-Powered First Aid Guide
                                 </DialogTitle>
                                 <DialogDescription>
-                                Basic first aid for common construction site injuries. This is not a substitute for professional medical advice.
+                                Get AI-driven advice for common construction site injuries. This is not a substitute for professional medical advice.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="max-h-[60vh] overflow-y-auto pr-4">
@@ -538,16 +573,18 @@ export default function SafetyDashboardPage() {
                             <span>First Aid Guide</span>
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <BriefcaseMedical /> First Aid Guide
-                            </DialogTitle>
-                            <DialogDescription>
-                              Basic first aid for common construction site injuries. This is not a substitute for professional medical advice.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <FirstAidGuide />
+                         <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                <Wand2 className='text-ai-accent' /> AI-Powered First Aid Guide
+                                </DialogTitle>
+                                <DialogDescription>
+                                Get AI-driven advice for common construction site injuries. This is not a substitute for professional medical advice.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="max-h-[60vh] overflow-y-auto pr-4">
+                                <FirstAidGuide />
+                            </div>
                         </DialogContent>
                       </Dialog>
                       <Button
