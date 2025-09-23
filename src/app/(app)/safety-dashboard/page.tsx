@@ -87,6 +87,14 @@ type OpenIssue = {
     assignee: string;
 };
 
+type NearMiss = {
+    id: string;
+    area: string;
+    description: string;
+    date: string;
+};
+
+
 export default function SafetyDashboardPage() {
   const [trainingDate, setTrainingDate] = useState<Date>();
   const { toast } = useToast();
@@ -97,10 +105,11 @@ export default function SafetyDashboardPage() {
       { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', severity: 'Medium', assignee: 'Diana Green' },
   ]);
 
-  const nearMisses = [
+  const nearMisses: NearMiss[] = [
     { id: 'NMR-001', area: 'Sector B - Scaffolding', description: 'Tool dropped from height, landed near worker.', date: '2024-07-28' },
     { id: 'NMR-002', area: 'Loading Bay 1', description: 'Forklift operated too close to excavation edge.', date: '2024-07-25' },
   ];
+  const [selectedNearMiss, setSelectedNearMiss] = useState<NearMiss | null>(null);
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -208,6 +217,46 @@ export default function SafetyDashboardPage() {
             </DialogFooter>
         </DialogContent>
     );
+  }
+  
+  const NearMissReviewDialog = ({ report }: { report: NearMiss | null }) => {
+    if (!report) return null;
+    return (
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Review Near-Miss Report: {report.id}</DialogTitle>
+              <DialogDescription>
+                Review the details and assign corrective actions if necessary.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p className="font-medium">{report.area}</p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-medium">{report.date}</p>
+                </div>
+                 <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Description</p>
+                    <p className="font-medium p-3 bg-muted rounded-md">{report.description}</p>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="corrective-action">Corrective Action Notes</Label>
+                    <Textarea id="corrective-action" placeholder="Describe the corrective action to be taken..." />
+                </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="secondary" onClick={() => handleSubmit('Report Acknowledged', 'The near-miss report has been reviewed and closed.')}>Acknowledge & Close</Button>
+              </DialogClose>
+               <DialogClose asChild>
+                <Button onClick={() => handleSubmit('Corrective Action Assigned', 'A corrective action has been created for this near-miss report.')}>Assign Corrective Action</Button>
+              </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    )
   }
 
   return (
@@ -780,42 +829,45 @@ export default function SafetyDashboardPage() {
       </div>
 
        <div className="grid grid-cols-1">
-        <Card>
-            <CardHeader>
-                <CardTitle>Near-Miss Reports</CardTitle>
-                <CardDescription>A log of reported near-miss incidents.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {nearMisses.map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell className="font-medium">{item.id}</TableCell>
-                                <TableCell>
-                                    <p>{item.description}</p>
-                                    <p className="text-xs text-muted-foreground">{item.area}</p>
-                                </TableCell>
-                                <TableCell>{item.date}</TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="outline" size="sm">Review <ArrowRight className="ml-2 h-4 w-4" /></Button>
-                                </TableCell>
+        <Dialog open={!!selectedNearMiss} onOpenChange={(isOpen) => !isOpen && setSelectedNearMiss(null)}>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Near-Miss Reports</CardTitle>
+                    <CardDescription>A log of reported near-miss incidents.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>ID</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
-            </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {nearMisses.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.id}</TableCell>
+                                    <TableCell>
+                                        <p>{item.description}</p>
+                                        <p className="text-xs text-muted-foreground">{item.area}</p>
+                                    </TableCell>
+                                    <TableCell>{item.date}</TableCell>
+                                    <TableCell className="text-right">
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm" onClick={() => setSelectedNearMiss(item)}>Review <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                                        </DialogTrigger>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                     </Table>
+                </CardContent>
+            </Card>
+            <NearMissReviewDialog report={selectedNearMiss} />
+        </Dialog>
       </div>
     </div>
   );
 }
-
-    
