@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical } from 'lucide-react';
+import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical, CalendarIcon } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -30,6 +30,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 type Checklist = {
   title: string;
@@ -48,6 +53,13 @@ export default function QualityControlPage() {
   const [isCreateChecklistOpen, setIsCreateChecklistOpen] = React.useState(false);
   const [newChecklistTitle, setNewChecklistTitle] = React.useState("");
   const [newChecklistItems, setNewChecklistItems] = React.useState("");
+  
+  const [isNewInspectionOpen, setIsNewInspectionOpen] = React.useState(false);
+  const [newInspectionType, setNewInspectionType] = React.useState('');
+  const [newInspectionLocation, setNewInspectionLocation] = React.useState('');
+  const [newInspectionInspector, setNewInspectionInspector] = React.useState('');
+  const [newInspectionChecklist, setNewInspectionChecklist] = React.useState('');
+  const [newInspectionDate, setNewInspectionDate] = React.useState<Date>();
 
   
   const defects = [
@@ -109,6 +121,28 @@ export default function QualityControlPage() {
     }
   };
 
+  const handleNewInspection = () => {
+    if (newInspectionType && newInspectionLocation && newInspectionInspector && newInspectionChecklist && newInspectionDate) {
+      toast({
+        title: 'Inspection Created',
+        description: `A new ${newInspectionType.toLowerCase()} inspection has been scheduled for ${format(newInspectionDate, 'PPP')}.`,
+      });
+      setIsNewInspectionOpen(false);
+      // Reset form fields
+      setNewInspectionType('');
+      setNewInspectionLocation('');
+      setNewInspectionInspector('');
+      setNewInspectionChecklist('');
+      setNewInspectionDate(undefined);
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Missing Information',
+            description: 'Please fill out all fields to create an inspection.',
+        });
+    }
+  };
+
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -123,9 +157,83 @@ export default function QualityControlPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> New Inspection
-          </Button>
+            <Dialog open={isNewInspectionOpen} onOpenChange={setIsNewInspectionOpen}>
+                <DialogTrigger asChild>
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" /> New Inspection
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>New Quality Inspection</DialogTitle>
+                        <DialogDescription>
+                            Schedule a new inspection and assign it to a team member.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="inspection-type">Inspection Type</Label>
+                            <Input id="inspection-type" placeholder="e.g., Final Paint Inspection" value={newInspectionType} onChange={(e) => setNewInspectionType(e.target.value)} />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="inspection-location">Location</Label>
+                            <Input id="inspection-location" placeholder="e.g., Level 5, West Wing" value={newInspectionLocation} onChange={(e) => setNewInspectionLocation(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="inspection-inspector">Inspector</Label>
+                            <Select value={newInspectionInspector} onValueChange={setNewInspectionInspector}>
+                                <SelectTrigger id="inspection-inspector">
+                                    <SelectValue placeholder="Select an inspector" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Alice Johnson">Alice Johnson</SelectItem>
+                                    <SelectItem value="Bob Miller">Bob Miller</SelectItem>
+                                    <SelectItem value="Charlie Davis">Charlie Davis</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="inspection-checklist">Checklist</Label>
+                             <Select value={newInspectionChecklist} onValueChange={setNewInspectionChecklist}>
+                                <SelectTrigger id="inspection-checklist">
+                                    <SelectValue placeholder="Select a checklist" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {checklists.map(cl => <SelectItem key={cl.title} value={cl.title}>{cl.title}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="inspection-date">Date</Label>
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !newInspectionDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {newInspectionDate ? format(newInspectionDate, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={newInspectionDate}
+                                    onSelect={setNewInspectionDate}
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleNewInspection}>Schedule Inspection</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
       </div>
 
