@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -335,7 +336,18 @@ export default function PaymentCertificatePage() {
                         <Button><ThumbsUp className="mr-2 h-4 w-4" /> Approve</Button>
                         <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" /> Reject</Button>
                      </div>
-                     <Button variant="outline" className="w-full"><Send className="mr-2 h-4 w-4" /> Return for Revision</Button>
+                     <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                            toast({
+                                title: 'Certificate Returned for Revision',
+                                description: 'The payment certificate has been sent back with your comments.',
+                            });
+                        }}
+                        >
+                        <Send className="mr-2 h-4 w-4" /> Return for Revision
+                    </Button>
                 </CardContent>
             </Card>
             <Card>
