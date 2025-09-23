@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   DollarSign,
   Download,
-  BarChart,
+  BarChart as BarChartIcon,
   LineChart,
   Repeat,
   Calculator,
@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart as RechartsLineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line as RechartsLine } from 'recharts';
+import { LineChart as RechartsLineChart, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line as RechartsLine } from 'recharts';
 
 type AnalysisTool = 'Cost Modeling' | 'ROI Calculation' | 'Replacement Analysis' | 'Budget Planning' | null;
 
@@ -40,6 +40,12 @@ const costTrendData = [
   { year: '2029', capex: 0, opex: 90 },
 ];
 
+const benchmarkData = [
+    { name: 'Energy (kWh/yr)', yourAsset: 12000, industryAvg: 15000 },
+    { name: 'Maint. Cost ($/yr)', yourAsset: 5000, industryAvg: 4000 },
+    { name: 'Uptime (%)', yourAsset: 99.5, industryAvg: 98.0 },
+];
+
 const chartConfig = {
   capex: {
     label: "CAPEX",
@@ -48,6 +54,14 @@ const chartConfig = {
   opex: {
     label: "OPEX",
     color: "hsl(var(--chart-2))",
+  },
+  yourAsset: {
+    label: "Your Asset",
+    color: "hsl(var(--primary))",
+  },
+  industryAvg: {
+    label: "Industry Avg.",
+    color: "hsl(var(--secondary))",
   },
 };
 
@@ -58,7 +72,7 @@ export default function LifecycleCostAnalysisPage() {
     { id: 'Cost Modeling' as const, icon: Calculator, variant: 'secondary' as const },
     { id: 'ROI Calculation' as const, icon: DollarSign, variant: 'outline' as const },
     { id: 'Replacement Analysis' as const, icon: Repeat, variant: 'outline' as const },
-    { id: 'Budget Planning' as const, icon: BarChart, variant: 'outline' as const },
+    { id: 'Budget Planning' as const, icon: BarChartIcon, variant: 'outline' as const },
   ];
 
   return (
@@ -95,7 +109,7 @@ export default function LifecycleCostAnalysisPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Initial Cost (CAPEX)</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <BarChartIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$450K</div>
@@ -156,7 +170,17 @@ export default function LifecycleCostAnalysisPage() {
                 <CardDescription>Asset performance vs. industry standards.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <BarChart data={benchmarkData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} angle={-30} textAnchor="end" height={50}/>
+                        <YAxis />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Bar dataKey="yourAsset" fill={chartConfig.yourAsset.color} radius={4} />
+                        <Bar dataKey="industryAvg" fill={chartConfig.industryAvg.color} radius={4} />
+                    </BarChart>
+                 </ChartContainer>
             </CardContent>
         </Card>
       </div>
