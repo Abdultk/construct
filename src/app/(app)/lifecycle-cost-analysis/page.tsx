@@ -25,8 +25,31 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { LineChart as RechartsLineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line as RechartsLine } from 'recharts';
 
 type AnalysisTool = 'Cost Modeling' | 'ROI Calculation' | 'Replacement Analysis' | 'Budget Planning' | null;
+
+const costTrendData = [
+  { year: '2023', capex: 450, opex: 50 },
+  { year: '2024', capex: 0, opex: 60 },
+  { year: '2025', capex: 0, opex: 65 },
+  { year: '2026', capex: 0, opex: 70 },
+  { year: '2027', capex: 75, opex: 80 }, // Replacement/Upgrade cost
+  { year: '2028', capex: 0, opex: 85 },
+  { year: '2029', capex: 0, opex: 90 },
+];
+
+const chartConfig = {
+  capex: {
+    label: "CAPEX",
+    color: "hsl(var(--chart-1))",
+  },
+  opex: {
+    label: "OPEX",
+    color: "hsl(var(--chart-2))",
+  },
+};
 
 export default function LifecycleCostAnalysisPage() {
   const [selectedTool, setSelectedTool] = useState<AnalysisTool>(null);
@@ -114,7 +137,17 @@ export default function LifecycleCostAnalysisPage() {
                 <CardDescription>CAPEX vs. OPEX over time.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+                <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <RechartsLineChart data={costTrendData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="year" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis tickFormatter={(value) => `$${value}k`} />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Legend />
+                        <RechartsLine dataKey="capex" type="monotone" stroke={chartConfig.capex.color} strokeWidth={2} dot={true} />
+                        <RechartsLine dataKey="opex" type="monotone" stroke={chartConfig.opex.color} strokeWidth={2} dot={false} />
+                    </RechartsLineChart>
+                </ChartContainer>
             </CardContent>
         </Card>
         <Card>
