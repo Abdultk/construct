@@ -30,7 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Pie, PieChart, Cell } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 const budgetVsActualData = [
@@ -94,8 +94,21 @@ const chartConfig = {
     net: {
         label: "Net Cash Flow",
         color: "hsl(var(--primary))",
-    }
+    },
+    substructure: { label: 'Substructure', color: 'hsl(var(--chart-1))' },
+    superstructure: { label: 'Superstructure', color: 'hsl(var(--chart-2))' },
+    facade: { label: 'Facade', color: 'hsl(var(--chart-3))' },
+    mep: { label: 'MEP', color: 'hsl(var(--chart-4))' },
+    finishes: { label: 'Finishes', color: 'hsl(var(--chart-5))' },
+    sitework: { label: 'Sitework', color: 'hsl(var(--muted))' },
 };
+
+const costBreakdownData = budgetVsActualData.map(item => ({
+    name: item.name,
+    value: item.actual,
+    fill: chartConfig[item.name.toLowerCase() as keyof typeof chartConfig]?.color || 'hsl(var(--muted))',
+}));
+
 
 export default function BudgetEstablishmentPage() {
     const [isClient, setIsClient] = useState(false);
@@ -118,6 +131,10 @@ export default function BudgetEstablishmentPage() {
             compactDisplay: "short",
         }).format(value);
     }
+     const formatCurrencyFull = (value: number) => {
+        if (!isClient) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+    };
 
     const recentTransactions = [
         { id: 'TRN001', project: 'Downtown Skyscraper', category: 'Materials', amount: 75000, status: 'Approved' },
@@ -214,9 +231,33 @@ export default function BudgetEstablishmentPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Cost Breakdown</CardTitle>
+                <CardDescription>Proportion of actual costs by work category for Downtown Skyscraper.</CardDescription>
             </CardHeader>
-            <CardContent>
-                 <p className="text-sm text-muted-foreground">Chart Coming Soon.</p>
+            <CardContent className='flex items-center justify-center'>
+                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full aspect-square">
+                    <PieChart accessibilityLayer>
+                         <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent
+                                formatter={(value) => formatCurrencyFull(value as number)}
+                                hideLabel
+                            />}
+                        />
+                        <Pie
+                            data={costBreakdownData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={50}
+                            strokeWidth={5}
+                            activeIndex={0}
+                        >
+                             {costBreakdownData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                        </Pie>
+                        <Legend />
+                    </PieChart>
+                </ChartContainer>
             </CardContent>
         </Card>
          <Card>
@@ -334,7 +375,7 @@ export default function BudgetEstablishmentPage() {
                                 {transaction.status}
                             </Badge>
                         </TableCell>
-                        <TableCell className="text-right font-code">{formatCurrency(transaction.amount)}</TableCell>
+                        <TableCell className="text-right font-code">{formatCurrencyFull(transaction.amount)}</TableCell>
                     </TableRow>
                 ))}
               </TableBody>
