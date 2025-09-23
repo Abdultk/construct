@@ -9,6 +9,7 @@ import {
     Gauge,
     AlertTriangle,
     Wallet,
+    TrendingUp
 } from 'lucide-react';
 import {
     Card,
@@ -108,6 +109,14 @@ const costBreakdownData = budgetVsActualData.map(item => ({
     value: item.actual,
     fill: chartConfig[item.name.toLowerCase() as keyof typeof chartConfig]?.color || 'hsl(var(--muted))',
 }));
+
+const budgetVariancesData = [
+  { workPackage: '4.1.2 - Labor', project: 'Suburban Housing', budget: 95000, actual: 120000 },
+  { workPackage: '3.2.1 - Facade Materials', project: 'Downtown Skyscraper', budget: 800000, actual: 850000 },
+  { workPackage: '5.5.4 - MEP Subcontractor', project: 'Hospital Wing', budget: 950000, actual: 925000 },
+  { workPackage: '2.3.1 - Bridge Deck', project: 'Interstate Bridge', budget: 1500000, actual: 1550000 },
+  { workPackage: '3.1.1 - Sitework Materials', project: 'Suburban Housing', budget: 300000, actual: 310000 },
+];
 
 
 export default function BudgetEstablishmentPage() {
@@ -311,7 +320,39 @@ export default function BudgetEstablishmentPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <p className="text-sm text-muted-foreground">Table Coming Soon.</p>
+             <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Work Package</TableHead>
+                        <TableHead>Project</TableHead>
+                        <TableHead className="text-right">Budget</TableHead>
+                        <TableHead className="text-right">Actual</TableHead>
+                        <TableHead className="text-right">Variance ($)</TableHead>
+                        <TableHead className="text-right">Variance (%)</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {budgetVariancesData.map(item => {
+                        const variance = item.actual - item.budget;
+                        const variancePercentage = (variance / item.budget) * 100;
+                        return (
+                            <TableRow key={item.workPackage}>
+                                <TableCell className="font-medium">{item.workPackage}</TableCell>
+                                <TableCell>{item.project}</TableCell>
+                                <TableCell className="text-right font-code">{formatCurrencyFull(item.budget)}</TableCell>
+                                <TableCell className="text-right font-code">{formatCurrencyFull(item.actual)}</TableCell>
+                                <TableCell className={`text-right font-code ${variance > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                                    {variance > 0 ? <TrendingUp className="inline-block h-4 w-4 mr-1" /> : <TrendingDown className="inline-block h-4 w-4 mr-1" />}
+                                    {formatCurrencyFull(variance)}
+                                </TableCell>
+                                <TableCell className={`text-right font-code ${variance > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                                    {variancePercentage.toFixed(2)}%
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })}
+                </TableBody>
+             </Table>
           </CardContent>
         </Card>
         <Card>
