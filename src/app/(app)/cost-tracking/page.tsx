@@ -340,14 +340,14 @@ export default function CostTrackingPage() {
                  </Card>
                )}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="space-y-1"><p className="text-muted-foreground">Project</p><p className="font-medium">{selectedTransaction?.project}</p></div>
-                    <div className="space-y-1"><p className="text-muted-foreground">Category</p><p className="font-medium">{selectedTransaction?.category}</p></div>
-                    <div className="space-y-1"><p className="text-muted-foreground">WBS Code</p><p className="font-medium font-code">{selectedTransaction?.wbs}</p></div>
-                    <div className="space-y-1"><p className="text-muted-foreground">Status</p><p><Badge variant={getStatusBadge(selectedTransaction?.status || '')}>{selectedTransaction?.status}</Badge></p></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">Project</div><div className="font-medium">{selectedTransaction?.project}</div></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">Category</div><div className="font-medium">{selectedTransaction?.category}</div></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">WBS Code</div><div className="font-medium font-code">{selectedTransaction?.wbs}</div></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">Status</div><div><Badge variant={getStatusBadge(selectedTransaction?.status || '')}>{selectedTransaction?.status}</Badge></div></div>
                 </div>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="space-y-1"><p className="text-muted-foreground">Date</p><p className="font-medium">{selectedTransaction?.date}</p></div>
-                    <div className="space-y-1 col-span-2"><p className="text-muted-foreground">Amount</p><p className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</p></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">Date</div><div className="font-medium">{selectedTransaction?.date}</div></div>
+                    <div className="space-y-1 col-span-2"><div className="text-muted-foreground">Amount</div><div className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</div></div>
                 </div>
                 {selectedTransaction && (
                   <Button variant="outline" size="sm" asChild>
@@ -363,5 +363,3 @@ export default function CostTrackingPage() {
     </div>
   );
 }
-
-    
