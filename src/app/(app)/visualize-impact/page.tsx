@@ -32,11 +32,17 @@ import { useToast } from '@/hooks/use-toast';
 export default function ChangeImpactVisualizationPage() {
     const { toast } = useToast();
 
-    const communicationPlan = [
-        { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100', status: 'Acknowledged' },
-        { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/100/100', status: 'Notified' },
-        { name: 'Structural Team', role: 'Engineering', avatar: 'https://picsum.photos/seed/32/100/100', status: 'Pending' },
-    ];
+    const communicationPlan = {
+        internal: [
+            { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/100/100', status: 'Acknowledged' },
+            { name: 'Engineering Dept.', role: 'Technical Review', avatar: 'https://picsum.photos/seed/32/100/100', status: 'Acknowledged' },
+            { name: 'Finance Team', role: 'Cost Review', avatar: 'https://picsum.photos/seed/33/100/100', status: 'Notified' },
+        ],
+        external: [
+            { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/100/100', status: 'Notified' },
+            { name: 'City Permits Office', role: 'Regulatory', avatar: 'https://picsum.photos/seed/34/100/100', status: 'Pending' },
+        ]
+    };
 
     const getStatusBadgeVariant = (status: string) => {
         switch (status) {
@@ -279,21 +285,47 @@ export default function ChangeImpactVisualizationPage() {
               <CardDescription>Key stakeholders to be notified.</CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
-                {communicationPlan.map(person => (
-                    <div key={person.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9">
-                                <AvatarImage src={person.avatar} />
-                                <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="text-sm font-medium">{person.name}</p>
-                                <p className="text-xs text-muted-foreground">{person.role}</p>
+                <div>
+                    <h4 className="text-sm font-semibold mb-2">Internal Stakeholders</h4>
+                    <div className="space-y-3">
+                        {communicationPlan.internal.map(person => (
+                            <div key={person.name} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-9 w-9">
+                                        <AvatarImage src={person.avatar} />
+                                        <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-sm font-medium">{person.name}</p>
+                                        <p className="text-xs text-muted-foreground">{person.role}</p>
+                                    </div>
+                                </div>
+                                <Badge variant={getStatusBadgeVariant(person.status)}>{person.status}</Badge>
                             </div>
-                        </div>
-                        <Badge variant={getStatusBadgeVariant(person.status)}>{person.status}</Badge>
+                        ))}
                     </div>
-                ))}
+                </div>
+                <Separator />
+                 <div>
+                    <h4 className="text-sm font-semibold mb-2">External Stakeholders</h4>
+                    <div className="space-y-3">
+                        {communicationPlan.external.map(person => (
+                            <div key={person.name} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-9 w-9">
+                                        <AvatarImage src={person.avatar} />
+                                        <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-sm font-medium">{person.name}</p>
+                                        <p className="text-xs text-muted-foreground">{person.role}</p>
+                                    </div>
+                                </div>
+                                <Badge variant={getStatusBadgeVariant(person.status)}>{person.status}</Badge>
+                            </div>
+                        ))}
+                    </div>
+                </div>
                  <Button variant="outline" className="w-full"><MessageSquare className="mr-2 h-4 w-4" /> Notify All</Button>
             </CardContent>
           </Card>
