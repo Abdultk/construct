@@ -344,7 +344,19 @@ export default function ChangeImpactVisualizationPage() {
                         ))}
                     </div>
                 </div>
-                 <Button variant="outline" className="w-full"><MessageSquare className="mr-2 h-4 w-4" /> Notify All</Button>
+                 <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() =>
+                      toast({
+                        title: 'Notifications Sent',
+                        description:
+                          'All relevant stakeholders have been notified of this change.',
+                      })
+                    }
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" /> Notify All
+                  </Button>
             </CardContent>
           </Card>
         </div>
@@ -354,3 +366,5 @@ export default function ChangeImpactVisualizationPage() {
 }
 
   
+
+    
