@@ -12,7 +12,10 @@ import {
   Pen,
   Paperclip,
   FileCheck,
-  ArrowRight
+  ArrowRight,
+  Image as ImageIcon,
+  File as FileIcon,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useState }from 'react';
+import { useState, useRef }from 'react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -37,6 +40,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 type WorkPackage = {
   id: string;
@@ -58,6 +62,9 @@ export default function ProgressEntryPage() {
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>(initialWorkPackages);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const handleProgressChange = (id: string, newProgress: number[]) => {
     setWorkPackages(prev => 
@@ -70,6 +77,21 @@ export default function ProgressEntryPage() {
       prev.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg)
     );
   };
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setAttachments(prev => [...prev, ...Array.from(event.target.files!)]);
+      toast({
+          title: "File(s) Attached",
+          description: `${event.target.files.length} file(s) have been attached.`
+      })
+    }
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setAttachments(prev => prev.filter(file => file.name !== fileName));
+  };
+
 
   const handleSubmit = () => {
     setIsSubmitted(true);
@@ -155,7 +177,7 @@ export default function ProgressEntryPage() {
                       onChange={(e) => handleInputChange(pkg.id, 'notes', e.target.value)}
                     />
                   </div>
-                  <Button variant="outline" size="sm"><Camera className="mr-2 h-4 w-4" />Attach Photo</Button>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}><Camera className="mr-2 h-4 w-4" />Attach Photo</Button>
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -169,13 +191,56 @@ export default function ProgressEntryPage() {
           <CardTitle>Evidence & Attachments</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-            <div className='p-4 rounded-lg border-dashed border-2 text-center'>
-                <Paperclip className='mx-auto h-8 w-8 text-muted-foreground' />
-                <p className='mt-2 text-sm text-muted-foreground'>Photo gallery, videos, and notes will appear here.</p>
-                <p className='text-xs text-muted-foreground'>Drag & drop or browse files.</p>
-            </div>
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                multiple
+                onChange={handleFileChange}
+                accept="image/*,video/*,.pdf,.doc,.docx"
+            />
+            {attachments.length === 0 ? (
+                <div 
+                    className='p-4 rounded-lg border-dashed border-2 text-center cursor-pointer hover:bg-muted/50'
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <Paperclip className='mx-auto h-8 w-8 text-muted-foreground' />
+                    <p className='mt-2 text-sm text-muted-foreground'>No files attached yet.</p>
+                    <p className='text-xs text-muted-foreground'>Drag & drop or browse files.</p>
+                </div>
+            ) : (
+                 <div className="space-y-2">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded-md border">
+                        <div className="flex items-center gap-3 truncate">
+                          {file.type.startsWith('image/') ? (
+                             <Image
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                width={40}
+                                height={40}
+                                className="h-10 w-10 rounded-md object-cover"
+                                unoptimized
+                              />
+                          ) : (
+                            <div className="h-10 w-10 flex items-center justify-center bg-muted rounded-md">
+                                <FileIcon className="h-6 w-6" />
+                            </div>
+                          )}
+                          <div className='truncate'>
+                            <span className="text-sm font-medium truncate block">{file.name}</span>
+                            <span className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</span>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemoveFile(file.name)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+            )}
             <div className="flex justify-center gap-4">
-                <Button variant="outline" size="icon"><Camera className="h-5 w-5" /></Button>
+                <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}><Camera className="h-5 w-5" /></Button>
                 <Button variant="outline" size="icon"><Mic className="h-5 w-5" /></Button>
                 <Button variant="outline" size="icon"><Video className="h-5 w-5" /></Button>
             </div>
@@ -232,3 +297,4 @@ export default function ProgressEntryPage() {
     </div>
   );
 }
+
