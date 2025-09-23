@@ -38,18 +38,18 @@ export default function AiAssistantPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const handleSendMessage = async (query?: string) => {
+    const messageText = query || input;
+    if (!messageText.trim()) return;
 
-    const userMessage: Message = { sender: 'user', text: input };
+    const userMessage: Message = { sender: 'user', text: messageText };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
       const result = await generateInsightfulReport({
-        query: input,
+        query: messageText,
         documents: mockProjectDocuments,
         userContext: {
             name: "Jane Doe",
@@ -71,6 +71,11 @@ export default function AiAssistantPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage();
   };
 
 
@@ -124,7 +129,7 @@ export default function AiAssistantPage() {
                 )}
             </CardContent>
             <CardFooter className="border-t p-4">
-              <form onSubmit={handleSendMessage} className="relative w-full">
+              <form onSubmit={handleFormSubmit} className="relative w-full">
                 <Input
                   placeholder="Type a message or ask a question..."
                   className="pr-24"
@@ -155,13 +160,13 @@ export default function AiAssistantPage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => setInput('Generate the weekly progress report for Downtown Skyscraper')}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleSendMessage('Generate the weekly progress report for Downtown Skyscraper')}>
                 <FileText className="mr-2 h-4 w-4" /> Generate Weekly Report
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => setInput('Are there any cost overruns on the Downtown Skyscraper project?')}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleSendMessage('Are there any cost overruns on the Downtown Skyscraper project?')}>
                 <BarChart className="mr-2 h-4 w-4" /> Analyze Cost Overruns
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => setInput('Suggest some schedule optimizations for the Downtown Skyscraper project.')}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleSendMessage('Suggest some schedule optimizations for the Downtown Skyscraper project.')}>
                 <Wand2 className="mr-2 h-4 w-4" /> Suggest Optimizations
               </Button>
             </CardContent>
