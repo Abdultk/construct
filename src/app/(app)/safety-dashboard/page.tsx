@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -377,14 +376,15 @@ export default function SafetyDashboardPage() {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-3 gap-4 py-4">
-                    <Button
-                        variant="destructive"
-                        className="flex-col h-20 text-sm"
-                        onClick={() => toast({ title: 'Contacting Emergency Services...', variant: 'destructive'})}
-                    >
-                        <Phone className="h-6 w-6 mb-1" />
-                        <span>Emergency Call</span>
-                    </Button>
+                    <a href="tel:911">
+                        <Button
+                            variant="destructive"
+                            className="flex-col h-20 text-sm w-full"
+                        >
+                            <Phone className="h-6 w-6 mb-1" />
+                            <span>Emergency Call</span>
+                        </Button>
+                    </a>
                      <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -577,13 +577,15 @@ export default function SafetyDashboardPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-3 gap-2">
-                      <Button
-                        variant="destructive"
-                        className="flex-col h-16 text-xs"
-                      >
-                        <Phone className="h-5 w-5 mb-1" />
-                        <span>Emergency Contact</span>
-                      </Button>
+                        <a href="tel:911">
+                            <Button
+                                variant="destructive"
+                                className="flex-col h-16 text-xs w-full"
+                            >
+                                <Phone className="h-5 w-5 mb-1" />
+                                <span>Emergency Call</span>
+                            </Button>
+                        </a>
                        <Dialog>
                         <DialogTrigger asChild>
                           <Button
