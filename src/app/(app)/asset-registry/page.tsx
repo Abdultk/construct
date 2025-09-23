@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Paperclip,
   TrendingUp,
+  X,
 } from 'lucide-react';
 import {
   Table,
@@ -40,7 +41,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem
 } from '@/components/ui/dropdown-menu';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -114,6 +115,11 @@ const initialAssets: Asset[] = [
     },
 ];
 
+const initialDocs: File[] = [
+    new File([], "Operation_Manual.pdf"),
+    new File([], "Warranty_Certificate.pdf"),
+]
+
 export default function AssetRegistryPage() {
   const [assets, setAssets] = useState<Asset[]>(initialAssets);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(assets[0]);
@@ -121,6 +127,8 @@ export default function AssetRegistryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const { toast } = useToast();
+  const [documents, setDocuments] = useState<File[]>(initialDocs);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredAssets = useMemo(() => {
     return assets.filter(asset => {
@@ -162,6 +170,20 @@ export default function AssetRegistryPage() {
       description: `Asset "${newAsset.name}" has been successfully registered.`,
     });
   };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setDocuments(prev => [...prev, ...Array.from(event.target.files!)]);
+      toast({
+        title: `${event.target.files.length} file(s) attached.`,
+      });
+    }
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setDocuments(prev => prev.filter(file => file.name !== fileName));
+  };
+
 
   const AddItemForm = () => {
     const [id, setId] = useState('');
@@ -402,9 +424,27 @@ export default function AssetRegistryPage() {
               <CardTitle>Documentation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-                 <Button variant="outline" className="w-full justify-start"><Paperclip className="mr-2 h-4 w-4" /> Operation_Manual.pdf</Button>
-                 <Button variant="outline" className="w-full justify-start"><Paperclip className="mr-2 h-4 w-4" /> Warranty_Certificate.pdf</Button>
-                 <Button variant="secondary" className="w-full justify-start"><Plus className="mr-2 h-4 w-4" /> Attach Document</Button>
+                <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    multiple
+                    onChange={handleFileChange}
+                />
+                {documents.map((doc, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 rounded-md border">
+                        <div className="flex items-center gap-2 truncate">
+                            <Paperclip className="h-4 w-4" />
+                            <span className="text-sm truncate">{doc.name}</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(doc.name)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ))}
+                 <Button variant="secondary" className="w-full justify-start" onClick={() => fileInputRef.current?.click()}>
+                    <Plus className="mr-2 h-4 w-4" /> Attach Document
+                 </Button>
             </CardContent>
           </Card>
         </div>
@@ -412,5 +452,3 @@ export default function AssetRegistryPage() {
     </div>
   );
 }
-
-    
