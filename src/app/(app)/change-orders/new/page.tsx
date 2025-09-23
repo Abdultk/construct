@@ -186,7 +186,7 @@ export default function ChangeRequestFormPage() {
                   onChange={(e) => setChangeDescription(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="wbs-affected">
                     Affected Work Package (WBS)
@@ -239,6 +239,20 @@ export default function ChangeRequestFormPage() {
                         <SelectItem value="structural-issue">Structural Issues</SelectItem>
                         <SelectItem value="regulatory-compliance">Regulatory Compliance</SelectItem>
                       </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="complexity-level">Complexity Level</Label>
+                  <Select>
+                    <SelectTrigger id="complexity-level">
+                      <SelectValue placeholder="Select complexity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="simple">Simple (Level 1)</SelectItem>
+                        <SelectItem value="moderate">Moderate (Level 2)</SelectItem>
+                        <SelectItem value="complex">Complex (Level 3)</SelectItem>
+                        <SelectItem value="major">Major (Level 4)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
