@@ -40,7 +40,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import {
   ChartContainer,
   ChartTooltip,
@@ -55,6 +55,7 @@ import { format } from 'date-fns';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 type Transaction = {
   id: string;
@@ -80,14 +81,17 @@ const allTransactions: Transaction[] = [
     { id: 'TRN008', project: 'Coastal Wind Farm', projectId: 'proj-005', category: 'Subcontractor', wbs: '6.1.1', amount: 550000, status: 'Approved', date: '2024-06-20', isAnomaly: false },
 ];
 
-export default function CostTrackingPage() {
+function CostTrackingContent() {
+  const searchParams = useSearchParams();
+  const anomaliesParam = searchParams.get('anomalies');
+
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [projectFilter, setProjectFilter] = useState<string>('All');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [wbsFilter, setWbsFilter] = useState('');
-  const [showAnomalies, setShowAnomalies] = useState(false);
+  const [showAnomalies, setShowAnomalies] = useState(anomaliesParam === 'true');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
@@ -362,4 +366,12 @@ export default function CostTrackingPage() {
       </Drawer>
     </div>
   );
+}
+
+export default function CostTrackingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CostTrackingContent />
+    </Suspense>
+  )
 }

@@ -30,6 +30,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function BudgetEstablishmentPage() {
     const [isClient, setIsClient] = useState(false);
@@ -69,9 +70,11 @@ export default function BudgetEstablishmentPage() {
                 <Gauge className='h-5 w-5 text-green-500' />
                 <span className='font-bold'>Budget Health: 82%</span>
             </Badge>
-             <Button variant="destructive" size="sm">
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                2 AI Anomalies
+             <Button variant="destructive" size="sm" asChild>
+                <Link href="/cost-tracking?anomalies=true">
+                    <AlertTriangle className="mr-2 h-4 w-4" />
+                    2 AI Anomalies
+                </Link>
             </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
