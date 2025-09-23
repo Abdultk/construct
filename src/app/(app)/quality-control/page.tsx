@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical, CalendarIcon } from 'lucide-react';
+import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical, CalendarIcon, ChevronDown } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, Bar as RechartsBar } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -40,6 +40,17 @@ type Checklist = {
   title: string;
   items: string[];
 };
+
+type Defect = {
+  id: string;
+  area: string;
+  description: string;
+  severity: 'High' | 'Medium' | 'Low';
+  status: 'Open' | 'In Progress' | 'Resolved';
+  assignee: { name: string; avatar: string; };
+  dueDate: string;
+};
+
 
 const checklists: Checklist[] = [
     { title: 'Concrete Pour Checklist', items: ['Verify formwork is clean and oiled', 'Check rebar placement and cover', 'Confirm concrete mix design', 'Monitor slump test results', 'Ensure proper vibration'] },
@@ -60,13 +71,44 @@ export default function QualityControlPage() {
   const [newInspectionInspector, setNewInspectionInspector] = React.useState('');
   const [newInspectionChecklist, setNewInspectionChecklist] = React.useState('');
   const [newInspectionDate, setNewInspectionDate] = React.useState<Date>();
-
   
-  const defects = [
+  const [defects] = React.useState<Defect[]>([
     { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', severity: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, dueDate: '2024-08-05'},
     { id: 'NCF-002', area: 'Facade - Panel 7B', description: 'Incorrect panel alignment.', severity: 'Medium', status: 'In Progress', assignee: { name: 'D. Green', avatar: 'https://picsum.photos/seed/13/100/100'}, dueDate: '2024-08-10'},
     { id: 'NCF-003', area: 'Lobby - Drywall', description: 'Minor surface scratches near entrance.', severity: 'Low', status: 'Resolved', assignee: { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/100/100'}, dueDate: '2024-07-30'},
-  ];
+  ]);
+  
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [severityFilter, setSeverityFilter] = React.useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = React.useState<string[]>([]);
+  
+  const filteredDefects = React.useMemo(() => {
+    return defects.filter(defect => {
+      const matchesSearch = searchTerm === '' ||
+        Object.values(defect).some(val =>
+          typeof val === 'string' && val.toLowerCase().includes(searchTerm.toLowerCase())
+        ) || defect.assignee.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesSeverity = severityFilter.length === 0 || severityFilter.includes(defect.severity);
+      const matchesStatus = statusFilter.length === 0 || statusFilter.includes(defect.status);
+      
+      return matchesSearch && matchesSeverity && matchesStatus;
+    });
+  }, [defects, searchTerm, severityFilter, statusFilter]);
+
+  const toggleFilter = (filterType: 'severity' | 'status', value: string) => {
+    const setter = filterType === 'severity' ? setSeverityFilter : setStatusFilter;
+    setter(prev => 
+      prev.includes(value) 
+        ? prev.filter(v => v !== value)
+        : [...prev, value]
+    );
+  };
+  
+  const clearFilters = () => {
+    setSeverityFilter([]);
+    setStatusFilter([]);
+  };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -293,9 +335,35 @@ export default function QualityControlPage() {
             <div className="flex items-center gap-2">
                 <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search defects..." className="pl-8" />
+                    <Input placeholder="Search defects..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
-                <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <Filter className="mr-2 h-4 w-4" /> Filter <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Severity</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'High')}>High</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'Medium')}>Medium</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'Low')}>Low</DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem onClick={() => toggleFilter('status', 'Open')}>Open</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('status', 'In Progress')}>In Progress</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('status', 'Resolved')}>Resolved</DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={clearFilters}>Clear Filters</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -314,7 +382,7 @@ export default function QualityControlPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {defects.map((defect) => (
+                {filteredDefects.map((defect) => (
                   <TableRow key={defect.id}>
                     <TableCell><Checkbox /></TableCell>
                     <TableCell className="font-medium font-code">{defect.id}</TableCell>
