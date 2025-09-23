@@ -16,6 +16,7 @@ import {
   CheckSquare,
   Repeat,
   Lightbulb,
+  FileSignature,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -88,7 +89,7 @@ export default function ChangeImpactVisualizationPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -124,24 +125,30 @@ export default function ChangeImpactVisualizationPage() {
             </CardTitle>
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <p className="font-semibold">Compliance: Meets all specs</p>
-            <p className="text-xs text-muted-foreground">
-              Rework Risk: Low (15%)
+          <CardContent className="space-y-1">
+             <div className="flex justify-between items-center">
+                <p className="font-semibold text-sm">Spec Compliance</p>
+                <Badge variant="secondary">Meets Standards</Badge>
+            </div>
+             <p className="text-xs text-muted-foreground">
+              Rework Risk: <span className="font-semibold">Low (15%)</span>
             </p>
           </CardContent>
         </Card>
-        <Card>
+         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Risk Profile Change
+              Compliance & Legal
             </CardTitle>
-            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+            <FileSignature className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">Medium</div>
-            <p className="text-xs text-muted-foreground">
-              Increased material lead time risk
+          <CardContent className="space-y-1">
+            <div className="flex justify-between items-center">
+                <p className="font-semibold text-sm">Contract Compliance</p>
+                <Badge variant="secondary">Compliant</Badge>
+            </div>
+             <p className="text-xs text-muted-foreground">
+              Regulatory Adherence: <span className="font-semibold">No issues</span>
             </p>
           </CardContent>
         </Card>
@@ -149,7 +156,7 @@ export default function ChangeImpactVisualizationPage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4">
         {/* Comparison Views */}
-        <div className="col-span-8 space-y-4">
+        <div className="col-span-12 lg:col-span-8 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Comparison Views</CardTitle>
@@ -267,7 +274,7 @@ export default function ChangeImpactVisualizationPage() {
         </div>
 
         {/* Implementation Plan */}
-        <div className="col-span-4 space-y-4">
+        <div className="col-span-12 lg:col-span-4 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Risk Impact Evaluation</CardTitle>
@@ -344,7 +351,4 @@ export default function ChangeImpactVisualizationPage() {
       </div>
     </div>
   );
-
-    
-
-    
+}
