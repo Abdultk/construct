@@ -34,6 +34,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
@@ -203,14 +205,40 @@ export default function ChangeRequestFormPage() {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="client">Client Request</SelectItem>
-                      <SelectItem value="design">
-                        Design Modification
-                      </SelectItem>
-                      <SelectItem value="site">Site Condition</SelectItem>
-                      <SelectItem value="value-eng">
-                        Value Engineering
-                      </SelectItem>
+                      <SelectGroup>
+                        <SelectLabel>Scope Changes</SelectLabel>
+                        <SelectItem value="design-mod">Design Modifications</SelectItem>
+                        <SelectItem value="spec-change">Specification Changes</SelectItem>
+                        <SelectItem value="additional-work">Additional Work</SelectItem>
+                        <SelectItem value="work-elimination">Work Elimination</SelectItem>
+                        <SelectItem value="substitution">Substitutions</SelectItem>
+                        <SelectItem value="value-eng">Value Engineering</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Quantity Adjustments</SelectLabel>
+                        <SelectItem value="qty-overrun">Quantity Overruns</SelectItem>
+                        <SelectItem value="qty-underrun">Quantity Underruns</SelectItem>
+                        <SelectItem value="unit-rate-adj">Unit Rate Adjustments</SelectItem>
+                        <SelectItem value="measurement-correction">Measurement Corrections</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Time Extensions</SelectLabel>
+                        <SelectItem value="weather-delay">Weather-Related Delays</SelectItem>
+                        <SelectItem value="site-condition-delay">Unforeseen Site Conditions</SelectItem>
+                        <SelectItem value="client-delay">Client-Caused Delays</SelectItem>
+                        <SelectItem value="supply-chain-delay">Material/Equipment Delays</SelectItem>
+                      </SelectGroup>
+                       <SelectGroup>
+                        <SelectLabel>Cost Adjustments</SelectLabel>
+                        <SelectItem value="material-price">Material Price Fluctuations</SelectItem>
+                        <SelectItem value="labor-rate">Labor Rate Adjustments</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Emergency Changes</SelectLabel>
+                        <SelectItem value="safety-critical">Safety-Critical Changes</SelectItem>
+                        <SelectItem value="structural-issue">Structural Issues</SelectItem>
+                        <SelectItem value="regulatory-compliance">Regulatory Compliance</SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
