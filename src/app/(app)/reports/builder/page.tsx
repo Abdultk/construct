@@ -2,14 +2,6 @@
 'use client';
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
   ArrowLeft,
   Table as TableIcon,
   BarChart2,
@@ -33,6 +25,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 
 const dataSources = [
@@ -40,13 +34,46 @@ const dataSources = [
     { id: 'costs', name: 'Cost Data', icon: DollarSign, description: 'Transactions, budget items, and variances.' },
     { id: 'schedules', name: 'Schedules', icon: GanttChartSquare, description: 'Tasks, milestones, and dependencies from WBS.' },
     { id: 'risks', name: 'Risks & Safety', icon: ShieldAlert, description: 'Incidents, near-misses, and AI-predicted risks.' },
-]
+];
+
+const dataSourceFields: Record<string, { name: string; type: 'category' | 'value' }[]> = {
+    projects: [
+        { name: 'Status', type: 'category' },
+        { name: 'Project Type', type: 'category' },
+        { name: 'Portfolio Value', type: 'value' },
+        { name: 'Budget Health', type: 'value' },
+        { name: 'Completion %', type: 'value' },
+    ],
+    costs: [
+        { name: 'Category', type: 'category' },
+        { name: 'Status', type: 'category' },
+        { name: 'Amount', type: 'value' },
+        { name: 'Budget Variance', type: 'value' },
+    ],
+    schedules: [
+        { name: 'Resource', type: 'category' },
+        { name: 'Status', type: 'category' },
+        { name: 'Duration (days)', type: 'value' },
+        { name: 'Progress %', type: 'value' },
+    ],
+    risks: [
+        { name: 'Severity', type: 'category' },
+        { name: 'Status', type: 'category' },
+        { name: 'Incident Count', type: 'value' },
+        { name: 'Days Since Last Incident', type: 'value' },
+    ]
+};
+
 
 type ReportComponent = {
     id: string;
     type: 'Table' | 'BarChart' | 'PieChart';
     title: string;
     dataSource: string;
+    xAxisField?: string;
+    yAxisField?: string;
+    xAxisLabel?: string;
+    yAxisLabel?: string;
 }
 
 export default function ReportBuilderPage() {
@@ -91,6 +118,10 @@ export default function ReportBuilderPage() {
     if (!selectedComponent) {
         return <p className="text-sm text-muted-foreground">Select a component to configure its properties.</p>;
     }
+
+    const availableFields = dataSourceFields[selectedComponent.dataSource] || [];
+    const categoryFields = availableFields.filter(f => f.type === 'category');
+    const valueFields = availableFields.filter(f => f.type === 'value');
     
     return (
         <div className="space-y-4">
@@ -106,7 +137,7 @@ export default function ReportBuilderPage() {
                 <Label htmlFor="comp-datasource">Data Source</Label>
                  <Select
                     value={selectedComponent.dataSource}
-                    onValueChange={(value) => updateSelectedComponent({ dataSource: value })}
+                    onValueChange={(value) => updateSelectedComponent({ dataSource: value, xAxisField: '', yAxisField: '' })}
                  >
                     <SelectTrigger id="comp-datasource">
                         <SelectValue placeholder="Select a data source" />
@@ -121,7 +152,6 @@ export default function ReportBuilderPage() {
                     </SelectContent>
                 </Select>
             </div>
-            {/* Add more specific properties based on component type */}
             {selectedComponent.type === 'Table' && (
                 <div className="space-y-2">
                     <Label>Columns</Label>
@@ -129,9 +159,56 @@ export default function ReportBuilderPage() {
                 </div>
             )}
              {selectedComponent.type.includes('Chart') && (
-                <div className="space-y-2">
-                    <Label>Chart Axis</Label>
-                    <p className="text-xs text-muted-foreground">Axis configuration coming soon.</p>
+                <div className="space-y-4 pt-2 border-t">
+                    <Label className="font-semibold">Chart Configuration</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="xaxis-field" className="text-xs">X-Axis (Category)</Label>
+                            <Select 
+                                value={selectedComponent.xAxisField} 
+                                onValueChange={(value) => updateSelectedComponent({ xAxisField: value })}
+                                disabled={!selectedComponent.dataSource}
+                            >
+                                <SelectTrigger id="xaxis-field"><SelectValue placeholder="Field..." /></SelectTrigger>
+                                <SelectContent>
+                                    {categoryFields.map(f => <SelectItem key={f.name} value={f.name}>{f.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="yaxis-field" className="text-xs">Y-Axis (Value)</Label>
+                            <Select 
+                                value={selectedComponent.yAxisField} 
+                                onValueChange={(value) => updateSelectedComponent({ yAxisField: value })}
+                                disabled={!selectedComponent.dataSource}
+                            >
+                                <SelectTrigger id="yaxis-field"><SelectValue placeholder="Field..." /></SelectTrigger>
+                                <SelectContent>
+                                    {valueFields.map(f => <SelectItem key={f.name} value={f.name}>{f.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="xaxis-label" className="text-xs">X-Axis Label</Label>
+                            <Input 
+                                id="xaxis-label" 
+                                placeholder="Custom label..." 
+                                value={selectedComponent.xAxisLabel || ''}
+                                onChange={(e) => updateSelectedComponent({ xAxisLabel: e.target.value })}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="yaxis-label" className="text-xs">Y-Axis Label</Label>
+                            <Input 
+                                id="yaxis-label" 
+                                placeholder="Custom label..." 
+                                value={selectedComponent.yAxisLabel || ''}
+                                onChange={(e) => updateSelectedComponent({ yAxisLabel: e.target.value })}
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -140,6 +217,7 @@ export default function ReportBuilderPage() {
 
   const renderComponent = (component: ReportComponent) => {
     const Icon = component.type === 'Table' ? TableIcon : component.type === 'BarChart' ? BarChart2 : PieChart;
+    const dataSourceName = dataSources.find(ds => ds.id === component.dataSource)?.name;
     return (
         <Card 
             key={component.id} 
@@ -155,13 +233,25 @@ export default function ReportBuilderPage() {
                 <Trash2 className="h-4 w-4" />
             </Button>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                    <Icon className="h-5 w-5" />
-                    {component.title}
+                <CardTitle className="flex items-center gap-2 text-base truncate">
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{component.title}</span>
                 </CardTitle>
+                 {dataSourceName && (
+                    <CardDescription className="text-xs">
+                        Source: {dataSourceName}
+                    </CardDescription>
+                 )}
             </CardHeader>
             <CardContent className="flex items-center justify-center text-muted-foreground h-32">
-                <p>({component.type} preview)</p>
+                <div className="text-center">
+                    <p>({component.type} preview)</p>
+                     {component.xAxisField && component.yAxisField && (
+                        <p className="text-xs mt-2">
+                            {component.yAxisField} by {component.xAxisField}
+                        </p>
+                     )}
+                </div>
             </CardContent>
         </Card>
     )
@@ -200,7 +290,7 @@ export default function ReportBuilderPage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Data Source Panel */}
-        <div className="col-span-3 flex flex-col gap-4 overflow-y-auto">
+        <div className="col-span-3 flex flex-col gap-4 overflow-y-auto pr-2">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -250,7 +340,7 @@ export default function ReportBuilderPage() {
         </div>
 
         {/* Design Canvas */}
-        <div className="col-span-6 flex flex-col gap-4 overflow-y-auto">
+        <div className="col-span-6 flex flex-col gap-4 overflow-y-auto pr-2">
           <Card className="flex-1">
             <CardHeader>
               <CardTitle>Design Canvas</CardTitle>
@@ -263,7 +353,7 @@ export default function ReportBuilderPage() {
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">
-                    Drag or click components to add them to your report.
+                    Click components on the right to add them to your report.
                   </p>
                 </div>
               )}
@@ -272,7 +362,7 @@ export default function ReportBuilderPage() {
         </div>
 
         {/* Components & Preview Panel */}
-        <div className="col-span-3 flex flex-col gap-4 overflow-y-auto">
+        <div className="col-span-3 flex flex-col gap-4 overflow-y-auto pr-2">
           <Card>
             <CardHeader>
               <CardTitle>Components</CardTitle>
@@ -308,4 +398,3 @@ export default function ReportBuilderPage() {
   );
 }
 
-    
