@@ -19,10 +19,37 @@ import {
   Play,
   Settings,
   Database,
+  Users,
+  DollarSign,
+  GanttChartSquare,
+  ShieldAlert,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+
+
+const dataSources = [
+    { id: 'projects', name: 'Projects', icon: Users, description: 'Core project information, status, and metadata.' },
+    { id: 'costs', name: 'Cost Data', icon: DollarSign, description: 'Transactions, budget items, and variances.' },
+    { id: 'schedules', name: 'Schedules', icon: GanttChartSquare, description: 'Tasks, milestones, and dependencies from WBS.' },
+    { id: 'risks', name: 'Risks & Safety', icon: ShieldAlert, description: 'Incidents, near-misses, and AI-predicted risks.' },
+]
 
 export default function ReportBuilderPage() {
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+
+  const handleSourceChange = (sourceId: string) => {
+    setSelectedSources(prev => 
+      prev.includes(sourceId) 
+        ? prev.filter(id => id !== sourceId) 
+        : [...prev, sourceId]
+    );
+  };
+
+
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
       {/* Header */}
@@ -61,11 +88,35 @@ export default function ReportBuilderPage() {
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" /> Data Sources
               </CardTitle>
+              <CardDescription>Select the data to include in your report.</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Select and filter data sources here.
-              </p>
+               <Accordion type="multiple" defaultValue={['data-sources']} className="w-full">
+                <AccordionItem value="data-sources">
+                    <AccordionTrigger className="text-sm font-semibold">Available Sources</AccordionTrigger>
+                    <AccordionContent>
+                        <div className="space-y-4 pt-2">
+                            {dataSources.map(source => (
+                                <div key={source.id} className="flex items-start gap-3 p-3 rounded-md border hover:bg-muted/50">
+                                    <Checkbox 
+                                        id={source.id} 
+                                        checked={selectedSources.includes(source.id)} 
+                                        onCheckedChange={() => handleSourceChange(source.id)}
+                                        className="mt-1"
+                                    />
+                                    <Label htmlFor={source.id} className="flex-1 cursor-pointer">
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <source.icon className="h-4 w-4" />
+                                            <span>{source.name}</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground font-normal mt-1">{source.description}</p>
+                                    </Label>
+                                </div>
+                            ))}
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </CardContent>
           </Card>
           <Card>
@@ -90,7 +141,7 @@ export default function ReportBuilderPage() {
             </CardHeader>
             <CardContent className="flex h-full items-center justify-center rounded-lg border-2 border-dashed">
               <p className="text-muted-foreground">
-                Drag and drop components from the left panel.
+                Drag and drop components from the right panel.
               </p>
             </CardContent>
           </Card>
