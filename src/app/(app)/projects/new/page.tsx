@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -50,7 +50,10 @@ export default function ProjectSetupPage() {
   const [projectType, setProjectType] = React.useState('');
   const [otherProjectType, setOtherProjectType] = React.useState('');
   const [projectDescription, setProjectDescription] = React.useState('');
+  const [projectScope, setProjectScope] = React.useState('');
+  const [projectDeliverables, setProjectDeliverables] = React.useState('');
   const [clientInfo, setClientInfo] = React.useState('');
+  const [contractType, setContractType] = React.useState('');
   const [contractValue, setContractValue] = React.useState('');
   const [currency, setCurrency] = React.useState('USD');
   const [startDate, setStartDate] = React.useState<Date>();
@@ -64,7 +67,7 @@ export default function ProjectSetupPage() {
   // Step 3 State
   const [boqFile, setBoqFile] = React.useState<File | null>(null);
   const [wbsFile, setWbsFile] = React.useState<File | null>(null);
-  const [selectedStandard, setSelectedStandard] = React.useState<string>('Auto-Detect');
+  const [selectedStandard, setSelectedStandard] = React.useState('Auto-Detect');
 
   const nextStep = () => setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
@@ -227,11 +230,36 @@ export default function ProjectSetupPage() {
                     <Label htmlFor="project-description">Project Description</Label>
                     <Textarea id="project-description" placeholder="A brief description of the project." value={projectDescription} onChange={e => setProjectDescription(e.target.value)} />
                 </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="project-scope">Scope of Project</Label>
+                    <Textarea id="project-scope" placeholder="Describe the high-level scope of work." value={projectScope} onChange={e => setProjectScope(e.target.value)} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="project-deliverables">Key Deliverables</Label>
+                    <Textarea id="project-deliverables" placeholder="List the main project deliverables." value={projectDeliverables} onChange={e => setProjectDeliverables(e.target.value)} />
+                </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="client-info">Client Information</Label>
                         <Input id="client-info" placeholder="Client name or contact" value={clientInfo} onChange={e => setClientInfo(e.target.value)} />
                     </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="contract-type">Contract Type</Label>
+                        <Select value={contractType} onValueChange={setContractType}>
+                            <SelectTrigger id="contract-type">
+                                <SelectValue placeholder="Select contract type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="fixed-price">Fixed Price (Lump Sum)</SelectItem>
+                                <SelectItem value="cost-plus">Cost-Plus</SelectItem>
+                                <SelectItem value="time-and-materials">Time & Materials (T&M)</SelectItem>
+                                <SelectItem value="gmp">Guaranteed Maximum Price (GMP)</SelectItem>
+                                <SelectItem value="unit-price">Unit Price</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="contract-value">Contract Value</Label>
                         <div className="relative">
