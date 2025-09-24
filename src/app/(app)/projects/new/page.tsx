@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package, Palette, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,14 @@ const boqStandards = {
   "Custom": ["Enterprise Standard", "Project Specific", "Hybrid Model"]
 }
 
+const projectThemes = [
+    { name: 'Default', colors: ['bg-primary', 'bg-secondary', 'bg-accent'] },
+    { name: 'Ocean', colors: ['bg-blue-500', 'bg-blue-100', 'bg-teal-300'] },
+    { name: 'Forest', colors: ['bg-green-600', 'bg-green-100', 'bg-amber-400'] },
+    { name: 'Sunset', colors: ['bg-orange-500', 'bg-yellow-100', 'bg-red-400'] },
+    { name: 'Mono', colors: ['bg-gray-800', 'bg-gray-200', 'bg-gray-400'] },
+];
+
 
 export default function ProjectSetupPage() {
   const [step, setStep] = React.useState(1);
@@ -58,6 +66,8 @@ export default function ProjectSetupPage() {
   const [currency, setCurrency] = React.useState('USD');
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
+  const [projectPicture, setProjectPicture] = React.useState<File | null>(null);
+  const [selectedTheme, setSelectedTheme] = React.useState('Default');
 
   // Step 2 State
   const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
@@ -119,12 +129,14 @@ export default function ProjectSetupPage() {
     router.push('/projects');
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'boq' | 'wbs') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'boq' | 'wbs' | 'picture') => {
       if (e.target.files && e.target.files.length > 0) {
           if (fileType === 'boq') {
               setBoqFile(e.target.files[0]);
-          } else {
+          } else if (fileType === 'wbs'){
               setWbsFile(e.target.files[0]);
+          } else if (fileType === 'picture') {
+              setProjectPicture(e.target.files[0]);
           }
       }
   }
@@ -224,6 +236,37 @@ export default function ProjectSetupPage() {
                                 onChange={e => setOtherProjectType(e.target.value)}
                              />
                         )}
+                    </div>
+                </div>
+                 <div className="space-y-2">
+                    <Label>Project Picture</Label>
+                    <div className="flex items-center gap-4">
+                        <div className="w-24 h-24 bg-muted rounded-md flex items-center justify-center">
+                            {projectPicture ? (
+                                <img src={URL.createObjectURL(projectPicture)} alt="Project Preview" className="w-full h-full object-cover rounded-md"/>
+                            ) : (
+                                <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                            )}
+                        </div>
+                        <Label htmlFor="picture-file" className="text-primary underline cursor-pointer">
+                            Upload a picture
+                        </Label>
+                        <Input id="picture-file" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'picture')} />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label>Project Theme</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {projectThemes.map(theme => (
+                            <div key={theme.name} className={cn("rounded-md border-2 p-2 cursor-pointer", selectedTheme === theme.name ? 'border-primary' : 'border-transparent')} onClick={() => setSelectedTheme(theme.name)}>
+                                <div className="flex justify-center space-x-1">
+                                    {theme.colors.map((color, index) => (
+                                        <div key={index} className={cn("w-5 h-5 rounded-full", color)}></div>
+                                    ))}
+                                </div>
+                                <p className="text-center text-sm mt-2">{theme.name}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="space-y-2">
@@ -361,6 +404,7 @@ export default function ProjectSetupPage() {
                                 <SelectItem value="Quantity Surveyor">Quantity Surveyor</SelectItem>
                                 <SelectItem value="Safety Officer">Safety Officer</SelectItem>
                                 <SelectItem value="Foreman">Foreman</SelectItem>
+                                <SelectItem value="Staff">Staff</SelectItem>
                                 <SelectItem value="Subcontractor">Subcontractor</SelectItem>
                                 <SelectItem value="Client">Client</SelectItem>
                                 <SelectItem value="Viewer">Viewer</SelectItem>
@@ -586,3 +630,5 @@ export default function ProjectSetupPage() {
     </div>
   );
 }
+
+    
