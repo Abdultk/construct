@@ -31,6 +31,7 @@ import {
   CheckCircle,
   Wrench,
   LineChart as LineChartIcon,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { projects } from '@/lib/data';
@@ -178,6 +179,64 @@ export default function ReportsPage() {
        <div className="grid grid-cols-12 gap-4">
         {/* Left Panel */}
         <div className="col-span-12 space-y-4 lg:col-span-8">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Work Progress
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">15%</div>
+                  <p className="text-xs text-muted-foreground">
+                    of planned work completed
+                  </p>
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Cost Impact
+                  </CardTitle>
+                  <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">$125,000</div>
+                  <p className="text-xs text-muted-foreground">
+                    work completed this period
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Personnel on Site
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">128</div>
+                  <p className="text-xs text-muted-foreground">
+                    average daily headcount
+                  </p>
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Schedule Variance
+                  </CardTitle>
+                  <LineChartIcon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-500">+0.5 days</div>
+                  <p className="text-xs text-muted-foreground">
+                    ahead of schedule
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -223,60 +282,6 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LineChartIcon className="h-5 w-5" /> Progress & Cost Impact
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Summary of progress and financial impact for the selected period.
-                </p>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">
-                    Work Completed
-                  </p>
-                  <p className="text-xl font-bold">$125,000</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">
-                    Schedule Variance
-                  </p>
-                  <p className="text-xl font-bold text-green-500">+0.5 days</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wrench className="h-5 w-5" /> Administrative Processing
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Items requiring administrative review and approval.
-                </p>
-                <Link href="/payment-certificate">
-                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                    <div className="flex justify-between">
-                      <p className="font-semibold">Pending Invoices</p>
-                      <p className="font-bold">3</p>
-                    </div>
-                  </div>
-                </Link>
-                <Link href="/change-orders">
-                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                      <div className="flex justify-between">
-                          <p className="font-semibold">Change Orders to Review</p>
-                          <p className="font-bold">1</p>
-                      </div>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         {/* Right Panel */}
@@ -328,6 +333,34 @@ export default function ReportsPage() {
               </div>
             </CardContent>
           </Card>
+           <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wrench className="h-5 w-5" /> Administrative Processing
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Items requiring administrative review and approval.
+                </p>
+                <Link href="/payment-certificate">
+                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="flex justify-between">
+                      <p className="font-semibold">Pending Invoices</p>
+                      <p className="font-bold">3</p>
+                    </div>
+                  </div>
+                </Link>
+                <Link href="/change-orders">
+                  <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between">
+                          <p className="font-semibold">Change Orders to Review</p>
+                          <p className="font-bold">1</p>
+                      </div>
+                  </div>
+                </Link>
+              </CardContent>
+            </Card>
         </div>
       </div>
 
