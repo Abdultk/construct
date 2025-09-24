@@ -16,6 +16,7 @@ import {
   GanttChartSquare,
   ShieldAlert,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -27,7 +28,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart as RechartsBarChart, Pie, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const dataSources = [
     { id: 'projects', name: 'Projects', icon: Users, description: 'Core project information, status, and metadata.' },
@@ -64,6 +67,19 @@ const dataSourceFields: Record<string, { name: string; type: 'category' | 'value
     ]
 };
 
+// Mock data for preview
+const mockChartData = [
+  { name: 'On Track', value: 5, fill: 'hsl(var(--chart-2))' },
+  { name: 'At Risk', value: 2, fill: 'hsl(var(--chart-4))' },
+  { name: 'Delayed', value: 1, fill: 'hsl(var(--chart-1))' },
+];
+
+const mockTableData = [
+    { project: 'Downtown Skyscraper', status: 'On Track', health: '95%' },
+    { project: 'Suburban Housing', status: 'At Risk', health: '78%' },
+    { project: 'Interstate Bridge', status: 'On Track', health: '89%' },
+];
+
 
 type ReportComponent = {
     id: string;
@@ -80,6 +96,8 @@ export default function ReportBuilderPage() {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [reportComponents, setReportComponents] = useState<ReportComponent[]>([]);
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reportPreview, setReportPreview] = useState<ReportComponent[] | null>(null);
 
   const handleSourceChange = (sourceId: string) => {
     setSelectedSources(prev => 
@@ -110,6 +128,15 @@ export default function ReportBuilderPage() {
   const updateSelectedComponent = (updates: Partial<ReportComponent>) => {
     if (!selectedComponentId) return;
     setReportComponents(prev => prev.map(c => c.id === selectedComponentId ? { ...c, ...updates } : c));
+  }
+
+  const handleRunReport = () => {
+    setIsGenerating(true);
+    setReportPreview(null);
+    setTimeout(() => {
+        setReportPreview(reportComponents);
+        setIsGenerating(false);
+    }, 1500);
   }
   
   const selectedComponent = reportComponents.find(c => c.id === selectedComponentId);
@@ -257,6 +284,63 @@ export default function ReportBuilderPage() {
     )
   }
 
+  const renderPreviewComponent = (component: ReportComponent) => {
+      return (
+          <Card key={`preview-${component.id}`}>
+              <CardHeader>
+                  <CardTitle>{component.title}</CardTitle>
+                  {component.dataSource && <CardDescription>Source: {dataSources.find(ds => ds.id === component.dataSource)?.name}</CardDescription>}
+              </CardHeader>
+              <CardContent>
+                  {component.type === 'Table' && (
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Project</TableHead>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead>Health</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {mockTableData.map(row => (
+                                  <TableRow key={row.project}>
+                                      <TableCell>{row.project}</TableCell>
+                                      <TableCell>{row.status}</TableCell>
+                                      <TableCell>{row.health}</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  )}
+                  {component.type === 'BarChart' && (
+                      <ChartContainer config={{}} className="h-48 w-full">
+                          <RechartsBarChart data={mockChartData} accessibilityLayer>
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                              <Bar dataKey="value" radius={4}>
+                                 {mockChartData.map((entry) => (
+                                    <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                                  ))}
+                              </Bar>
+                          </RechartsBarChart>
+                      </ChartContainer>
+                  )}
+                   {component.type === 'PieChart' && (
+                      <ChartContainer config={{}} className="h-48 w-full">
+                          <RechartsPieChart>
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                              <Pie data={mockChartData} dataKey="value" nameKey="name" >
+                                {mockChartData.map((entry) => (
+                                    <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                                  ))}
+                              </Pie>
+                          </RechartsPieChart>
+                      </ChartContainer>
+                  )}
+              </CardContent>
+          </Card>
+      )
+  }
+
 
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
@@ -282,8 +366,17 @@ export default function ReportBuilderPage() {
           <Button variant="outline">
             <Share2 className="mr-2 h-4 w-4" /> Share
           </Button>
-          <Button>
-            <Play className="mr-2 h-4 w-4" /> Run Report
+          <Button onClick={handleRunReport} disabled={isGenerating}>
+            {isGenerating ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Running...
+                </>
+            ) : (
+                <>
+                    <Play className="mr-2 h-4 w-4" /> Run Report
+                </>
+            )}
           </Button>
         </div>
       </div>
@@ -387,9 +480,23 @@ export default function ReportBuilderPage() {
               <CardTitle>Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Real-time preview will appear here.
-              </p>
+              {isGenerating ? (
+                 <div className="flex items-center justify-center h-48">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                 </div>
+              ) : reportPreview ? (
+                <div className="space-y-4">
+                    {reportPreview.length > 0 ? (
+                      reportPreview.map(renderPreviewComponent)
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">Add components to the canvas and run the report to see a preview.</p>
+                    )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Click "Run Report" to see a preview.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -397,5 +504,3 @@ export default function ReportBuilderPage() {
     </div>
   );
 }
-
-    
