@@ -12,7 +12,6 @@ export function DashboardNav() {
   const pathname = usePathname();
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
-    { href: "/daily-review", label: "Daily Review", icon: Briefcase },
     { href: "/projects", label: "Projects", icon: GanttChartSquare, badge: '5' },
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/wbs", label: "WBS", icon: Network },
