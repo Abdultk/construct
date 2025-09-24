@@ -79,6 +79,18 @@ export default function ProjectSetupPage() {
   const [wbsFile, setWbsFile] = React.useState<File | null>(null);
   const [selectedStandard, setSelectedStandard] = React.useState('Auto-Detect');
 
+  // Step 4 State
+  const [budgetAllocation, setBudgetAllocation] = React.useState({
+    materials: '40',
+    labor: '35',
+    equipment: '15',
+    overheads: '10'
+  });
+
+  const handleBudgetAllocationChange = (category: keyof typeof budgetAllocation, value: string) => {
+    setBudgetAllocation(prev => ({ ...prev, [category]: value }));
+  };
+
   const nextStep = () => setStep((prev) => (prev < totalSteps ? prev + 1 : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
 
@@ -556,10 +568,58 @@ export default function ProjectSetupPage() {
                             <div className="space-y-4">
                                 <h4 className="font-semibold flex items-center"><BarChart3 className="mr-2 h-5 w-5 text-ai-accent" /> Initial Budget Allocation</h4>
                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between"><span>Materials</span> <span className="font-medium">40%</span></div>
-                                    <div className="flex justify-between"><span>Labor</span> <span className="font-medium">35%</span></div>
-                                    <div className="flex justify-between"><span>Equipment</span> <span className="font-medium">15%</span></div>
-                                    <div className="flex justify-between"><span>Overheads</span> <span className="font-medium">10%</span></div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Label htmlFor="budget-materials" className="flex-shrink-0">Materials</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Input
+                                                id="budget-materials"
+                                                type="number"
+                                                value={budgetAllocation.materials}
+                                                onChange={(e) => handleBudgetAllocationChange('materials', e.target.value)}
+                                                className="h-8 w-20 text-right"
+                                            />
+                                            <span className="text-muted-foreground">%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Label htmlFor="budget-labor" className="flex-shrink-0">Labor</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Input
+                                                id="budget-labor"
+                                                type="number"
+                                                value={budgetAllocation.labor}
+                                                onChange={(e) => handleBudgetAllocationChange('labor', e.target.value)}
+                                                className="h-8 w-20 text-right"
+                                            />
+                                            <span className="text-muted-foreground">%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Label htmlFor="budget-equipment" className="flex-shrink-0">Equipment</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Input
+                                                id="budget-equipment"
+                                                type="number"
+                                                value={budgetAllocation.equipment}
+                                                onChange={(e) => handleBudgetAllocationChange('equipment', e.target.value)}
+                                                className="h-8 w-20 text-right"
+                                            />
+                                            <span className="text-muted-foreground">%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Label htmlFor="budget-overheads" className="flex-shrink-0">Overheads</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Input
+                                                id="budget-overheads"
+                                                type="number"
+                                                value={budgetAllocation.overheads}
+                                                onChange={(e) => handleBudgetAllocationChange('overheads', e.target.value)}
+                                                className="h-8 w-20 text-right"
+                                            />
+                                            <span className="text-muted-foreground">%</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                              <div className="space-y-4">
