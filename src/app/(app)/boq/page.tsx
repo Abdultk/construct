@@ -20,6 +20,8 @@ import {
   TrendingUp,
   ArrowRight,
   BookCheck,
+  MoreHorizontal,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,6 +63,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { validateBoq, type ValidateBoqOutput } from '@/ai/flows/validate-boq';
@@ -68,6 +71,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
 
 type BoqItem = {
   id: string;
@@ -78,6 +93,7 @@ type BoqItem = {
   amount: number;
   status: 'Approved' | 'Pending' | 'In Review' | 'Rejected';
   isParent: boolean;
+  costCode?: string;
 };
 
 type ChangeLog = {
@@ -101,6 +117,7 @@ const initialBoqItems: BoqItem[] = [
     amount: 150000,
     status: 'Approved',
     isParent: true,
+    costCode: '01-00-00',
   },
   {
     id: '1.1',
@@ -111,6 +128,7 @@ const initialBoqItems: BoqItem[] = [
     amount: 50000,
     status: 'Approved',
     isParent: false,
+    costCode: '01-51-00',
   },
   {
     id: '1.2',
@@ -131,6 +149,7 @@ const initialBoqItems: BoqItem[] = [
     amount: 750000,
     status: 'In Review',
     isParent: true,
+    costCode: '03-00-00',
   },
 ];
 
@@ -162,6 +181,17 @@ export default function BoqDataGridPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handleRemoveItem = (idToRemove: string) => {
+    setBoqItems(currentItems => currentItems.filter(item => item.id !== idToRemove));
+    toast({
+      title: 'Item Removed',
+      description: `Item with ID ${idToRemove} has been removed.`,
+    });
+    if (selectedItem?.id === idToRemove) {
+      setSelectedItem(null);
+    }
+  };
 
 
   const formatNumber = (num: number | string | undefined | null) => {
@@ -235,6 +265,7 @@ export default function BoqDataGridPage() {
             quantity: typeof i.quantity === 'number' ? i.quantity : undefined,
             rate: typeof i.rate === 'number' ? i.rate : undefined,
             isParent: i.isParent,
+            costCode: i.costCode,
           })),
           boqStandard: selectedStandard !== 'Auto-Detect' ? selectedStandard : undefined,
         });
@@ -321,6 +352,7 @@ export default function BoqDataGridPage() {
     const [unit, setUnit] = useState('');
     const [quantity, setQuantity] = useState('');
     const [rate, setRate] = useState('');
+    const [costCode, setCostCode] = useState('');
 
     const handleSubmit = () => {
         handleAddItem({
@@ -329,7 +361,8 @@ export default function BoqDataGridPage() {
             isParent,
             unit,
             quantity: isParent ? '' : Number(quantity),
-            rate: isParent ? '' : Number(rate)
+            rate: isParent ? '' : Number(rate),
+            costCode: costCode || undefined,
         });
     }
 
@@ -344,9 +377,15 @@ export default function BoqDataGridPage() {
                     <Switch id="is-parent" checked={isParent} onCheckedChange={setIsParent} />
                     <Label htmlFor="is-parent">Is this a parent item?</Label>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="item-id">Item ID</Label>
-                    <Input id="item-id" value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g., 2.1"/>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="item-id">Item ID</Label>
+                        <Input id="item-id" value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g., 2.1"/>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="item-cost-code">Cost Code (Optional)</Label>
+                        <Input id="item-cost-code" value={costCode} onChange={(e) => setCostCode(e.target.value)} placeholder="e.g., 03-30-00"/>
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="item-description">Description</Label>
@@ -523,11 +562,13 @@ export default function BoqDataGridPage() {
                 <TableRow>
                   <TableHead className="w-24">Item</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead className="w-28 hidden xl:table-cell">Cost Code</TableHead>
                   <TableHead className="w-20 hidden sm:table-cell">Unit</TableHead>
                   <TableHead className="w-24 text-right hidden md:table-cell">Quantity</TableHead>
                   <TableHead className="w-24 text-right hidden md:table-cell">Rate</TableHead>
                   <TableHead className="w-32 text-right">Amount</TableHead>
                   <TableHead className="w-28 text-center hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -553,10 +594,12 @@ export default function BoqDataGridPage() {
                         {anomaly && (
                           <p className="text-xs text-yellow-600 mt-1">
                             <Wand2 className="inline-block h-3 w-3 mr-1" />
-                            <span className="font-semibold">AI Suggestion:</span> {anomaly.suggestion}
+                            <span className="font-semibold">{anomaly.anomaly}:</span> {anomaly.suggestion}
+                            {anomaly.suggestedCostCode && ` (Suggested Code: ${anomaly.suggestedCostCode})`}
                           </p>
                         )}
                       </TableCell>
+                       <TableCell className="font-code hidden xl:table-cell">{item.costCode || '-'}</TableCell>
                       <TableCell className="hidden sm:table-cell">{item.unit}</TableCell>
                       <TableCell className="text-right font-code hidden md:table-cell">
                         {formatNumber(item.quantity)}
@@ -571,6 +614,41 @@ export default function BoqDataGridPage() {
                         <Badge variant={getStatusBadge(item.status)}>
                           {item.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setSelectedItem(item)}>View Details</DropdownMenuItem>
+                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                               <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                </DropdownMenuItem>
+                               </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                           <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently remove the BOQ item "{item.id} - {item.description}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleRemoveItem(item.id)}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   );

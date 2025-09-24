@@ -26,6 +26,7 @@ const BoqItemSchema = z.object({
   quantity: z.number().optional().describe('The quantity of the item.'),
   rate: z.number().optional().describe('The rate per unit.'),
   isParent: z.boolean().describe('Whether this is a parent/summary item or a line item.'),
+  costCode: z.string().optional().describe('An optional cost code associated with the item (e.g., "03-30-00").'),
 });
 
 const ValidateBoqInputSchema = z.object({
@@ -36,8 +37,9 @@ export type ValidateBoqInput = z.infer<typeof ValidateBoqInputSchema>;
 
 const AnomalySchema = z.object({
     itemId: z.string().describe('The ID of the BOQ item with the anomaly.'),
-    anomaly: z.string().describe('A brief description of the identified anomaly (e.g., "Unusually High Rate", "Mismatched Unit"). This represents a piece of mined knowledge.'),
+    anomaly: z.string().describe('A brief description of the identified anomaly (e.g., "Unusually High Rate", "Mismatched Unit", "Missing Cost Code"). This represents a piece of mined knowledge.'),
     suggestion: z.string().describe('A concise, actionable suggestion to correct the anomaly or for further investigation. This is the extracted, actionable insight.'),
+    suggestedCostCode: z.string().optional().describe('If the anomaly is a missing or incorrect cost code, suggest a relevant code (e.g., "03-30-00" for Cast-in-Place Concrete).'),
 });
 
 const ValidateBoqOutputSchema = z.object({
@@ -70,17 +72,19 @@ Analyze the following list of BOQ items:
   - Unit: {{unit}}
   - Quantity: {{quantity}}
   - Rate: {{rate}}
+  - Cost Code: {{costCode}}
   - Is Parent: {{isParent}}
 {{/each}}
 
 Review the items based on the specified (or detected) standard and the following criteria to extract new knowledge:
-1.  **Structural & Vocabulary Compliance:** Analyze the numbering scheme, hierarchy, and terminology. Does the itemization and vocabulary comply with the rules and common language of the BOO standard? For example, NRM uses numeric subsections (1.1, 1.2), whereas CESMM4 might use alphanumeric (A1, A2). Similarly, check if the technical terms used in descriptions are consistent with the chosen standard.
+1.  **Structural & Vocabulary Compliance:** Analyze the numbering scheme, hierarchy, and terminology. Does the itemization and vocabulary comply with the rules and common language of the BOO standard?
 2.  **Reasonableness of Rates:** Are the rates for each item within a typical range for standard construction work? Flag any rates that seem unusually high or low.
-3.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
-4.  **Completeness:** Are there any obvious items missing for a standard construction project of this type according to the chosen standard?
-5.  **Cost Optimization:** Identify any items where the rate seems high and could be a candidate for negotiation or value engineering.
+3.  **Cost Code Analysis:** Check if a cost code is present. If it is missing, suggest a standard cost code based on the item description (e.g., use CSI MasterFormat). If it is present, check its validity against the standard. The anomaly type should be "Missing Cost Code" or "Invalid Cost Code".
+4.  **Consistency:** Do units and descriptions match? (e.g., 'Concrete' should be in 'm³', not 'sqm').
+5.  **Completeness:** Are there any obvious items missing for a standard construction project of this type according to the chosen standard?
+6.  **Cost Optimization:** Identify any items where the rate seems high and could be a candidate for negotiation or value engineering.
 
-Based on your analysis, provide a high-level summary, the detected standard (if applicable), and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do. This output will represent the new, validated knowledge extracted from the data.
+Based on your analysis, provide a high-level summary, the detected standard (if applicable), and then a list of specific, actionable anomalies. For each anomaly, provide the item ID, a description of the issue, and a clear suggestion for what to do. This output will represent the new, validated knowledge extracted from the data. If suggesting a cost code, populate the 'suggestedCostCode' field.
 `,
 });
 
