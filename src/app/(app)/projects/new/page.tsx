@@ -48,6 +48,7 @@ export default function ProjectSetupPage() {
   // Step 1 State
   const [projectName, setProjectName] = React.useState('');
   const [projectType, setProjectType] = React.useState('');
+  const [otherProjectType, setOtherProjectType] = React.useState('');
   const [projectDescription, setProjectDescription] = React.useState('');
   const [clientInfo, setClientInfo] = React.useState('');
   const [contractValue, setContractValue] = React.useState('');
@@ -206,8 +207,20 @@ export default function ProjectSetupPage() {
                             <SelectItem value="residential">Residential</SelectItem>
                             <SelectItem value="industrial">Industrial</SelectItem>
                             <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                            <SelectItem value="oil-and-gas">Oil and Gas</SelectItem>
+                            <SelectItem value="energy">Energy</SelectItem>
+                            <SelectItem value="others">Others</SelectItem>
                         </SelectContent>
                         </Select>
+                        {projectType === 'others' && (
+                            <Input 
+                                id="other-project-type" 
+                                placeholder="Please specify project type" 
+                                className="mt-2"
+                                value={otherProjectType}
+                                onChange={e => setOtherProjectType(e.target.value)}
+                             />
+                        )}
                     </div>
                 </div>
                 <div className="space-y-2">
@@ -443,7 +456,7 @@ export default function ProjectSetupPage() {
                         <CardContent className="space-y-4 text-sm">
                             <div className="grid grid-cols-2 gap-4">
                                 <div><span className="font-semibold">Project Name:</span> {projectName || 'N/A'}</div>
-                                <div><span className="font-semibold">Project Type:</span> {projectType || 'N/A'}</div>
+                                <div><span className="font-semibold">Project Type:</span> {projectType === 'others' ? otherProjectType : projectType || 'N/A'}</div>
                                 <div><span className="font-semibold">Start Date:</span> {startDate ? format(startDate, "PPP") : 'N/A'}</div>
                                 <div><span className="font-semibold">End Date:</span> {endDate ? format(endDate, "PPP") : 'N/A'}</div>
                                 <div><span className="font-semibold">Contract Value:</span> {currency} {Number(contractValue).toLocaleString() || 'N/A'}</div>
