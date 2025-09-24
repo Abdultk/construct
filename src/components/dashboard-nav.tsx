@@ -14,7 +14,7 @@ export function DashboardNav() {
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/projects", label: "Projects", icon: GanttChartSquare, badge: '5' },
     { href: "/boq", label: "BOQ", icon: ClipboardList },
-    { href: "/wbs", label: "WBS", icon: Network },
+    { href: "/program-of-works", label: "Program of Works", icon: Network },
     { href: "/change-orders", label: "Change Orders", icon: FilePlus, badge: '3' },
     { href: "/visualize-impact", label: "Impact Viz", icon: Eye },
     { href: "/field-dashboard", label: "Field", icon: HardHat },
@@ -64,3 +64,5 @@ export function DashboardNav() {
     </nav>
   )
 }
+
+    
