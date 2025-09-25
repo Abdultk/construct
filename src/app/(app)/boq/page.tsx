@@ -143,6 +143,7 @@ const initialBoqItems: BoqItem[] = [
     amount: 100000,
     isParent: false,
     status: 'Pending',
+    costCode: '01-52-13'
   },
   {
     id: '2.0',
@@ -686,7 +687,7 @@ export default function BoqDataGridPage() {
                         {item.id}
                       </TableCell>
                       <TableCell>
-                         <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} ${!isSelected && 'truncate'}`}>
+                         <p className={`${item.isParent ? 'font-semibold' : 'font-normal'}`}>
                            {item.heading}
                          </p>
                         {anomaly && (
