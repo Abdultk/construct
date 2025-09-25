@@ -66,7 +66,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuLabel
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useState, useRef, ChangeEvent } from 'react';
@@ -139,7 +142,7 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
   ],
    "Archive": [
-    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
+    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }, { id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }] },
     { name: 'Old Correspondence', documents: [] },
   ],
 };
@@ -343,10 +346,40 @@ export default function DocumentLibraryPage() {
                             <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Live Comments</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                           <div className="text-center text-muted-foreground pt-10">
-                                <MessageSquare className="mx-auto h-8 w-8" />
-                                <p className="mt-2 text-sm">No comments yet.</p>
-                            </div>
+                            {comments.length > 0 ? (
+                                comments.map(comment => (
+                                    <div key={comment.id} className={cn("p-2 rounded-md", comment.status === 'Resolved' ? 'bg-green-500/10' : '')}>
+                                        <div className="flex items-start gap-3">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={comment.user.avatar} />
+                                                <AvatarFallback>{comment.user.name.slice(0,2)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-semibold">{comment.user.name}</span>
+                                                    <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                                                </div>
+                                                <div className="text-sm mt-1">{renderCommentWithMentions(comment.text)}</div>
+                                            </div>
+                                        </div>
+                                         <div className="mt-2 flex items-center justify-between pl-11">
+                                            <div className="flex items-center gap-2">
+                                                {getCommentIcon(comment.type)}
+                                                <span className="text-xs font-medium">{comment.type}</span>
+                                            </div>
+                                            <Button variant="ghost" size="sm" onClick={() => toggleCommentStatus(comment.id)}>
+                                                {comment.status === 'Open' ? <CheckCircle className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                                                {comment.status === 'Open' ? 'Resolve' : 'Re-open'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center text-muted-foreground pt-10">
+                                    <MessageSquare className="mx-auto h-8 w-8" />
+                                    <p className="mt-2 text-sm">No comments yet.</p>
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="p-2 border-t">
                              <div className="relative w-full">
@@ -664,9 +697,23 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search documents..." className="pl-8" />
             </div>
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" /> Filter
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="mr-2 h-4 w-4" /> Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Discipline</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>Architectural</DropdownMenuItem>
+                    <DropdownMenuItem>Structural</DropdownMenuItem>
+                    <DropdownMenuItem>MEP</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent>
@@ -760,4 +807,3 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
     </div>
   );
 }
-
