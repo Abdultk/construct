@@ -119,7 +119,7 @@ const initialBoqItems: BoqItem[] = [
   },
   {
     id: '1.1',
-    description: 'Clearing and Grubbing',
+    description: 'Clearing and Grubbing of the entire site area, including removal of all vegetation, debris, and topsoil to a depth of 150mm. This includes disposal of all materials off-site in an environmentally approved manner.',
     unit: 'LS',
     quantity: 1,
     rate: 50000,
@@ -129,7 +129,7 @@ const initialBoqItems: BoqItem[] = [
   },
   {
     id: '1.2',
-    description: 'Excavation and Earthwork',
+    description: 'Bulk excavation for building foundations and basement levels. Includes shoring and dewatering as required per geotechnical report. All excavated material to be stockpiled on-site for later use as backfill or disposed of off-site.',
     unit: 'm³',
     quantity: 2000,
     rate: 50,
@@ -646,10 +646,10 @@ export default function BoqDataGridPage() {
                       >
                         {item.id}
                       </TableCell>
-                      <TableCell
-                        className={`${item.isParent ? 'font-semibold' : 'font-normal'}`}
-                      >
-                        {item.description}
+                      <TableCell>
+                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} whitespace-pre-wrap`}>
+                          {item.description}
+                        </p>
                         {anomaly && (
                           <p className="text-xs text-yellow-600 mt-1">
                             <Wand2 className="inline-block h-3 w-3 mr-1" />
@@ -717,11 +717,16 @@ export default function BoqDataGridPage() {
           <Card>
             <CardHeader>
               <CardTitle>Item Details</CardTitle>
-              <CardDescription>{selectedItem ? `${selectedItem.id} - ${selectedItem.description}` : "Select an item to view details"}</CardDescription>
+              <CardDescription>{selectedItem ? `ID: ${selectedItem.id}` : "Select an item to view details"}</CardDescription>
             </CardHeader>
             <CardContent>
               {selectedItem ? (
                 <div className="space-y-4 text-sm">
+                    <div className="space-y-1">
+                      <p className="font-semibold">Description</p>
+                      <p className="text-muted-foreground whitespace-pre-wrap">{selectedItem.description}</p>
+                    </div>
+                    <Separator />
                     {!selectedItem.isParent && (
                         <>
                              <div className='flex justify-between'>
@@ -818,3 +823,5 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    
