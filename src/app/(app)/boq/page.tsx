@@ -93,6 +93,7 @@ type BoqItem = {
   rate: number | string;
   amount: number;
   isParent: boolean;
+  status: 'Approved' | 'Pending' | 'In Review' | 'Draft';
   costCode?: string;
 };
 
@@ -117,6 +118,7 @@ const initialBoqItems: BoqItem[] = [
     rate: '',
     amount: 150000,
     isParent: true,
+    status: 'Approved',
     costCode: '01-00-00',
   },
   {
@@ -128,6 +130,7 @@ const initialBoqItems: BoqItem[] = [
     rate: 50000,
     amount: 50000,
     isParent: false,
+    status: 'Approved',
     costCode: '01-51-00',
   },
   {
@@ -139,6 +142,7 @@ const initialBoqItems: BoqItem[] = [
     rate: 50,
     amount: 100000,
     isParent: false,
+    status: 'Pending',
   },
   {
     id: '2.0',
@@ -149,6 +153,7 @@ const initialBoqItems: BoqItem[] = [
     rate: '',
     amount: 750000,
     isParent: true,
+    status: 'Approved',
     costCode: '03-00-00',
   },
 ];
@@ -215,12 +220,12 @@ export default function BoqDataGridPage() {
     });
   };
 
-  const handleAddItem = (newItemData: Omit<BoqItem, 'amount'>) => {
+  const handleAddItem = (newItemData: Omit<BoqItem, 'amount' | 'status'>) => {
     const amount = (typeof newItemData.quantity === 'number' && typeof newItemData.rate === 'number')
       ? newItemData.quantity * newItemData.rate
       : 0;
 
-    const newItem: BoqItem = { ...newItemData, amount };
+    const newItem: BoqItem = { ...newItemData, amount, status: 'Draft' };
 
     let newItems = [...boqItems];
     const parentIndex = newItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
@@ -427,6 +432,7 @@ export default function BoqDataGridPage() {
     const [quantity, setQuantity] = useState(String(item.quantity));
     const [rate, setRate] = useState(String(item.rate));
     const [costCode, setCostCode] = useState(item.costCode || '');
+    const [status, setStatus] = useState(item.status);
   
     const handleSubmit = () => {
       const updatedQuantity = item.isParent ? '' : Number(quantity);
@@ -444,6 +450,7 @@ export default function BoqDataGridPage() {
         rate: updatedRate,
         amount: newAmount,
         costCode: costCode || undefined,
+        status,
       });
     };
   
@@ -524,6 +531,19 @@ export default function BoqDataGridPage() {
   }
 
   const costImpact = getCostImpact();
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Approved':
+        return 'secondary';
+      case 'Pending':
+        return 'default';
+      case 'In Review':
+        return 'outline';
+      default:
+        return 'destructive';
+    }
+  };
 
 
   return (
@@ -650,12 +670,14 @@ export default function BoqDataGridPage() {
               <TableBody>
                 {boqItems.map((item) => {
                   const anomaly = getValidationForId(item.id);
+                  const isSelected = selectedItem?.id === item.id;
+                  
                   return (
                     <TableRow
                       key={item.id}
                       className={`cursor-pointer ${
                         item.isParent ? 'bg-muted/50' : ''
-                      } ${selectedItem?.id === item.id ? 'bg-muted' : ''} ${anomaly ? 'bg-yellow-500/10' : ''}`}
+                      } ${isSelected ? 'bg-muted' : ''} ${anomaly ? 'bg-yellow-500/10' : ''}`}
                       onClick={() => setSelectedItem(item)}
                     >
                       <TableCell
@@ -664,9 +686,9 @@ export default function BoqDataGridPage() {
                         {item.id}
                       </TableCell>
                       <TableCell>
-                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'}`}>
-                          {item.heading}
-                        </p>
+                         <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} ${!isSelected && 'truncate'}`}>
+                           {item.heading}
+                         </p>
                         {anomaly && (
                           <p className="text-xs text-yellow-600 mt-1">
                             <Wand2 className="inline-block h-3 w-3 mr-1" />
@@ -743,6 +765,10 @@ export default function BoqDataGridPage() {
             <CardContent>
               {selectedItem ? (
                 <div className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center p-2 rounded-md bg-muted">
+                        <span className="font-semibold">Status</span>
+                        <Badge variant={getStatusBadge(selectedItem.status)}>{selectedItem.status}</Badge>
+                    </div>
                     <div className="space-y-1">
                       <p className="font-semibold">{selectedItem.heading}</p>
                       <p className="text-muted-foreground whitespace-pre-wrap">{selectedItem.description}</p>
