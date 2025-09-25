@@ -54,6 +54,7 @@ import {
   GitCommit,
   GitBranch,
   BarChart3,
+  Share2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -91,6 +92,7 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 type Document = {
@@ -142,8 +144,8 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
   ],
    "Archive": [
-    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }, { id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }] },
-    { name: 'Old Correspondence', documents: [] },
+    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
+    { name: 'Old Correspondence', documents: [{ id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }] },
   ],
 };
 
@@ -287,16 +289,27 @@ export default function DocumentLibraryPage() {
     }
 
     const renderCommentWithMentions = (text: string) => {
-        const mentionRegex = /@(\w+)/g;
+        const mentionRegex = /@(\w+\s?\w*)/g;
         const parts = text.split(mentionRegex);
         return parts.map((part, index) => {
             const isMention = index % 2 === 1;
-            const collaborator = isMention ? collaborators.find(c => c.name.toLowerCase().replace(' ', '') === part.toLowerCase()) : null;
+            const collaborator = isMention ? collaborators.find(c => c.name.toLowerCase().replace(' ', '') === part.toLowerCase().replace(' ', '')) : null;
             if (isMention && collaborator) {
                 return <span key={index} className="text-primary font-semibold bg-primary/10 p-0.5 rounded-sm">@{collaborator.name}</span>
             }
             return part;
         });
+    }
+
+    const knowledgeGraphEntities = {
+        'Materials': ['Concrete Grade C40', 'Reinforcement Steel B500B'],
+        'Equipment': ['Tower Crane TC-1', 'Concrete Pump P-02'],
+        'Locations': ['Level 10-15', 'Core Shaft B'],
+    };
+
+    const knowledgeGraphDependencies = {
+        'Upstream': [{id: 'STR-PLN-002', name: 'Structural Plan v2'}],
+        'Downstream': [{id: 'MEP-DWD-005', name: 'MEP Coordination Drawing'}, {id: 'BOQ-v1.3', name: 'Bill of Quantities v1.3'}],
     }
 
     return (
@@ -322,23 +335,75 @@ export default function DocumentLibraryPage() {
                 </div>
             </DialogHeader>
             <div className="grid grid-cols-12 gap-4 h-full py-4 overflow-hidden">
-                <div className="col-span-2">
-                    <Card className="h-full">
-                        <CardHeader className="p-2">
-                            <CardTitle className="text-base">Markup Tools</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-2 grid grid-cols-2 gap-2">
-                            <Button variant="outline" className="flex-col h-16"><Pen className="h-5 w-5" /> Pen</Button>
-                            <Button variant="outline" className="flex-col h-16"><Highlighter className="h-5 w-5" /> Highlight</Button>
-                            <Button variant="outline" className="flex-col h-16"><Type className="h-5 w-5" /> Text</Button>
-                            <Button variant="outline" className="flex-col h-16"><Square className="h-5 w-5" /> Shape</Button>
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="col-span-7 bg-muted rounded-md h-full overflow-auto">
-                    {docPreviewImage && (
-                        <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
-                    )}
+                <div className="col-span-9 flex flex-col gap-4">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div className="col-span-1">
+                             <Card className="h-full">
+                                <CardHeader className="p-2">
+                                    <CardTitle className="text-base">Markup Tools</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-2 grid grid-cols-2 gap-2">
+                                    <Button variant="outline" className="flex-col h-16"><Pen className="h-5 w-5" /> Pen</Button>
+                                    <Button variant="outline" className="flex-col h-16"><Highlighter className="h-5 w-5" /> Highlight</Button>
+                                    <Button variant="outline" className="flex-col h-16"><Type className="h-5 w-5" /> Text</Button>
+                                    <Button variant="outline" className="flex-col h-16"><Square className="h-5 w-5" /> Shape</Button>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div className="col-span-2">
+                            <Card>
+                                <Tabs defaultValue="entities">
+                                    <CardHeader className="p-2">
+                                        <CardTitle className="text-base">Knowledge Graph</CardTitle>
+                                        <TabsList className="grid w-full grid-cols-3 h-8">
+                                            <TabsTrigger value="entities" className="h-6">Entities</TabsTrigger>
+                                            <TabsTrigger value="dependencies" className="h-6">Dependencies</TabsTrigger>
+                                            <TabsTrigger value="related" className="h-6">Related</TabsTrigger>
+                                        </TabsList>
+                                    </CardHeader>
+                                    <CardContent className="p-2 h-36 overflow-y-auto">
+                                        <TabsContent value="entities">
+                                             <div className="space-y-2">
+                                                {Object.entries(knowledgeGraphEntities).map(([category, items]) => (
+                                                    <div key={category}>
+                                                        <p className="text-xs font-semibold text-muted-foreground">{category}</p>
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {items.map(item => <Badge key={item} variant="outline">{item}</Badge>)}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </TabsContent>
+                                        <TabsContent value="dependencies">
+                                            <div className="space-y-2">
+                                                 <div>
+                                                    <p className="text-xs font-semibold text-muted-foreground">Upstream (Influences this doc)</p>
+                                                    {knowledgeGraphDependencies.Upstream.map(dep => (
+                                                        <Button key={dep.id} variant="link" className="p-0 h-auto text-sm">{dep.name}</Button>
+                                                    ))}
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-semibold text-muted-foreground">Downstream (Affected by this doc)</p>
+                                                    {knowledgeGraphDependencies.Downstream.map(dep => (
+                                                         <Button key={dep.id} variant="link" className="p-0 h-auto text-sm block">{dep.name}</Button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+                                        <TabsContent value="related">
+                                            <Button variant="link" className="p-0 h-auto text-sm block">TEC-MS-001 - Method Statement - Concrete.pdf</Button>
+                                            <Button variant="link" className="p-0 h-auto text-sm block">COM-RFI-012_Response.pdf</Button>
+                                        </TabsContent>
+                                    </CardContent>
+                                </Tabs>
+                            </Card>
+                        </div>
+                    </div>
+                     <div className="flex-1 bg-muted rounded-md h-full overflow-auto">
+                        {docPreviewImage && (
+                            <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
+                        )}
+                    </div>
                 </div>
                 <div className="col-span-3 flex flex-col h-full">
                     <Card className="flex-1 flex flex-col">
@@ -384,7 +449,7 @@ export default function DocumentLibraryPage() {
                         <CardFooter className="p-2 border-t">
                              <div className="relative w-full">
                                 <Input 
-                                    placeholder="Add a comment... Type @ to mention a user" 
+                                    placeholder="Add a comment... Type @ to mention" 
                                     className="pr-10" 
                                     value={newComment} 
                                     onChange={(e) => setNewComment(e.target.value)}
@@ -433,7 +498,13 @@ export default function DocumentLibraryPage() {
             if (prev.length < 2) {
                 return [...prev, version];
             }
-            return prev; // Or show a toast message
+            // Or show a toast message
+            toast({
+                variant: 'destructive',
+                title: 'Selection Limit Reached',
+                description: 'You can only compare two versions at a time.',
+            });
+            return prev;
         });
     };
     
@@ -502,6 +573,7 @@ export default function DocumentLibraryPage() {
 };
 
 const CompareDialog = ({ versions }: { versions: string[] }) => {
+    if (versions.length < 2) return null;
     return (
         <DialogContent className="max-w-6xl h-[80vh]">
             <DialogHeader>
@@ -513,17 +585,17 @@ const CompareDialog = ({ versions }: { versions: string[] }) => {
             <div className="grid grid-cols-2 gap-4 h-full overflow-hidden">
                 <Card className="flex flex-col">
                     <CardHeader>
-                        <CardTitle className="text-base">Version: {versions[0]}</CardTitle>
+                        <CardTitle className="text-base">Version: {versions.sort()[0]}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto text-sm prose prose-sm max-w-none">
                         <p>This is the original section of the document. It contains the initial text that was drafted for the project specifications.</p>
                         <p>The structural requirements for the foundation are detailed here, specifying a concrete strength of 4000 psi.</p>
-                        <p className="bg-red-500/20 p-1 rounded-sm">The HVAC system was originally specified to use a single large chiller unit.</p>
+                        <p className="bg-red-500/20 p-1 rounded-sm line-through">The HVAC system was originally specified to use a single large chiller unit.</p>
                     </CardContent>
                 </Card>
                 <Card className="flex flex-col border-primary">
                     <CardHeader>
-                        <CardTitle className="text-base">Version: {versions[1]}</CardTitle>
+                        <CardTitle className="text-base">Version: {versions.sort()[1]}</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto text-sm prose prose-sm max-w-none">
                         <p>This is the original section of the document. It contains the initial text that was drafted for the project specifications.</p>
@@ -633,7 +705,7 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
-            <Link href={`/projects/${params.id}`}>
+            <Link href={`/projects`}>
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -778,7 +850,9 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                                                             <DropdownMenuItem>View History</DropdownMenuItem>
                                                         </DialogTrigger>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                        <DialogTrigger asChild>
+                                                            <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                        </DialogTrigger>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-destructive">
                                                         Delete
@@ -791,6 +865,10 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                                                      <DialogTrigger asChild><span/></DialogTrigger>
                                                      <RealTimeReviewDialog doc={doc} />
                                                 </Dialog>
+                                                 <Dialog>
+                                                    <DialogTrigger asChild><span/></DialogTrigger>
+                                                    <DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent>
+                                                 </Dialog>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -807,3 +885,4 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
     </div>
   );
 }
+
