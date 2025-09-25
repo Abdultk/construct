@@ -316,7 +316,10 @@ export default function DocumentLibraryPage() {
     const knowledgeGraphIntegrations = [
         { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
         { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
-        { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' }
+        { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' },
+        { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
+        { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
+        { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
     ];
 
     return (
