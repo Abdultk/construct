@@ -51,6 +51,7 @@ import {
   DownloadCloud,
   HelpCircle,
   ListTodo,
+  GitCommit,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -83,6 +84,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 type Document = {
   id: string;
@@ -158,6 +162,14 @@ const documentHistory = [
     author: 'B. Miller',
     action: 'Major Revision',
     description: 'Integrated structural engineer\'s feedback. Added new sections for MEP.',
+    status: 'Approved',
+  },
+   {
+    version: '1.0.0',
+    date: '2024-07-01',
+    author: 'B. Miller',
+    action: 'Initial Draft',
+    description: 'First version of the architectural plans.',
     status: 'Approved',
   },
 ];
@@ -268,7 +280,7 @@ export default function DocumentLibraryPage() {
         const parts = text.split(mentionRegex);
         return parts.map((part, index) => {
             const isMention = index % 2 === 1;
-            const collaborator = isMention ? collaborators.find(c => c.id === part.toLowerCase()) : null;
+            const collaborator = isMention ? collaborators.find(c => c.name.toLowerCase().replace(' ', '') === part.toLowerCase()) : null;
             if (isMention && collaborator) {
                 return <span key={index} className="text-primary font-semibold bg-primary/10 p-0.5 rounded-sm">@{collaborator.name}</span>
             }
@@ -383,6 +395,133 @@ export default function DocumentLibraryPage() {
         </DialogContent>
     );
   }
+
+  const HistoryDialog = ({ doc }: { doc: Document }) => {
+    const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+    const [isCompareOpen, setIsCompareOpen] = useState(false);
+    
+    const handleVersionSelect = (version: string) => {
+        setSelectedVersions(prev => {
+            if (prev.includes(version)) {
+                return prev.filter(v => v !== version);
+            }
+            if (prev.length < 2) {
+                return [...prev, version];
+            }
+            return prev; // Or show a toast message
+        });
+    };
+    
+    const canCompare = selectedVersions.length === 2;
+
+    return (
+        <>
+            <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Version History: {doc.name}</DialogTitle>
+                    <DialogDescription>
+                        Review and compare changes for this document.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto pr-4 my-4">
+                  <div className="space-y-6">
+                    {documentHistory.map((entry, index) => (
+                      <div key={index} className="flex gap-4">
+                        <Checkbox 
+                            id={`version-${entry.version}`} 
+                            className="mt-1"
+                            checked={selectedVersions.includes(entry.version)}
+                            onCheckedChange={() => handleVersionSelect(entry.version)}
+                            disabled={!selectedVersions.includes(entry.version) && selectedVersions.length >= 2}
+                        />
+                        <div className="flex flex-col items-center">
+                          <Avatar className="h-9 w-9 mb-1">
+                            <AvatarImage src={`https://picsum.photos/seed/${entry.author}/40/40`} />
+                            <AvatarFallback>{entry.author.slice(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          {index < documentHistory.length - 1 && <div className="w-px flex-grow bg-border" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-sm">{entry.action}</p>
+                            <Badge variant={getStatusBadge(entry.status)}>{entry.status}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Rev {entry.version} by {entry.author} on {entry.date}
+                          </p>
+                          <p className="text-sm mt-1 bg-muted p-2 rounded-md">{entry.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                 <DialogFooter>
+                    <Button variant="secondary" onClick={() => setIsCompareOpen(true)} disabled={!canCompare}>
+                        Compare Selected Versions
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+            
+            <Dialog open={isCompareOpen} onOpenChange={setIsCompareOpen}>
+                <CompareDialog versions={selectedVersions} />
+            </Dialog>
+        </>
+    );
+};
+
+const CompareDialog = ({ versions }: { versions: string[] }) => {
+    return (
+        <DialogContent className="max-w-6xl h-[80vh]">
+            <DialogHeader>
+                <DialogTitle>Compare Versions</DialogTitle>
+                <DialogDescription>
+                    Showing differences between {versions[0]} and {versions[1]}.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 h-full overflow-hidden">
+                <Card className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="text-base">Version: {versions[0]}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-y-auto text-sm prose prose-sm max-w-none">
+                        <p>This is the original section of the document. It contains the initial text that was drafted for the project specifications.</p>
+                        <p>The structural requirements for the foundation are detailed here, specifying a concrete strength of 4000 psi.</p>
+                        <p className="bg-red-500/20 p-1 rounded-sm">The HVAC system was originally specified to use a single large chiller unit.</p>
+                    </CardContent>
+                </Card>
+                <Card className="flex flex-col border-primary">
+                    <CardHeader>
+                        <CardTitle className="text-base">Version: {versions[1]}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-y-auto text-sm prose prose-sm max-w-none">
+                        <p>This is the original section of the document. It contains the initial text that was drafted for the project specifications.</p>
+                        <p>The structural requirements for the foundation are detailed here, specifying a concrete strength of <span className="bg-green-500/20 p-1 rounded-sm font-bold">5000 psi</span>.</p>
+                        <p className="bg-green-500/20 p-1 rounded-sm">The HVAC system has been updated to use two smaller, more efficient chiller units in a redundant configuration for improved reliability and energy savings.</p>
+                    </CardContent>
+                </Card>
+            </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Change Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p className="font-bold text-lg text-green-600">25</p>
+                        <p className="text-xs text-muted-foreground">Words Added</p>
+                    </div>
+                    <div>
+                        <p className="font-bold text-lg text-red-600">10</p>
+                        <p className="text-xs text-muted-foreground">Words Deleted</p>
+                    </div>
+                     <div>
+                        <p className="font-bold text-lg">3</p>
+                        <p className="text-xs text-muted-foreground">Format Changes</p>
+                    </div>
+                </CardContent>
+            </Card>
+        </DialogContent>
+    );
+}
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -526,39 +665,7 @@ export default function DocumentLibraryPage() {
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                     </DropdownMenu>
-                                                    <DialogContent className="sm:max-w-2xl">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Version History: {doc.name}</DialogTitle>
-                                                            <DialogDescription>
-                                                                Review the change log for this document.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <div className="max-h-[60vh] overflow-y-auto pr-4 my-4">
-                                                          <div className="space-y-6">
-                                                            {documentHistory.map((entry, index) => (
-                                                              <div key={index} className="flex gap-4">
-                                                                <div className="flex flex-col items-center">
-                                                                  <Avatar className="h-9 w-9 mb-1">
-                                                                    <AvatarImage src={`https://picsum.photos/seed/${entry.author}/40/40`} />
-                                                                    <AvatarFallback>{entry.author.slice(0, 2)}</AvatarFallback>
-                                                                  </Avatar>
-                                                                  {index < documentHistory.length - 1 && <div className="w-px flex-grow bg-border" />}
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                  <div className="flex items-center justify-between">
-                                                                    <p className="font-semibold text-sm">{entry.action}</p>
-                                                                    <Badge variant={getStatusBadge(entry.status)}>{entry.status}</Badge>
-                                                                  </div>
-                                                                  <p className="text-xs text-muted-foreground">
-                                                                    Rev {entry.version} by {entry.author} on {entry.date}
-                                                                  </p>
-                                                                  <p className="text-sm mt-1 bg-muted p-2 rounded-md">{entry.description}</p>
-                                                                </div>
-                                                              </div>
-                                                            ))}
-                                                          </div>
-                                                        </div>
-                                                    </DialogContent>
+                                                    <HistoryDialog doc={doc} />
                                                 </Dialog>
                                                 <Dialog>
                                                      <DialogTrigger asChild><span/></DialogTrigger>
