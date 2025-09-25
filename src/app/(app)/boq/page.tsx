@@ -165,6 +165,7 @@ export default function BoqDataGridPage() {
   const [boqItems, setBoqItems] = useState<BoqItem[]>(initialBoqItems);
   const [selectedItem, setSelectedItem] = useState<BoqItem | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [aiValidationEnabled, setAiValidationEnabled] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidateBoqOutput | null>(null);
@@ -197,39 +198,50 @@ export default function BoqDataGridPage() {
     return String(num);
   }
 
+  const recalculateParentAmounts = (items: BoqItem[]) => {
+    return items.map(item => {
+      if (item.isParent) {
+        const newAmount = items
+          .filter(i => !i.isParent && i.id.startsWith(item.id + '.'))
+          .reduce((sum, child) => sum + child.amount, 0);
+        return { ...item, amount: newAmount };
+      }
+      return item;
+    });
+  };
+
   const handleAddItem = (newItemData: Omit<BoqItem, 'amount'>) => {
     const amount = (typeof newItemData.quantity === 'number' && typeof newItemData.rate === 'number')
       ? newItemData.quantity * newItemData.rate
       : 0;
 
-    const newItem: BoqItem = {
-        ...newItemData,
-        amount: newItemData.isParent ? initialBoqItems.filter(i => i.id.startsWith(newItemData.id + '.')).reduce((sum, i) => sum + i.amount, 0) : amount,
-    };
+    const newItem: BoqItem = { ...newItemData, amount };
 
-    const parentIndex = boqItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
-    
     let newItems = [...boqItems];
+    const parentIndex = newItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
+    
     if (parentIndex !== -1) {
         const lastChildIndex = newItems.map(i => i.id).lastIndexOf(newItems.filter(i => i.id.startsWith(newItems[parentIndex].id + '.')).pop()?.id || newItems[parentIndex].id);
         newItems.splice(lastChildIndex + 1, 0, newItem);
     } else {
         newItems.push(newItem);
     }
-    
-    // Recalculate parent amounts
-    newItems = newItems.map(item => {
-        if (item.isParent) {
-            return {
-                ...item,
-                amount: newItems.filter(i => i.id.startsWith(item.id + '.') && !i.isParent).reduce((sum, i) => sum + i.amount, 0)
-            }
-        }
-        return item;
-    })
 
-    setBoqItems(newItems);
+    setBoqItems(recalculateParentAmounts(newItems));
     setIsAddOpen(false);
+  };
+  
+  const handleEditItem = (updatedItemData: BoqItem) => {
+    let newItems = boqItems.map(item =>
+      item.id === updatedItemData.id ? updatedItemData : item
+    );
+    
+    setBoqItems(recalculateParentAmounts(newItems));
+    setIsEditOpen(false);
+    toast({
+      title: 'Item Updated',
+      description: `Item "${updatedItemData.id}" has been updated.`
+    });
   };
 
   const handleAiValidationToggle = async (checked: boolean) => {
@@ -396,6 +408,73 @@ export default function BoqDataGridPage() {
         </DialogContent>
     );
   }
+  
+  const EditItemForm = ({ item }: { item: BoqItem }) => {
+    const [description, setDescription] = useState(item.description);
+    const [unit, setUnit] = useState(item.unit);
+    const [quantity, setQuantity] = useState(String(item.quantity));
+    const [rate, setRate] = useState(String(item.rate));
+    const [costCode, setCostCode] = useState(item.costCode || '');
+  
+    const handleSubmit = () => {
+      const updatedQuantity = item.isParent ? '' : Number(quantity);
+      const updatedRate = item.isParent ? '' : Number(rate);
+      const newAmount = typeof updatedQuantity === 'number' && typeof updatedRate === 'number'
+        ? updatedQuantity * updatedRate
+        : item.amount;
+  
+      handleEditItem({
+        ...item,
+        description,
+        unit,
+        quantity: updatedQuantity,
+        rate: updatedRate,
+        amount: newAmount,
+        costCode: costCode || undefined,
+      });
+    };
+  
+    return (
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit BOQ Item: {item.id}</DialogTitle>
+          <DialogDescription>
+            Modify the details for this item.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="edit-cost-code">Cost Code (Optional)</Label>
+            <Input id="edit-cost-code" value={costCode} onChange={(e) => setCostCode(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-description">Description</Label>
+            <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+          {!item.isParent && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-unit">Unit</Label>
+                <Input id="edit-unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-quantity">Quantity</Label>
+                <Input id="edit-quantity" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-rate">Rate</Label>
+                <Input id="edit-rate" type="number" value={rate} onChange={(e) => setRate(e.target.value)} />
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+          <Button onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    );
+  };
 
   const getHistoryIcon = (action: string) => {
     switch (action) {
@@ -594,13 +673,13 @@ export default function BoqDataGridPage() {
                         <AlertDialog>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}>
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => setSelectedItem(item)}>View Details</DropdownMenuItem>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>Edit</DropdownMenuItem>
                               <DropdownMenuSeparator />
                                <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-destructive">
@@ -733,6 +812,9 @@ export default function BoqDataGridPage() {
           </Card>
         </div>
       </div>
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        {selectedItem && <EditItemForm item={selectedItem} />}
+      </Dialog>
     </div>
   );
 }
