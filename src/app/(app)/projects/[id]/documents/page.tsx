@@ -97,7 +97,7 @@ type Document = {
   size: string;
   lastModified: string;
   discipline: 'Architectural' | 'Structural' | 'MEP' | 'Civil' | 'Commercial' | 'General';
-  status: 'Approved' | 'Under Review' | 'Draft' | 'Superseded';
+  status: 'Approved' | 'Under Review' | 'Draft' | 'Superseded' | 'Archived';
   revision: string;
 };
 
@@ -126,7 +126,6 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Design Documents', documents: [{ id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0.0-D2' }] },
     { name: 'Technical Documents', documents: [{ id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.2.0' }] },
     { name: 'Regulatory Documents', documents: [{ id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
-    { name: 'Commercial Documents', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
     { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.pdf', type: 'Report', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
   ],
   "Reference Documentation": [
@@ -138,7 +137,11 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
     { name: 'RFIs (Request for Information)', documents: [{ id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.1.0' }] },
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
-  ]
+  ],
+   "Archive": [
+    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
+    { name: 'Old Correspondence', documents: [] },
+  ],
 };
 
 const documentHistory = [
@@ -214,26 +217,29 @@ export default function DocumentLibraryPage() {
         case 'Report': return <FileText className="h-5 w-5 text-purple-500" />;
         case 'Permit': return <FileText className="h-5 w-5 text-green-500" />;
         case 'Spreadsheet': return <FileText className="h-5 w-5 text-green-700" />;
+        case 'Archive': return <Archive className="h-5 w-5 text-gray-500" />;
         default: return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
   
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: Document['status']) => {
     switch(status) {
         case 'Approved': return 'secondary';
         case 'Under Review': return 'default';
         case 'Draft': return 'outline';
         case 'Superseded': return 'destructive';
+        case 'Archived': return 'outline';
         default: return 'outline';
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: Document['status']) => {
      switch(status) {
         case 'Approved': return <CheckCircle className="mr-2 h-4 w-4 text-green-500" />;
         case 'Under Review': return <Eye className="mr-2 h-4 w-4 text-yellow-500" />;
         case 'Draft': return <FileText className="mr-2 h-4 w-4 text-blue-500" />;
         case 'Superseded': return <Archive className="mr-2 h-4 w-4 text-red-500" />;
+        case 'Archived': return <Archive className="mr-2 h-4 w-4 text-gray-500" />;
         default: return null;
     }
   }
@@ -305,6 +311,9 @@ export default function DocumentLibraryPage() {
                                 <AvatarFallback>{c.name.slice(0,2)}</AvatarFallback>
                             </Avatar>
                         ))}
+                         <Avatar className="border-2 border-background">
+                            <AvatarFallback>+2</AvatarFallback>
+                        </Avatar>
                     </div>
                     <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download Marked-up PDF</Button>
                 </div>
@@ -334,30 +343,10 @@ export default function DocumentLibraryPage() {
                             <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Live Comments</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                            {comments.map((comment) => (
-                                <div key={comment.id} className="flex items-start gap-3">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={comment.user.avatar} />
-                                        <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 bg-muted/50 p-2 rounded-md">
-                                        <div className="flex justify-between items-center">
-                                            <p className="font-semibold text-sm flex items-center gap-1.5">
-                                                {getCommentIcon(comment.type)}
-                                                {comment.user.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
-                                        </div>
-                                        <p className="text-sm py-1">{renderCommentWithMentions(comment.text)}</p>
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Badge variant={comment.status === 'Resolved' ? 'secondary' : 'outline'}>{comment.status}</Badge>
-                                            <Button size="sm" variant="ghost" onClick={() => toggleCommentStatus(comment.id)}>
-                                               {comment.status === 'Open' ? 'Resolve' : 'Re-open'}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                           <div className="text-center text-muted-foreground pt-10">
+                                <MessageSquare className="mx-auto h-8 w-8" />
+                                <p className="mt-2 text-sm">No comments yet.</p>
+                            </div>
                         </CardContent>
                         <CardFooter className="p-2 border-t">
                              <div className="relative w-full">
@@ -448,7 +437,7 @@ export default function DocumentLibraryPage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <p className="font-semibold text-sm">{entry.action}</p>
-                            <Badge variant={getStatusBadge(entry.status)}>{entry.status}</Badge>
+                            <Badge variant={getStatusBadge(entry.status as Document['status'])}>{entry.status}</Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Rev {entry.version} by {entry.author} on {entry.date}
@@ -742,6 +731,8 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                                                             <DropdownMenuItem>View History</DropdownMenuItem>
                                                         </DialogTrigger>
                                                         <DropdownMenuSeparator />
+                                                        <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-destructive">
                                                         Delete
                                                         </DropdownMenuItem>
@@ -769,3 +760,4 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
     </div>
   );
 }
+
