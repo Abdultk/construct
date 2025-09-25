@@ -52,6 +52,8 @@ import {
   HelpCircle,
   ListTodo,
   GitCommit,
+  GitBranch,
+  BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -399,6 +401,7 @@ export default function DocumentLibraryPage() {
   const HistoryDialog = ({ doc }: { doc: Document }) => {
     const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
     
     const handleVersionSelect = (version: string) => {
         setSelectedVersions(prev => {
@@ -413,6 +416,7 @@ export default function DocumentLibraryPage() {
     };
     
     const canCompare = selectedVersions.length === 2;
+    const canGenerateReport = selectedVersions.length > 0;
 
     return (
         <>
@@ -420,7 +424,7 @@ export default function DocumentLibraryPage() {
                 <DialogHeader>
                     <DialogTitle>Version History: {doc.name}</DialogTitle>
                     <DialogDescription>
-                        Review and compare changes for this document.
+                        Review and compare changes for this document. Select up to 2 versions to compare.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="max-h-[60vh] overflow-y-auto pr-4 my-4">
@@ -456,6 +460,9 @@ export default function DocumentLibraryPage() {
                   </div>
                 </div>
                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsReportOpen(true)} disabled={!canGenerateReport}>
+                        Generate Report
+                    </Button>
                     <Button variant="secondary" onClick={() => setIsCompareOpen(true)} disabled={!canCompare}>
                         Compare Selected Versions
                     </Button>
@@ -464,6 +471,9 @@ export default function DocumentLibraryPage() {
             
             <Dialog open={isCompareOpen} onOpenChange={setIsCompareOpen}>
                 <CompareDialog versions={selectedVersions} />
+            </Dialog>
+             <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+                <ComparisonReportDialog versions={selectedVersions} />
             </Dialog>
         </>
     );
@@ -502,7 +512,7 @@ const CompareDialog = ({ versions }: { versions: string[] }) => {
             </div>
              <Card>
                 <CardHeader>
-                    <CardTitle className="text-base">Change Summary</CardTitle>
+                    <CardTitle className="text-base">Change Statistics</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 gap-4 text-center">
                     <div>
@@ -521,6 +531,78 @@ const CompareDialog = ({ versions }: { versions: string[] }) => {
             </Card>
         </DialogContent>
     );
+};
+
+const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
+    return (
+        <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>Comparison Report</DialogTitle>
+                <DialogDescription>
+                    Summary of changes between selected versions: {versions.join(', ')}.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Executive Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm">
+                            The document underwent one major revision (2.0.0) integrating structural feedback, followed by a minor correction (2.1.0) and a recent draft update (3.0.0-D2) for client feedback. Key changes involve floor plan updates and MEP integration.
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Change Statistics</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p className="font-bold text-lg">1</p>
+                            <p className="text-xs text-muted-foreground">Content Changes</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">1</p>
+                            <p className="text-xs text-muted-foreground">Minor Corrections</p>
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">2</p>
+                            <p className="text-xs text-muted-foreground">Status Changes</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Detailed Change Log</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Version</TableHead>
+                                    <TableHead>Author</TableHead>
+                                    <TableHead>Description</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {documentHistory.filter(h => versions.includes(h.version)).map(h => (
+                                    <TableRow key={h.version}>
+                                        <TableCell className="font-code">{h.version}</TableCell>
+                                        <TableCell>{h.author}</TableCell>
+                                        <TableCell>{h.description}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                         </Table>
+                    </CardContent>
+                </Card>
+            </div>
+            <DialogFooter>
+                <Button variant="secondary">Download Report</Button>
+            </DialogFooter>
+        </DialogContent>
+    )
 }
 
   return (
