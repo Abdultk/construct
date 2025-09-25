@@ -647,7 +647,7 @@ export default function BoqDataGridPage() {
                         {item.id}
                       </TableCell>
                       <TableCell>
-                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} whitespace-pre-wrap`}>
+                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} ${selectedItem?.id === item.id ? 'whitespace-pre-wrap' : 'truncate'}`}>
                           {item.description}
                         </p>
                         {anomaly && (
@@ -717,7 +717,11 @@ export default function BoqDataGridPage() {
           <Card>
             <CardHeader>
               <CardTitle>Item Details</CardTitle>
-              <CardDescription>{selectedItem ? `ID: ${selectedItem.id}` : "Select an item to view details"}</CardDescription>
+                {selectedItem ? (
+                    <CardDescription>ID: {selectedItem.id}</CardDescription>
+                ) : (
+                    <CardDescription>Select an item to view details</CardDescription>
+                )}
             </CardHeader>
             <CardContent>
               {selectedItem ? (
@@ -823,5 +827,7 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
+
+    
 
     
