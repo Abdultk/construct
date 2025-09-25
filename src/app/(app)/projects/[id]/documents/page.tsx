@@ -56,6 +56,8 @@ import {
   BarChart3,
   Share2,
   Link as LinkIcon,
+  BarChart,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -320,7 +322,23 @@ export default function DocumentLibraryPage() {
         { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
         { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
         { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
+        { type: 'Issues', id: 'RFI-012', name: 'RFI-012_Response.pdf' },
+        { type: 'Compliance', id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf' },
+        { type: 'Change Order', id: 'CR-0012', name: 'Substitute roofing material' },
     ];
+
+    const usageAnalytics = {
+      views: '128',
+      uniqueViewers: '15',
+      shares: '5',
+      comments: comments.length,
+    };
+    
+    const contentAnalytics = {
+      revisions: documentHistory.length,
+      status: 'Under Review',
+      age: '12 days',
+    };
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
@@ -365,11 +383,12 @@ export default function DocumentLibraryPage() {
                                 <Tabs defaultValue="entities">
                                     <CardHeader className="p-2">
                                         <CardTitle className="text-base">Knowledge Graph</CardTitle>
-                                        <TabsList className="grid w-full grid-cols-4 h-8">
+                                        <TabsList className="grid w-full grid-cols-5 h-8">
                                             <TabsTrigger value="entities" className="h-6">Entities</TabsTrigger>
                                             <TabsTrigger value="dependencies" className="h-6">Dependencies</TabsTrigger>
-                                            <TabsTrigger value="related" className="h-6">Related</TabsTrigger>
                                             <TabsTrigger value="integrations" className="h-6">Integrations</TabsTrigger>
+                                            <TabsTrigger value="analytics" className="h-6">Analytics</TabsTrigger>
+                                            <TabsTrigger value="related" className="h-6">Related</TabsTrigger>
                                         </TabsList>
                                     </CardHeader>
                                     <CardContent className="p-2 h-36 overflow-y-auto">
@@ -416,6 +435,27 @@ export default function DocumentLibraryPage() {
                                                         </Button>
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </TabsContent>
+                                        <TabsContent value="analytics">
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <p className="text-xs font-semibold text-muted-foreground">Usage Analytics</p>
+                                                    <div className="grid grid-cols-4 gap-x-2 text-center mt-1">
+                                                        <div className="font-medium">{usageAnalytics.views}<span className="text-xs text-muted-foreground block">Views</span></div>
+                                                        <div className="font-medium">{usageAnalytics.uniqueViewers}<span className="text-xs text-muted-foreground block">Viewers</span></div>
+                                                        <div className="font-medium">{usageAnalytics.comments}<span className="text-xs text-muted-foreground block">Comments</span></div>
+                                                        <div className="font-medium">{usageAnalytics.shares}<span className="text-xs text-muted-foreground block">Shares</span></div>
+                                                    </div>
+                                                </div>
+                                                 <div>
+                                                    <p className="text-xs font-semibold text-muted-foreground">Content Analytics</p>
+                                                    <div className="grid grid-cols-3 gap-x-2 text-center mt-1">
+                                                        <div className="font-medium">{contentAnalytics.revisions}<span className="text-xs text-muted-foreground block">Revisions</span></div>
+                                                        <div className="font-medium">{contentAnalytics.status}<span className="text-xs text-muted-foreground block">Status</span></div>
+                                                        <div className="font-medium">{contentAnalytics.age}<span className="text-xs text-muted-foreground block">Age</span></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </TabsContent>
                                     </CardContent>
