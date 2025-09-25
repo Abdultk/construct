@@ -55,6 +55,7 @@ import {
   GitBranch,
   BarChart3,
   Share2,
+  Link as LinkIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -310,7 +311,13 @@ export default function DocumentLibraryPage() {
     const knowledgeGraphDependencies = {
         'Upstream': [{id: 'STR-PLN-002', name: 'Structural Plan v2'}],
         'Downstream': [{id: 'MEP-DWD-005', name: 'MEP Coordination Drawing'}, {id: 'BOQ-v1.3', name: 'Bill of Quantities v1.3'}],
-    }
+    };
+
+    const knowledgeGraphIntegrations = [
+        { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
+        { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
+        { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' }
+    ];
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
@@ -355,10 +362,11 @@ export default function DocumentLibraryPage() {
                                 <Tabs defaultValue="entities">
                                     <CardHeader className="p-2">
                                         <CardTitle className="text-base">Knowledge Graph</CardTitle>
-                                        <TabsList className="grid w-full grid-cols-3 h-8">
+                                        <TabsList className="grid w-full grid-cols-4 h-8">
                                             <TabsTrigger value="entities" className="h-6">Entities</TabsTrigger>
                                             <TabsTrigger value="dependencies" className="h-6">Dependencies</TabsTrigger>
                                             <TabsTrigger value="related" className="h-6">Related</TabsTrigger>
+                                            <TabsTrigger value="integrations" className="h-6">Integrations</TabsTrigger>
                                         </TabsList>
                                     </CardHeader>
                                     <CardContent className="p-2 h-36 overflow-y-auto">
@@ -393,6 +401,19 @@ export default function DocumentLibraryPage() {
                                         <TabsContent value="related">
                                             <Button variant="link" className="p-0 h-auto text-sm block">TEC-MS-001 - Method Statement - Concrete.pdf</Button>
                                             <Button variant="link" className="p-0 h-auto text-sm block">COM-RFI-012_Response.pdf</Button>
+                                        </TabsContent>
+                                        <TabsContent value="integrations">
+                                            <div className="space-y-2">
+                                                {knowledgeGraphIntegrations.map(item => (
+                                                    <div key={item.id}>
+                                                        <p className="text-xs font-semibold text-muted-foreground">{item.type} Integration</p>
+                                                        <Button variant="link" className="p-0 h-auto text-sm flex items-center gap-1">
+                                                            <LinkIcon className="h-3 w-3"/>
+                                                            {item.name} ({item.id})
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </TabsContent>
                                     </CardContent>
                                 </Tabs>
