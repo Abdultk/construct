@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from "next/link"
@@ -47,6 +48,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/
 import * as React from "react"
 
 const notifications = [
+    { title: "New Mention", description: "@Jane Doe mentioned you in 'Architectural_Plans_v3.dwg'", time: "2m ago" },
     { title: "Change Order Approved", description: "CR-0011 for Downtown Skyscraper was approved.", time: "5m ago" },
     { title: "New Document Uploaded", description: "Floor-Plan-Rev3.dwg was added to the project.", time: "1h ago" },
     { title: "Task Completed", description: "Jackson Lee marked 'Foundation Pour' as complete.", time: "3h ago" },

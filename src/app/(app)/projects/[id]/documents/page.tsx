@@ -116,28 +116,28 @@ type LiveComment = {
 
 const initialDocumentStructure: DocumentStructure = {
   "Project Documentation": [
-    { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.pdf', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1' }] },
-    { name: 'Design Documents', documents: [{ id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0' }] },
-    { name: 'Technical Documents', documents: [{ id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.0' }] },
-    { name: 'Regulatory Documents', documents: [{ id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0' }] },
-    { name: 'Commercial Documents', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2' }] },
-    { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.pdf', type: 'Report', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0' }] },
+    { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.pdf', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' }] },
+    { name: 'Design Documents', documents: [{ id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0.0-D2' }] },
+    { name: 'Technical Documents', documents: [{ id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.2.0' }] },
+    { name: 'Regulatory Documents', documents: [{ id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Commercial Documents', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
+    { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.pdf', type: 'Report', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
   ],
   "Reference Documentation": [
-    { name: 'Standards & Codes', documents: [{ id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0' }] },
-    { name: 'Procedures & Guidelines', documents: [{ id: 'REF-PRO-001', name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20', discipline: 'General', status: 'Approved', revision: '3.0' }] },
-    { name: 'Templates & Forms', documents: [{ id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0' }] },
+    { name: 'Standards & Codes', documents: [{ id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Procedures & Guidelines', documents: [{ id: 'REF-PRO-001', name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20', discipline: 'General', status: 'Approved', revision: '3.0.0' }] },
+    { name: 'Templates & Forms', documents: [{ id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
   ],
   "Communication Documentation": [
-    { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0' }] },
-    { name: 'RFIs (Request for Information)', documents: [{ id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.0' }] },
-    { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0' }] },
+    { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'RFIs (Request for Information)', documents: [{ id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.1.0' }] },
+    { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
   ]
 };
 
 const documentHistory = [
   {
-    version: '3.0',
+    version: '3.0.0-D2',
     date: '2024-07-22',
     author: 'B. Miller',
     action: 'Content Change',
@@ -145,7 +145,7 @@ const documentHistory = [
     status: 'Under Review',
   },
   {
-    version: '2.1',
+    version: '2.1.0',
     date: '2024-07-18',
     author: 'B. Miller',
     action: 'Minor Correction',
@@ -153,7 +153,7 @@ const documentHistory = [
     status: 'Approved',
   },
   {
-    version: '2.0',
+    version: '2.0.0',
     date: '2024-07-15',
     author: 'B. Miller',
     action: 'Major Revision',
@@ -231,9 +231,9 @@ export default function DocumentLibraryPage() {
     const [newCommentType, setNewCommentType] = useState<LiveComment['type']>('Comment');
 
     const collaborators = [
-        { name: 'JD', src: 'https://picsum.photos/seed/2/40/40' },
-        { name: 'BM', src: 'https://picsum.photos/seed/11/40/40' },
-        { name: 'CD', src: 'https://picsum.photos/seed/12/40/40' }
+        { id: 'jane', name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
+        { id: 'bob', name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/40/40' },
+        { id: 'charlie', name: 'Charlie Davis', avatar: 'https://picsum.photos/seed/12/40/40' }
     ];
 
     const handleSendComment = () => {
@@ -263,6 +263,19 @@ export default function DocumentLibraryPage() {
         }
     }
 
+    const renderCommentWithMentions = (text: string) => {
+        const mentionRegex = /@(\w+)/g;
+        const parts = text.split(mentionRegex);
+        return parts.map((part, index) => {
+            const isMention = index % 2 === 1;
+            const collaborator = isMention ? collaborators.find(c => c.id === part.toLowerCase()) : null;
+            if (isMention && collaborator) {
+                return <span key={index} className="text-primary font-semibold bg-primary/10 p-0.5 rounded-sm">@{collaborator.name}</span>
+            }
+            return part;
+        });
+    }
+
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
             <DialogHeader className="flex-row items-center justify-between pr-8">
@@ -274,8 +287,8 @@ export default function DocumentLibraryPage() {
                     <div className="flex items-center -space-x-2">
                         {collaborators.map(c => (
                             <Avatar key={c.name} className="border-2 border-background">
-                                <AvatarImage src={c.src} />
-                                <AvatarFallback>{c.name}</AvatarFallback>
+                                <AvatarImage src={c.avatar} />
+                                <AvatarFallback>{c.name.slice(0,2)}</AvatarFallback>
                             </Avatar>
                         ))}
                     </div>
@@ -321,7 +334,7 @@ export default function DocumentLibraryPage() {
                                             </p>
                                             <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
                                         </div>
-                                        <p className="text-sm py-1">{comment.text}</p>
+                                        <p className="text-sm py-1">{renderCommentWithMentions(comment.text)}</p>
                                         <div className="flex items-center justify-end gap-2">
                                             <Badge variant={comment.status === 'Resolved' ? 'secondary' : 'outline'}>{comment.status}</Badge>
                                             <Button size="sm" variant="ghost" onClick={() => toggleCommentStatus(comment.id)}>
@@ -335,7 +348,7 @@ export default function DocumentLibraryPage() {
                         <CardFooter className="p-2 border-t">
                              <div className="relative w-full">
                                 <Input 
-                                    placeholder="Add a comment..." 
+                                    placeholder="Add a comment... Type @ to mention a user" 
                                     className="pr-10" 
                                     value={newComment} 
                                     onChange={(e) => setNewComment(e.target.value)}
@@ -567,4 +580,3 @@ export default function DocumentLibraryPage() {
     </div>
   );
 }
-
