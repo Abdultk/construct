@@ -91,7 +91,6 @@ type BoqItem = {
   quantity: number | string;
   rate: number | string;
   amount: number;
-  status: 'Approved' | 'Pending' | 'In Review' | 'Rejected';
   isParent: boolean;
   costCode?: string;
 };
@@ -115,7 +114,6 @@ const initialBoqItems: BoqItem[] = [
     quantity: '',
     rate: '',
     amount: 150000,
-    status: 'Approved',
     isParent: true,
     costCode: '01-00-00',
   },
@@ -126,7 +124,6 @@ const initialBoqItems: BoqItem[] = [
     quantity: 1,
     rate: 50000,
     amount: 50000,
-    status: 'Approved',
     isParent: false,
     costCode: '01-51-00',
   },
@@ -137,7 +134,6 @@ const initialBoqItems: BoqItem[] = [
     quantity: 2000,
     rate: 50,
     amount: 100000,
-    status: 'Pending',
     isParent: false,
   },
   {
@@ -147,7 +143,6 @@ const initialBoqItems: BoqItem[] = [
     quantity: '',
     rate: '',
     amount: 750000,
-    status: 'In Review',
     isParent: true,
     costCode: '03-00-00',
   },
@@ -202,20 +197,7 @@ export default function BoqDataGridPage() {
     return String(num);
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Approved':
-        return 'secondary';
-      case 'Pending':
-        return 'outline';
-      case 'In Review':
-        return 'default';
-      default:
-        return 'destructive';
-    }
-  };
-
-  const handleAddItem = (newItemData: Omit<BoqItem, 'amount' | 'status'>) => {
+  const handleAddItem = (newItemData: Omit<BoqItem, 'amount'>) => {
     const amount = (typeof newItemData.quantity === 'number' && typeof newItemData.rate === 'number')
       ? newItemData.quantity * newItemData.rate
       : 0;
@@ -223,7 +205,6 @@ export default function BoqDataGridPage() {
     const newItem: BoqItem = {
         ...newItemData,
         amount: newItemData.isParent ? initialBoqItems.filter(i => i.id.startsWith(newItemData.id + '.')).reduce((sum, i) => sum + i.amount, 0) : amount,
-        status: 'Pending',
     };
 
     const parentIndex = boqItems.findIndex(item => item.id === newItem.id.split('.').slice(0, -1).join('.'));
@@ -302,7 +283,7 @@ export default function BoqDataGridPage() {
   }
   
   const handleExport = () => {
-    const headers = ['id', 'description', 'unit', 'quantity', 'rate', 'amount', 'status', 'isParent'];
+    const headers = ['id', 'description', 'unit', 'quantity', 'rate', 'amount', 'isParent'];
     const csvContent = [
       headers.join(','),
       ...boqItems.map(item => headers.map(header => JSON.stringify(item[header as keyof BoqItem])).join(','))
@@ -567,7 +548,6 @@ export default function BoqDataGridPage() {
                   <TableHead className="w-24 text-right hidden md:table-cell">Quantity</TableHead>
                   <TableHead className="w-24 text-right hidden md:table-cell">Rate</TableHead>
                   <TableHead className="w-32 text-right">Amount</TableHead>
-                  <TableHead className="w-28 text-center hidden sm:table-cell">Status</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -609,11 +589,6 @@ export default function BoqDataGridPage() {
                       </TableCell>
                       <TableCell className="text-right font-bold font-code">
                         ${formatNumber(item.amount)}
-                      </TableCell>
-                      <TableCell className="text-center hidden sm:table-cell">
-                        <Badge variant={getStatusBadge(item.status)}>
-                          {item.status}
-                        </Badge>
                       </TableCell>
                       <TableCell>
                         <AlertDialog>
@@ -668,10 +643,6 @@ export default function BoqDataGridPage() {
             <CardContent>
               {selectedItem ? (
                 <div className="space-y-4 text-sm">
-                    <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Status</span>
-                        <Badge variant={getStatusBadge(selectedItem.status)}>{selectedItem.status}</Badge>
-                    </div>
                     {!selectedItem.isParent && (
                         <>
                              <div className='flex justify-between'>
