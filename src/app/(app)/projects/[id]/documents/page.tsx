@@ -37,6 +37,7 @@ import {
   CheckCircle,
   Eye,
   Archive,
+  History,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -56,10 +57,13 @@ import {
   DialogTitle,
   DialogFooter,
   DialogTrigger,
-  DialogClose
+  DialogClose,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 type Document = {
   id: string;
@@ -101,6 +105,34 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0' }] },
   ]
 };
+
+const documentHistory = [
+  {
+    version: '3.0',
+    date: '2024-07-22',
+    author: 'B. Miller',
+    action: 'Content Change',
+    description: 'Updated floor plan based on client feedback from meeting on 07/20.',
+    status: 'Under Review',
+  },
+  {
+    version: '2.1',
+    date: '2024-07-18',
+    author: 'B. Miller',
+    action: 'Minor Correction',
+    description: 'Corrected typo in room labels.',
+    status: 'Approved',
+  },
+  {
+    version: '2.0',
+    date: '2024-07-15',
+    author: 'B. Miller',
+    action: 'Major Revision',
+    description: 'Integrated structural engineer\'s feedback. Added new sections for MEP.',
+    status: 'Approved',
+  },
+];
+
 
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
@@ -253,7 +285,7 @@ export default function DocumentLibraryPage() {
                                     <TableHead>Name</TableHead>
                                     <TableHead className="hidden sm:table-cell">Type</TableHead>
                                     <TableHead className="hidden lg:table-cell">Status</TableHead>
-                                    <TableHead className="hidden xl:table-cell">Discipline</TableHead>
+                                    <TableHead className="hidden xl:table-cell">Revision</TableHead>
                                     <TableHead className="hidden md:table-cell">Last Modified</TableHead>
                                     <TableHead className="w-12"></TableHead>
                                 </TableRow>
@@ -281,24 +313,61 @@ export default function DocumentLibraryPage() {
                                                    {getStatusIcon(doc.status)} {doc.status}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="hidden xl:table-cell">{doc.discipline}</TableCell>
+                                            <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
                                             <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
                                             <TableCell>
-                                                <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>Download</DropdownMenuItem>
-                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                    <DropdownMenuItem>Rename</DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive">
-                                                    Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                <Dialog>
+                                                    <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>Download</DropdownMenuItem>
+                                                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                        <DialogTrigger asChild>
+                                                            <DropdownMenuItem>View History</DropdownMenuItem>
+                                                        </DialogTrigger>
+                                                        <DropdownMenuItem className="text-destructive">
+                                                        Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <DialogContent className="sm:max-w-2xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Version History: {doc.name}</DialogTitle>
+                                                            <DialogDescription>
+                                                                Review the change log for this document.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <div className="max-h-[60vh] overflow-y-auto pr-4 my-4">
+                                                          <div className="space-y-6">
+                                                            {documentHistory.map((entry, index) => (
+                                                              <div key={index} className="flex gap-4">
+                                                                <div className="flex flex-col items-center">
+                                                                  <Avatar className="h-9 w-9 mb-1">
+                                                                    <AvatarImage src={`https://picsum.photos/seed/${entry.author}/40/40`} />
+                                                                    <AvatarFallback>{entry.author.slice(0, 2)}</AvatarFallback>
+                                                                  </Avatar>
+                                                                  {index < documentHistory.length - 1 && <div className="w-px flex-grow bg-border" />}
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                  <div className="flex items-center justify-between">
+                                                                    <p className="font-semibold text-sm">{entry.action}</p>
+                                                                    <Badge variant={getStatusBadge(entry.status)}>{entry.status}</Badge>
+                                                                  </div>
+                                                                  <p className="text-xs text-muted-foreground">
+                                                                    Rev {entry.version} by {entry.author} on {entry.date}
+                                                                  </p>
+                                                                  <p className="text-sm mt-1 bg-muted p-2 rounded-md">{entry.description}</p>
+                                                                </div>
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
                                             </TableCell>
                                         </TableRow>
                                     ))}
