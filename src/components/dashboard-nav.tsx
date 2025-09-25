@@ -52,7 +52,7 @@ export function DashboardNav() {
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
             (pathname === href || 
              (href !== '/dashboard' && pathname.startsWith(href)) ||
-             (subNavItems.find(sub => pathname.startsWith(sub.href.split('/[')[0]))?.parent === href)
+             (subNavItems.find(sub => new RegExp(`^${sub.href.replace(/\[id\]/g, '(?<id>[^/]+)')}$`).test(pathname))?.parent === href)
             ) && "bg-muted text-primary"
           )}
         >
@@ -64,5 +64,3 @@ export function DashboardNav() {
     </nav>
   )
 }
-
-    
