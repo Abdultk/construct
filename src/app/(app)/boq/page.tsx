@@ -86,6 +86,7 @@ import {
 
 type BoqItem = {
   id: string;
+  heading: string;
   description: string;
   unit: string;
   quantity: number | string;
@@ -109,7 +110,8 @@ type ChangeLog = {
 const initialBoqItems: BoqItem[] = [
   {
     id: '1.0',
-    description: 'Site Preparation',
+    heading: 'Site Preparation',
+    description: 'Site Preparation summary item.',
     unit: '',
     quantity: '',
     rate: '',
@@ -119,6 +121,7 @@ const initialBoqItems: BoqItem[] = [
   },
   {
     id: '1.1',
+    heading: 'Clearing and Grubbing',
     description: 'Clearing and Grubbing of the entire site area, including removal of all vegetation, debris, and topsoil to a depth of 150mm. This includes disposal of all materials off-site in an environmentally approved manner.',
     unit: 'LS',
     quantity: 1,
@@ -129,6 +132,7 @@ const initialBoqItems: BoqItem[] = [
   },
   {
     id: '1.2',
+    heading: 'Bulk excavation',
     description: 'Bulk excavation for building foundations and basement levels. Includes shoring and dewatering as required per geotechnical report. All excavated material to be stockpiled on-site for later use as backfill or disposed of off-site.',
     unit: 'm³',
     quantity: 2000,
@@ -138,7 +142,8 @@ const initialBoqItems: BoqItem[] = [
   },
   {
     id: '2.0',
-    description: 'Concrete Works',
+    heading: 'Concrete Works',
+    description: 'Concrete Works summary item.',
     unit: '',
     quantity: '',
     rate: '',
@@ -340,6 +345,7 @@ export default function BoqDataGridPage() {
 
   const AddItemForm = () => {
     const [id, setId] = useState('');
+    const [heading, setHeading] = useState('');
     const [description, setDescription] = useState('');
     const [isParent, setIsParent] = useState(false);
     const [unit, setUnit] = useState('');
@@ -350,6 +356,7 @@ export default function BoqDataGridPage() {
     const handleSubmit = () => {
         handleAddItem({
             id,
+            heading,
             description,
             isParent,
             unit,
@@ -380,9 +387,13 @@ export default function BoqDataGridPage() {
                         <Input id="item-cost-code" value={costCode} onChange={(e) => setCostCode(e.target.value)} placeholder="e.g., 03-30-00"/>
                     </div>
                 </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="item-heading">Heading</Label>
+                    <Input id="item-heading" value={heading} onChange={(e) => setHeading(e.target.value)} placeholder="e.g., Formwork for columns"/>
+                </div>
                 <div className="space-y-2">
-                    <Label htmlFor="item-description">Description</Label>
-                    <Textarea id="item-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g., Formwork for columns"/>
+                    <Label htmlFor="item-description">Full Description</Label>
+                    <Textarea id="item-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter the detailed description..."/>
                 </div>
                 {!isParent && (
                      <div className="grid grid-cols-3 gap-4">
@@ -410,6 +421,7 @@ export default function BoqDataGridPage() {
   }
   
   const EditItemForm = ({ item }: { item: BoqItem }) => {
+    const [heading, setHeading] = useState(item.heading);
     const [description, setDescription] = useState(item.description);
     const [unit, setUnit] = useState(item.unit);
     const [quantity, setQuantity] = useState(String(item.quantity));
@@ -425,6 +437,7 @@ export default function BoqDataGridPage() {
   
       handleEditItem({
         ...item,
+        heading,
         description,
         unit,
         quantity: updatedQuantity,
@@ -448,7 +461,11 @@ export default function BoqDataGridPage() {
             <Input id="edit-cost-code" value={costCode} onChange={(e) => setCostCode(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Description</Label>
+            <Label htmlFor="edit-heading">Heading</Label>
+            <Input id="edit-heading" value={heading} onChange={(e) => setHeading(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-description">Full Description</Label>
             <Textarea id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           {!item.isParent && (
@@ -647,8 +664,8 @@ export default function BoqDataGridPage() {
                         {item.id}
                       </TableCell>
                       <TableCell>
-                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'} ${selectedItem?.id === item.id ? 'whitespace-pre-wrap' : 'truncate'}`}>
-                          {item.description}
+                        <p className={`${item.isParent ? 'font-semibold' : 'font-normal'}`}>
+                          {item.heading}
                         </p>
                         {anomaly && (
                           <p className="text-xs text-yellow-600 mt-1">
@@ -692,7 +709,7 @@ export default function BoqDataGridPage() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently remove the BOQ item "{item.id} - {item.description}". This action cannot be undone.
+                                This will permanently remove the BOQ item "{item.id} - {item.heading}". This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -727,7 +744,7 @@ export default function BoqDataGridPage() {
               {selectedItem ? (
                 <div className="space-y-4 text-sm">
                     <div className="space-y-1">
-                      <p className="font-semibold">Description</p>
+                      <p className="font-semibold">{selectedItem.heading}</p>
                       <p className="text-muted-foreground whitespace-pre-wrap">{selectedItem.description}</p>
                     </div>
                     <Separator />
@@ -827,7 +844,3 @@ export default function BoqDataGridPage() {
     </div>
   );
 }
-
-    
-
-    
