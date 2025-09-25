@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -33,11 +34,20 @@ import {
   Upload,
   Folder,
   ChevronRight,
-  RefreshCcw,
+  RefreshCw,
   CheckCircle,
   Eye,
   Archive,
   History,
+  MessageSquare,
+  Users,
+  X,
+  Pen,
+  Highlighter,
+  Type,
+  Square,
+  Send,
+  DownloadCloud,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -47,6 +57,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useState, useRef, ChangeEvent } from 'react';
@@ -64,6 +75,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 type Document = {
   id: string;
@@ -84,6 +97,13 @@ type DocumentCategory = {
 type DocumentStructure = {
   [key: string]: DocumentCategory[];
 };
+
+type LiveComment = {
+  user: { name: string; avatar: string; };
+  text: string;
+  timestamp: string;
+};
+
 
 const initialDocumentStructure: DocumentStructure = {
   "Project Documentation": [
@@ -193,6 +213,108 @@ export default function DocumentLibraryPage() {
         case 'Superseded': return <Archive className="mr-2 h-4 w-4 text-red-500" />;
         default: return null;
     }
+  }
+
+  const RealTimeReviewDialog = ({ doc }: { doc: Document }) => {
+    const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
+    const [comments, setComments] = useState<LiveComment[]>([]);
+    const [newComment, setNewComment] = useState("");
+    const collaborators = [
+        { name: 'JD', src: 'https://picsum.photos/seed/2/40/40' },
+        { name: 'BM', src: 'https://picsum.photos/seed/11/40/40' },
+        { name: 'CD', src: 'https://picsum.photos/seed/12/40/40' }
+    ];
+
+    const handleSendComment = () => {
+        if (newComment.trim()) {
+            setComments(prev => [...prev, {
+                user: { name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
+                text: newComment,
+                timestamp: 'Just now'
+            }]);
+            setNewComment("");
+        }
+    }
+
+    return (
+        <DialogContent className="max-w-7xl h-[90vh]">
+            <DialogHeader className="flex-row items-center justify-between pr-8">
+                <div className="space-y-1">
+                    <DialogTitle>{doc.name}</DialogTitle>
+                    <DialogDescription>Real-time collaborative review session.</DialogDescription>
+                </div>
+                 <div className="flex items-center gap-4">
+                    <div className="flex items-center -space-x-2">
+                        {collaborators.map(c => (
+                            <Avatar key={c.name} className="border-2 border-background">
+                                <AvatarImage src={c.src} />
+                                <AvatarFallback>{c.name}</AvatarFallback>
+                            </Avatar>
+                        ))}
+                    </div>
+                    <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download Marked-up PDF</Button>
+                </div>
+            </DialogHeader>
+            <div className="grid grid-cols-12 gap-4 h-full py-4 overflow-hidden">
+                <div className="col-span-2">
+                    <Card className="h-full">
+                        <CardHeader className="p-2">
+                            <CardTitle className="text-base">Markup Tools</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-2 grid grid-cols-2 gap-2">
+                            <Button variant="outline" className="flex-col h-16"><Pen className="h-5 w-5" /> Pen</Button>
+                            <Button variant="outline" className="flex-col h-16"><Highlighter className="h-5 w-5" /> Highlight</Button>
+                            <Button variant="outline" className="flex-col h-16"><Type className="h-5 w-5" /> Text</Button>
+                            <Button variant="outline" className="flex-col h-16"><Square className="h-5 w-5" /> Shape</Button>
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="col-span-7 bg-muted rounded-md h-full overflow-auto">
+                    {docPreviewImage && (
+                        <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
+                    )}
+                </div>
+                <div className="col-span-3 flex flex-col h-full">
+                    <Card className="flex-1 flex flex-col">
+                        <CardHeader className="p-4 border-b">
+                            <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Live Comments</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
+                            {comments.map((comment, index) => (
+                                <div key={index} className="flex items-start gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={comment.user.avatar} />
+                                        <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 bg-muted/50 p-2 rounded-md">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-semibold text-sm">{comment.user.name}</p>
+                                            <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
+                                        </div>
+                                        <p className="text-sm">{comment.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                        <CardFooter className="p-2 border-t">
+                             <div className="relative w-full">
+                                <Input 
+                                    placeholder="Add a comment..." 
+                                    className="pr-10" 
+                                    value={newComment} 
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSendComment()}
+                                />
+                                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </div>
+            </div>
+        </DialogContent>
+    );
   }
 
   return (
@@ -324,11 +446,14 @@ export default function DocumentLibraryPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
+                                                        <DialogTrigger asChild>
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
+                                                        </DialogTrigger>
                                                         <DropdownMenuItem>Download</DropdownMenuItem>
-                                                        <DropdownMenuItem>View Details</DropdownMenuItem>
                                                         <DialogTrigger asChild>
                                                             <DropdownMenuItem>View History</DropdownMenuItem>
                                                         </DialogTrigger>
+                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-destructive">
                                                         Delete
                                                         </DropdownMenuItem>
@@ -367,6 +492,10 @@ export default function DocumentLibraryPage() {
                                                           </div>
                                                         </div>
                                                     </DialogContent>
+                                                </Dialog>
+                                                <Dialog>
+                                                     <DialogTrigger asChild><span/></DialogTrigger>
+                                                     <RealTimeReviewDialog doc={doc} />
                                                 </Dialog>
                                             </TableCell>
                                         </TableRow>
