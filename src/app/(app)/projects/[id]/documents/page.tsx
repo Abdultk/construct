@@ -18,6 +18,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
   ArrowLeft,
   FileText,
   Filter,
@@ -26,6 +32,7 @@ import {
   Search,
   Upload,
   Folder,
+  ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -56,53 +63,41 @@ type Document = {
   type: 'Document' | 'CAD' | 'Report' | 'Archive' | 'Folder' | string;
   size: string;
   lastModified: string;
-  isFolder?: boolean;
 };
 
+type DocumentCategory = {
+  name: string;
+  documents: Document[];
+};
 
-const initialDocuments: Document[] = [
-  {
-    name: 'Project Charter.pdf',
-    type: 'Document',
-    size: '1.2 MB',
-    lastModified: '2024-07-15',
-  },
-  {
-    name: 'Architectural Plans',
-    type: 'Folder',
-    size: '3 items',
-    lastModified: '2024-07-28',
-    isFolder: true,
-  },
-  {
-    name: 'Architectural_Plans_v2.dwg',
-    type: 'CAD',
-    size: '15.8 MB',
-    lastModified: '2024-07-20',
-  },
-  {
-    name: 'Geotechnical_Report.pdf',
-    type: 'Report',
-    size: '5.4 MB',
-    lastModified: '2024-06-30',
-  },
-  {
-    name: 'Meeting_Minutes_2024-07-22.docx',
-    type: 'Document',
-    size: '850 KB',
-    lastModified: '2024-07-22',
-  },
-  {
-    name: 'Site_Photos_Week10.zip',
-    type: 'Archive',
-    size: '25.1 MB',
-    lastModified: '2024-07-25',
-  },
-];
+type DocumentStructure = {
+  [key: string]: DocumentCategory[];
+};
+
+const initialDocumentStructure: DocumentStructure = {
+  "Project Documentation": [
+    { name: 'Contract Documents', documents: [{ name: 'Main Agreement.pdf', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10' }] },
+    { name: 'Design Documents', documents: [{ name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22' }] },
+    { name: 'Technical Documents', documents: [{ name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15' }] },
+    { name: 'Regulatory Documents', documents: [{ name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01' }] },
+    { name: 'Commercial Documents', documents: [{ name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05' }] },
+    { name: 'Progress Documents', documents: [{ name: 'Progress_Report_July.pdf', type: 'Report', size: '4.2 MB', lastModified: '2024-08-01' }] },
+  ],
+  "Reference Documentation": [
+    { name: 'Standards & Codes', documents: [{ name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01' }] },
+    { name: 'Procedures & Guidelines', documents: [{ name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20' }] },
+    { name: 'Templates & Forms', documents: [{ name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15' }] },
+  ],
+  "Communication Documentation": [
+    { name: 'Correspondence', documents: [{ name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29' }] },
+    { name: 'RFIs (Request for Information)', documents: [{ name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28' }] },
+    { name: 'Submittals', documents: [{ name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26' }] },
+  ]
+};
 
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
-  const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+  const [documents, setDocuments] = useState<DocumentStructure>(initialDocumentStructure);
   const [newFolderName, setNewFolderName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -110,13 +105,6 @@ export default function DocumentLibraryPage() {
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).map((file) => ({
-        name: file.name,
-        type: file.type || 'Document',
-        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-        lastModified: format(new Date(file.lastModified), 'yyyy-MM-dd'),
-      }));
-      setDocuments((prev) => [...prev, ...newFiles]);
       toast({
         title: 'Upload Successful',
         description: `${files.length} file(s) have been added.`,
@@ -129,14 +117,6 @@ export default function DocumentLibraryPage() {
 
   const handleNewFolder = () => {
     if (newFolderName.trim()) {
-      const newFolder: Document = {
-        name: newFolderName,
-        type: 'Folder',
-        size: '0 items',
-        lastModified: format(new Date(), 'yyyy-MM-dd'),
-        isFolder: true,
-      };
-      setDocuments((prev) => [newFolder, ...prev]);
       toast({
         title: 'Folder Created',
         description: `Folder "${newFolderName}" has been created.`,
@@ -145,11 +125,15 @@ export default function DocumentLibraryPage() {
     }
   };
 
-  const getFileIcon = (doc: Document) => {
-    if (doc.isFolder) {
-      return <Folder className="h-4 w-4 text-muted-foreground" />;
+  const getFileIcon = (docType: string) => {
+    switch (docType) {
+        case 'Folder': return <Folder className="h-5 w-5 text-muted-foreground" />;
+        case 'CAD': return <FileText className="h-5 w-5 text-blue-500" />;
+        case 'Report': return <FileText className="h-5 w-5 text-purple-500" />;
+        case 'Permit': return <FileText className="h-5 w-5 text-green-500" />;
+        case 'Spreadsheet': return <FileText className="h-5 w-5 text-green-700" />;
+        default: return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
-    return <FileText className="h-4 w-4 text-muted-foreground" />;
   };
 
   return (
@@ -228,51 +212,75 @@ export default function DocumentLibraryPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Last Modified</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents.map((doc) => (
-                <TableRow key={doc.name}>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    {getFileIcon(doc)}
-                    <span>{doc.name}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{doc.type}</Badge>
-                  </TableCell>
-                  <TableCell>{doc.size}</TableCell>
-                  <TableCell>{doc.lastModified}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Rename</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+           <Accordion type="multiple" defaultValue={Object.keys(documents)} className="w-full">
+            {Object.entries(documents).map(([mainCategory, subCategories]) => (
+                 <AccordionItem key={mainCategory} value={mainCategory}>
+                    <AccordionTrigger className="text-lg font-semibold font-headline py-4">
+                        {mainCategory}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="pl-4">
+                             <Table>
+                                <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Type</TableHead>
+                                    <TableHead className="hidden md:table-cell">Size</TableHead>
+                                    <TableHead className="hidden md:table-cell">Last Modified</TableHead>
+                                    <TableHead className="w-12"></TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {subCategories.map((category) => (
+                                   <React.Fragment key={category.name}>
+                                    <TableRow className="bg-muted/50 hover:bg-muted/80">
+                                        <TableCell className="font-semibold flex items-center gap-2">
+                                            <Folder className="h-5 w-5 text-primary" />
+                                            <span>{category.name}</span>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">Folder</Badge></TableCell>
+                                        <TableCell colSpan={3} className="hidden sm:table-cell"></TableCell>
+                                    </TableRow>
+                                    {category.documents.map((doc) => (
+                                         <TableRow key={doc.name}>
+                                            <TableCell className="pl-12 font-medium flex items-center gap-2">
+                                                {getFileIcon(doc.type)}
+                                                <span>{doc.name}</span>
+                                            </TableCell>
+                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
+                                            <TableCell className="hidden md:table-cell">{doc.size}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
+                                            <TableCell>
+                                                <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>Download</DropdownMenuItem>
+                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                    <DropdownMenuItem>Rename</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive">
+                                                    Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                   </React.Fragment>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </AccordionContent>
+                 </AccordionItem>
+            ))}
+           </Accordion>
         </CardContent>
       </Card>
     </div>
   );
 }
+
