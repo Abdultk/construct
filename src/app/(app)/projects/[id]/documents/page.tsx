@@ -147,8 +147,10 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
   ],
    "Archive": [
-    { name: 'Superseded Commercial', documents: [{ id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' }] },
-    { name: 'Old Correspondence', documents: [{ id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }] },
+    { name: 'Superseded Documents', documents: [
+        { id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' },
+        { id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }
+    ] },
   ],
 };
 
@@ -317,8 +319,11 @@ export default function DocumentLibraryPage() {
 
     const knowledgeGraphIntegrations = [
         { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
+        { type: 'Resource', id: 'TEAM-STR', name: 'Structural Team' },
+        { type: 'Progress', id: 'DEL-002', name: 'Foundation Completion' },
         { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
         { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' },
+        { type: 'Testing', id: 'TST-CNC-005', name: 'Concrete Strength Test Report' },
         { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
         { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
         { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
@@ -874,14 +879,15 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                                 </TableHeader>
                                 <TableBody>
                                 {subCategories.map((category) => (
-                                   <tr key={category.name} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
-                                        <Folder className="h-5 w-5 text-primary" />
-                                        <span>{category.name}</span>
-                                    </td>
-                                    <td className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></td>
-                                    <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
-                                   </tr>
+                                   <React.Fragment key={category.name}>
+                                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <td className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
+                                            <Folder className="h-5 w-5 text-primary" />
+                                            <span>{category.name}</span>
+                                        </td>
+                                        <td className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></td>
+                                        <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
+                                    </tr>
                                     
                                     {category.documents.map((doc) => (
                                          <TableRow key={doc.id}>
@@ -936,6 +942,7 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                                             </TableCell>
                                         </TableRow>
                                     ))}
+                                    </React.Fragment>
                                 ))}
                                 </TableBody>
                             </Table>
@@ -949,4 +956,3 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
     </div>
   );
 }
-
