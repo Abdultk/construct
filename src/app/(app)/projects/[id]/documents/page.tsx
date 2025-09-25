@@ -17,6 +17,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import {
   Accordion,
@@ -48,6 +49,8 @@ import {
   Square,
   Send,
   DownloadCloud,
+  HelpCircle,
+  ListTodo,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -57,7 +60,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useState, useRef, ChangeEvent } from 'react';
@@ -99,9 +105,12 @@ type DocumentStructure = {
 };
 
 type LiveComment = {
+  id: string;
   user: { name: string; avatar: string; };
   text: string;
   timestamp: string;
+  type: 'Comment' | 'Action Item' | 'Question';
+  status: 'Open' | 'Resolved';
 };
 
 
@@ -219,6 +228,8 @@ export default function DocumentLibraryPage() {
     const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
     const [comments, setComments] = useState<LiveComment[]>([]);
     const [newComment, setNewComment] = useState("");
+    const [newCommentType, setNewCommentType] = useState<LiveComment['type']>('Comment');
+
     const collaborators = [
         { name: 'JD', src: 'https://picsum.photos/seed/2/40/40' },
         { name: 'BM', src: 'https://picsum.photos/seed/11/40/40' },
@@ -228,11 +239,27 @@ export default function DocumentLibraryPage() {
     const handleSendComment = () => {
         if (newComment.trim()) {
             setComments(prev => [...prev, {
+                id: `comment-${Date.now()}`,
                 user: { name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
                 text: newComment,
-                timestamp: 'Just now'
+                timestamp: 'Just now',
+                type: newCommentType,
+                status: 'Open'
             }]);
             setNewComment("");
+            setNewCommentType('Comment');
+        }
+    }
+    
+    const toggleCommentStatus = (id: string) => {
+        setComments(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Open' ? 'Resolved' : 'Open' } : c));
+    }
+    
+    const getCommentIcon = (type: LiveComment['type']) => {
+        switch(type) {
+            case 'Action Item': return <ListTodo className="h-4 w-4 text-blue-500" />;
+            case 'Question': return <HelpCircle className="h-4 w-4 text-yellow-500" />;
+            default: return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
         }
     }
 
@@ -280,18 +307,27 @@ export default function DocumentLibraryPage() {
                             <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Live Comments</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                            {comments.map((comment, index) => (
-                                <div key={index} className="flex items-start gap-3">
+                            {comments.map((comment) => (
+                                <div key={comment.id} className="flex items-start gap-3">
                                     <Avatar className="h-8 w-8">
                                         <AvatarImage src={comment.user.avatar} />
                                         <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 bg-muted/50 p-2 rounded-md">
                                         <div className="flex justify-between items-center">
-                                            <p className="font-semibold text-sm">{comment.user.name}</p>
+                                            <p className="font-semibold text-sm flex items-center gap-1.5">
+                                                {getCommentIcon(comment.type)}
+                                                {comment.user.name}
+                                            </p>
                                             <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
                                         </div>
-                                        <p className="text-sm">{comment.text}</p>
+                                        <p className="text-sm py-1">{comment.text}</p>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Badge variant={comment.status === 'Resolved' ? 'secondary' : 'outline'}>{comment.status}</Badge>
+                                            <Button size="sm" variant="ghost" onClick={() => toggleCommentStatus(comment.id)}>
+                                               {comment.status === 'Open' ? 'Resolve' : 'Re-open'}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -305,9 +341,27 @@ export default function DocumentLibraryPage() {
                                     onChange={(e) => setNewComment(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSendComment()}
                                 />
-                                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
-                                    <Send className="h-4 w-4" />
-                                </Button>
+                                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        {getCommentIcon(newCommentType)}
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                      <DropdownMenuLabel>Comment Type</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuRadioGroup value={newCommentType} onValueChange={(v) => setNewCommentType(v as LiveComment['type'])}>
+                                        <DropdownMenuRadioItem value="Comment">Comment</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Action Item">Action Item</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Question">Question</DropdownMenuRadioItem>
+                                      </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSendComment}>
+                                      <Send className="h-4 w-4" />
+                                  </Button>
+                                </div>
                             </div>
                         </CardFooter>
                     </Card>
@@ -513,3 +567,4 @@ export default function DocumentLibraryPage() {
     </div>
   );
 }
+
