@@ -32,6 +32,7 @@ import {
   Wrench,
   LineChart as LineChartIcon,
   Users,
+  BarChart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { projects } from '@/lib/data';
@@ -106,6 +107,14 @@ export default function ReportsPage() {
             return '#';
         }
     };
+    
+    const reportTemplates = [
+      { title: "Document Status Report", icon: BarChart },
+      { title: "Review Performance", icon: TrendingUp },
+      { title: "Approval Efficiency", icon: CheckCircle },
+      { title: "Compliance Report", icon: AlertTriangle },
+    ];
+
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -334,6 +343,19 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
            <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">Standard Reports</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+                {reportTemplates.map(template => (
+                    <Button key={template.title} variant="outline" className="h-20 flex-col items-start p-3 gap-1">
+                        <template.icon className="h-5 w-5 mb-1" />
+                        <span className="text-xs font-semibold">{template.title}</span>
+                    </Button>
+                ))}
+            </CardContent>
+          </Card>
+           <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wrench className="h-5 w-5" /> Administrative Processing
@@ -367,3 +389,5 @@ export default function ReportsPage() {
     </div>
   );
 }
+
+    
