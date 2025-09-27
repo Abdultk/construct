@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -63,6 +64,7 @@ import {
   Shield,
   Fingerprint,
   ScanText,
+  Building2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -137,11 +139,11 @@ type LiveComment = {
 
 const initialDocumentStructure: DocumentStructure = {
   "Project Documentation": [
-    { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.pdf', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' }] },
+    { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.docx', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' }] },
     { name: 'Design Documents', documents: [{ id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0.0-D2' }] },
     { name: 'Technical Documents', documents: [{ id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.2.0' }] },
     { name: 'Regulatory Documents', documents: [{ id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
-    { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.pdf', type: 'Report', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.xlsx', type: 'Spreadsheet', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
   ],
   "Reference Documentation": [
     { name: 'Standards & Codes', documents: [{ id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0.0' }] },
@@ -203,7 +205,7 @@ const documentHistory = [
 
 
 let uploadIdCounter = 0;
-const getUploadId = () => `UPL-${uploadIdCounter++}`;
+const getUploadId = () => `UPL-${++uploadIdCounter}`;
 
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
@@ -284,14 +286,20 @@ export default function DocumentLibraryPage() {
 
 
   const getFileIcon = (docType: string) => {
-    switch (docType) {
-        case 'Folder': return <Folder className="h-5 w-5 text-muted-foreground" />;
-        case 'CAD': return <FileText className="h-5 w-5 text-blue-500" />;
-        case 'Report': return <FileText className="h-5 w-5 text-purple-500" />;
-        case 'Permit': return <FileText className="h-5 w-5 text-green-500" />;
-        case 'Spreadsheet': return <FileBarChart2 className="h-5 w-5 text-green-700" />;
-        case 'Archive': return <Archive className="h-5 w-5 text-gray-500" />;
-        case 'Presentation': return <Presentation className="h-5 w-5 text-orange-500" />;
+    switch (docType.toLowerCase()) {
+        case 'folder': return <Folder className="h-5 w-5 text-muted-foreground" />;
+        case 'cad': return <FileText className="h-5 w-5 text-blue-500" />;
+        case 'report': return <FileText className="h-5 w-5 text-purple-500" />;
+        case 'permit': return <FileText className="h-5 w-5 text-green-500" />;
+        case 'spreadsheet':
+        case 'xlsx':
+             return <FileBarChart2 className="h-5 w-5 text-green-700" />;
+        case 'archive': return <Archive className="h-5 w-5 text-gray-500" />;
+        case 'presentation':
+        case 'pptx':
+             return <Presentation className="h-5 w-5 text-orange-500" />;
+        case 'pdf':
+             return <FileText className="h-5 w-5 text-red-500" />;
         default: return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
@@ -410,6 +418,49 @@ export default function DocumentLibraryPage() {
       status: 'Under Review',
       age: '12 days',
     };
+
+    const getEditorInterface = () => {
+        const fileExtension = doc.name.split('.').pop()?.toLowerCase();
+        
+        switch(fileExtension) {
+            case 'docx':
+            case 'xlsx':
+            case 'pptx':
+                return (
+                    <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
+                        <div className="p-2 bg-white border-b flex items-center gap-2">
+                             <Building2 className="h-6 w-6 text-blue-600" />
+                             <h3 className="font-semibold text-blue-800">Microsoft 365</h3>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
+                            <p>Embedded Microsoft 365 editor for <strong>{doc.name}</strong> would be displayed here.</p>
+                        </div>
+                    </div>
+                )
+            case 'pdf':
+                 return (
+                    <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
+                        <div className="p-2 bg-white border-b flex items-center gap-2">
+                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
+                            </svg>
+                             <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
+                            <p>Embedded Adobe PDF editor for <strong>{doc.name}</strong> would be displayed here.</p>
+                        </div>
+                    </div>
+                )
+            default:
+                return (
+                     <div className="bg-muted rounded-md h-full overflow-auto">
+                        {docPreviewImage && (
+                            <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
+                        )}
+                    </div>
+                )
+        }
+    }
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
@@ -535,10 +586,8 @@ export default function DocumentLibraryPage() {
                             </Card>
                         </div>
                     </div>
-                     <div className="flex-1 bg-muted rounded-md h-full overflow-auto">
-                        {docPreviewImage && (
-                            <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
-                        )}
+                     <div className="flex-1 h-full overflow-auto">
+                       {getEditorInterface()}
                     </div>
                 </div>
                 <div className="col-span-3 flex flex-col h-full">
@@ -1096,7 +1145,7 @@ return (
                                                             onClick={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}
                                                         >
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
-                                                                {getFileIcon(doc.type)}
+                                                                {getFileIcon(doc.name.split('.').pop() || '')}
                                                                 <span>{doc.name}</span>
                                                             </TableCell>
                                                             <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
