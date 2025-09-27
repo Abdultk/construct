@@ -370,8 +370,8 @@ export default function DocumentLibraryPage() {
             </DialogHeader>
             <div className="grid grid-cols-12 gap-4 h-full py-4 overflow-hidden">
                 <div className="col-span-9 flex flex-col gap-4">
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="col-span-1">
+                    <div className="grid grid-cols-12 gap-2">
+                        <div className="col-span-3">
                              <Card className="h-full">
                                 <CardHeader className="p-2">
                                     <CardTitle className="text-base">Markup Tools</CardTitle>
@@ -384,7 +384,7 @@ export default function DocumentLibraryPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-9">
                             <Card>
                                 <Tabs defaultValue="entities">
                                     <CardHeader className="p-2">
@@ -766,194 +766,194 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
                 <Button variant="secondary">Download Report</Button>
             </DialogFooter>
         </DialogContent>
-    )
+    );
 }
 
-  return (
+return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href={`/projects`}>
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold font-headline">Document Library</h1>
-            <p className="text-muted-foreground">
-              Manage all files for project {params.id}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-           <input
-            type="file"
-            multiple
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" /> Upload File
-          </Button>
-           <Dialog>
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" /> New Folder
+        {/* Header */}
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <Button variant="outline" size="icon" asChild>
+                    <Link href={`/projects`}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
                 </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Create New Folder</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="folder-name" className="text-right">
-                            Name
-                        </Label>
-                        <Input
-                            id="folder-name"
-                            value={newFolderName}
-                            onChange={(e) => setNewFolderName(e.target.value)}
-                            className="col-span-3"
-                            placeholder="e.g., Submittals"
-                        />
-                    </div>
+                <div>
+                    <h1 className="text-2xl font-bold font-headline">Document Library</h1>
+                    <p className="text-muted-foreground">
+                        Manage all files for project {params.id}
+                    </p>
                 </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button" onClick={handleNewFolder}>
-                        Create Folder
-                      </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-           </Dialog>
-        </div>
-      </div>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search documents..." className="pl-8" />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="mr-2 h-4 w-4" /> Filter
+            <div className="flex items-center gap-2">
+                <input
+                    type="file"
+                    multiple
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileUpload}
+                />
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="mr-2 h-4 w-4" /> Upload File
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Discipline</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem>Architectural</DropdownMenuItem>
-                    <DropdownMenuItem>Structural</DropdownMenuItem>
-                    <DropdownMenuItem>MEP</DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
-        <CardContent>
-           <Accordion type="multiple" defaultValue={Object.keys(documents)} className="w-full">
-            {Object.entries(documents).map(([mainCategory, subCategories]) => (
-                 <AccordionItem key={mainCategory} value={mainCategory}>
-                    <AccordionTrigger className="text-lg font-semibold font-headline py-4">
-                        {mainCategory}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="pl-4">
-                             <Table>
-                                <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Type</TableHead>
-                                    <TableHead className="hidden lg:table-cell">Status</TableHead>
-                                    <TableHead className="hidden xl:table-cell">Revision</TableHead>
-                                    <TableHead className="hidden md:table-cell">Last Modified</TableHead>
-                                    <TableHead className="w-12"></TableHead>
-                                </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                {subCategories.map((category) => (
-                                   <React.Fragment key={category.name}>
-                                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                        <td className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
-                                            <Folder className="h-5 w-5 text-primary" />
-                                            <span>{category.name}</span>
-                                        </td>
-                                        <td className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></td>
-                                        <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
-                                    </tr>
-                                    
-                                    {category.documents.map((doc) => (
-                                         <TableRow key={doc.id}>
-                                            <TableCell className="pl-12 font-medium flex items-center gap-2">
-                                                {getFileIcon(doc.type)}
-                                                <span>{doc.name}</span>
-                                            </TableCell>
-                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
-                                            <TableCell className="hidden lg:table-cell">
-                                                <Badge variant={getStatusBadge(doc.status)} className="capitalize">
-                                                   {getStatusIcon(doc.status)} {doc.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
-                                            <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
-                                            <TableCell>
-                                                <Dialog>
-                                                    <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DialogTrigger asChild>
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
-                                                        </DialogTrigger>
-                                                        <DropdownMenuItem>Download</DropdownMenuItem>
-                                                        <DialogTrigger asChild>
-                                                            <DropdownMenuItem>View History</DropdownMenuItem>
-                                                        </DialogTrigger>
-                                                        <DropdownMenuSeparator />
-                                                        <DialogTrigger asChild>
-                                                            <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                        </DialogTrigger>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem className="text-destructive">
-                                                        Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                    <HistoryDialog doc={doc} />
-                                                </Dialog>
-                                                <Dialog>
-                                                     <DialogTrigger asChild><span/></DialogTrigger>
-                                                     <RealTimeReviewDialog doc={doc} />
-                                                </Dialog>
-                                                 <Dialog>
-                                                    <DialogTrigger asChild><span/></DialogTrigger>
-                                                    <DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent>
-                                                 </Dialog>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    </React.Fragment>
-                                ))}
-                                </TableBody>
-                            </Table>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> New Folder
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Create New Folder</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="folder-name" className="text-right">
+                                    Name
+                                </Label>
+                                <Input
+                                    id="folder-name"
+                                    value={newFolderName}
+                                    onChange={(e) => setNewFolderName(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder="e.g., Submittals"
+                                />
+                            </div>
                         </div>
-                    </AccordionContent>
-                 </AccordionItem>
-            ))}
-           </Accordion>
-        </CardContent>
-      </Card>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type="button" onClick={handleNewFolder}>
+                                    Create Folder
+                                </Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </div>
+        <Card>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Search documents..." className="pl-8" />
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <Filter className="mr-2 h-4 w-4" /> Filter
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>Discipline</DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                    <DropdownMenuItem>Architectural</DropdownMenuItem>
+                                    <DropdownMenuItem>Structural</DropdownMenuItem>
+                                    <DropdownMenuItem>MEP</DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="multiple" defaultValue={Object.keys(documents)} className="w-full">
+                    {Object.entries(documents).map(([mainCategory, subCategories]) => (
+                        <AccordionItem key={mainCategory} value={mainCategory}>
+                            <AccordionTrigger className="text-lg font-semibold font-headline py-4">
+                                {mainCategory}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="pl-4">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Type</TableHead>
+                                                <TableHead className="hidden lg:table-cell">Status</TableHead>
+                                                <TableHead className="hidden xl:table-cell">Revision</TableHead>
+                                                <TableHead className="hidden md:table-cell">Last Modified</TableHead>
+                                                <TableHead className="w-12"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {subCategories.map((category) => (
+                                                <React.Fragment key={category.name}>
+                                                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                                        <td className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
+                                                            <Folder className="h-5 w-5 text-primary" />
+                                                            <span>{category.name}</span>
+                                                        </td>
+                                                        <td className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></td>
+                                                        <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
+                                                    </tr>
+                                                    
+                                                    {category.documents.map((doc) => (
+                                                        <TableRow key={doc.id}>
+                                                            <TableCell className="pl-12 font-medium flex items-center gap-2">
+                                                                {getFileIcon(doc.type)}
+                                                                <span>{doc.name}</span>
+                                                            </TableCell>
+                                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
+                                                            <TableCell className="hidden lg:table-cell">
+                                                                <Badge variant={getStatusBadge(doc.status)} className="capitalize">
+                                                                    {getStatusIcon(doc.status)} {doc.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
+                                                            <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
+                                                            <TableCell>
+                                                                <Dialog>
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger asChild>
+                                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                                <MoreVertical className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent align="end">
+                                                                            <DialogTrigger asChild>
+                                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
+                                                                            </DialogTrigger>
+                                                                            <DropdownMenuItem>Download</DropdownMenuItem>
+                                                                            <DialogTrigger asChild>
+                                                                                <DropdownMenuItem>View History</DropdownMenuItem>
+                                                                            </DialogTrigger>
+                                                                            <DropdownMenuSeparator />
+                                                                            <DialogTrigger asChild>
+                                                                                <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                                            </DialogTrigger>
+                                                                            <DropdownMenuSeparator />
+                                                                            <DropdownMenuItem className="text-destructive">
+                                                                                Delete
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
+                                                                    <HistoryDialog doc={doc} />
+                                                                </Dialog>
+                                                                <Dialog>
+                                                                    <DialogTrigger asChild><span/></DialogTrigger>
+                                                                    <RealTimeReviewDialog doc={doc} />
+                                                                </Dialog>
+                                                                <Dialog>
+                                                                    <DialogTrigger asChild><span/></DialogTrigger>
+                                                                    <DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent>
+                                                                </Dialog>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </React.Fragment>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </CardContent>
+        </Card>
     </div>
-  );
+);
 }
