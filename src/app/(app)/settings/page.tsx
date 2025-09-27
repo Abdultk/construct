@@ -332,6 +332,24 @@ export default function SettingsPage() {
                     </Button>
                 </CardHeader>
               </Card>
+               <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22.286C6.32 22.286 1.714 17.68 1.714 12S6.32 1.714 12 1.714 22.286 6.32 22.286 12 17.68 22.286 12 22.286z" fill="#FF0000"/>
+                            <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
+                        </svg>
+                        <div>
+                            <CardTitle className="text-base">Adobe Creative Cloud</CardTitle>
+                            <CardDescription>Integration with professional design tools for PDF editing.</CardDescription>
+                        </div>
+                    </div>
+                    <Button variant="outline">
+                        <LinkIcon className="mr-2 h-4 w-4" />
+                        Connect
+                    </Button>
+                </CardHeader>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
