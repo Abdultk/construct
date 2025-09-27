@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -22,11 +23,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload, ChevronDown, Link as LinkIcon, Building2 } from 'lucide-react';
+import { Upload, ChevronDown, Link as LinkIcon, Building2, Check } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const boqStandards = {
   "International": ["NRM", "CESMM4", "POMI", "SMM7", "UNIFORMAT II", "MasterFormat", "Uniclass"],
@@ -39,6 +41,24 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'user-avatar-1');
   const [selectedStandard, setSelectedStandard] = useState('NRM');
+  const [isMicrosoftConnected, setIsMicrosoftConnected] = useState(false);
+  const { toast } = useToast();
+
+  const handleMicrosoftConnect = () => {
+    setIsMicrosoftConnected(true);
+    toast({
+      title: 'Microsoft 365 Connected',
+      description: 'Your account has been successfully linked.',
+    });
+  };
+
+  const handleMicrosoftDisconnect = () => {
+    setIsMicrosoftConnected(false);
+    toast({
+      title: 'Microsoft 365 Disconnected',
+      description: 'Your account has been unlinked.',
+    });
+  };
 
   return (
     <div className="flex-1 space-y-4">
@@ -304,10 +324,26 @@ export default function SettingsPage() {
                             <CardDescription>Sync documents with SharePoint and OneDrive.</CardDescription>
                         </div>
                     </div>
-                    <Button>
+                    {isMicrosoftConnected ? (
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="secondary">
+                            <Check className="mr-2 h-4 w-4" /> Connected
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={handleMicrosoftDisconnect} className="text-destructive">
+                            Disconnect
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Button onClick={handleMicrosoftConnect}>
                         <LinkIcon className="mr-2 h-4 w-4" />
                         Connect
-                    </Button>
+                        </Button>
+                    )}
                 </CardHeader>
               </Card>
               <Card>
