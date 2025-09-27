@@ -59,6 +59,8 @@ import {
   Link as LinkIcon,
   BarChart,
   TrendingUp,
+  FileBarChart2,
+  Presentation,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -102,7 +104,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 type Document = {
   id: string;
   name: string;
-  type: 'Document' | 'CAD' | 'Report' | 'Archive' | 'Folder' | 'Permit' | 'Spreadsheet' | 'Minutes' | 'Standard' | 'Template' | string;
+  type: 'Document' | 'CAD' | 'Report' | 'Archive' | 'Folder' | 'Permit' | 'Spreadsheet' | 'Minutes' | 'Standard' | 'Template' | 'Presentation' | string;
   size: string;
   lastModified: string;
   discipline: 'Architectural' | 'Structural' | 'MEP' | 'Civil' | 'Commercial' | 'General';
@@ -150,6 +152,7 @@ const initialDocumentStructure: DocumentStructure = {
     { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
     { name: 'RFIs (Request for Information)', documents: [{ id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.1.0' }] },
     { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
+    { name: 'Presentations', documents: [{ id: 'COM-PPT-001', name: 'Monthly_Progress_Review.pptx', type: 'Presentation', size: '8.5 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
   ],
    "Archive": [
     { name: 'Superseded Documents', documents: [
@@ -260,8 +263,9 @@ export default function DocumentLibraryPage() {
         case 'CAD': return <FileText className="h-5 w-5 text-blue-500" />;
         case 'Report': return <FileText className="h-5 w-5 text-purple-500" />;
         case 'Permit': return <FileText className="h-5 w-5 text-green-500" />;
-        case 'Spreadsheet': return <FileText className="h-5 w-5 text-green-700" />;
+        case 'Spreadsheet': return <FileBarChart2 className="h-5 w-5 text-green-700" />;
         case 'Archive': return <Archive className="h-5 w-5 text-gray-500" />;
+        case 'Presentation': return <Presentation className="h-5 w-5 text-orange-500" />;
         default: return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
