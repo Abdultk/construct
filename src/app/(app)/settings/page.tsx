@@ -42,6 +42,8 @@ export default function SettingsPage() {
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'user-avatar-1');
   const [selectedStandard, setSelectedStandard] = useState('NRM');
   const [isMicrosoftConnected, setIsMicrosoftConnected] = useState(false);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [isAdobeConnected, setIsAdobeConnected] = useState(false);
   const { toast } = useToast();
 
   const handleMicrosoftConnect = () => {
@@ -56,6 +58,38 @@ export default function SettingsPage() {
     setIsMicrosoftConnected(false);
     toast({
       title: 'Microsoft 365 Disconnected',
+      description: 'Your account has been unlinked.',
+    });
+  };
+
+  const handleGoogleConnect = () => {
+    setIsGoogleConnected(true);
+    toast({
+      title: 'Google Workspace Connected',
+      description: 'Your account has been successfully linked.',
+    });
+  };
+
+  const handleGoogleDisconnect = () => {
+    setIsGoogleConnected(false);
+    toast({
+      title: 'Google Workspace Disconnected',
+      description: 'Your account has been unlinked.',
+    });
+  };
+  
+  const handleAdobeConnect = () => {
+    setIsAdobeConnected(true);
+    toast({
+      title: 'Adobe Creative Cloud Connected',
+      description: 'Your account has been successfully linked.',
+    });
+  };
+
+  const handleAdobeDisconnect = () => {
+    setIsAdobeConnected(false);
+    toast({
+      title: 'Adobe Creative Cloud Disconnected',
       description: 'Your account has been unlinked.',
     });
   };
@@ -362,17 +396,32 @@ export default function SettingsPage() {
                             <CardDescription>Sync documents with Google Drive, Docs, and Sheets.</CardDescription>
                         </div>
                     </div>
-                    <Button variant="outline">
+                    {isGoogleConnected ? (
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="secondary">
+                            <Check className="mr-2 h-4 w-4" /> Connected
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={handleGoogleDisconnect} className="text-destructive">
+                            Disconnect
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Button onClick={handleGoogleConnect}>
                         <LinkIcon className="mr-2 h-4 w-4" />
                         Connect
-                    </Button>
+                        </Button>
+                    )}
                 </CardHeader>
               </Card>
                <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-4">
                         <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22.286C6.32 22.286 1.714 17.68 1.714 12S6.32 1.714 12 1.714 22.286 6.32 22.286 12 17.68 22.286 12 22.286z" fill="#FF0000"/>
                             <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
                         </svg>
                         <div>
@@ -380,10 +429,26 @@ export default function SettingsPage() {
                             <CardDescription>Integration with professional design tools for PDF editing.</CardDescription>
                         </div>
                     </div>
-                    <Button variant="outline">
+                     {isAdobeConnected ? (
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="secondary">
+                            <Check className="mr-2 h-4 w-4" /> Connected
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={handleAdobeDisconnect} className="text-destructive">
+                            Disconnect
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Button onClick={handleAdobeConnect}>
                         <LinkIcon className="mr-2 h-4 w-4" />
                         Connect
-                    </Button>
+                        </Button>
+                    )}
                 </CardHeader>
               </Card>
             </CardContent>
