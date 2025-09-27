@@ -435,8 +435,6 @@ export default function DocumentLibraryPage() {
         
         switch(fileExtension) {
             case 'docx':
-            case 'xlsx':
-            case 'pptx':
                 return (
                     <div className="bg-white rounded-md h-full overflow-hidden flex flex-col border">
                       {/* Mock Word Ribbon */}
@@ -1084,7 +1082,6 @@ return (
                         <DropdownMenuItem onSelect={() => handleSync('Dropbox')}>Dropbox</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuLabel>Industry Software</DropdownMenuLabel>
-                         <DropdownMenuItem onSelect={() => handleSync('Procore')}>Procore</DropdownMenuItem>
                          <DropdownMenuItem onSelect={() => handleSync('BIM 360')}>Autodesk BIM 360</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -1256,6 +1253,7 @@ return (
 
 
     
+
 
 
 
