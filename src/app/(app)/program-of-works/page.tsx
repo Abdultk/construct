@@ -16,6 +16,8 @@ import {
   CalendarIcon,
   ToyBrick,
   ArrowRight,
+  Upload,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, formatDistanceToNow, isValid } from 'date-fns';
@@ -56,6 +58,7 @@ import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/use-toast';
 
 
 type Material = {
@@ -80,10 +83,9 @@ type WbsItem = {
 };
 
 const initialWbsItems: WbsItem[] = [
-    { id: '1', name: 'Project Initiation', status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}], children: [
-        { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'}, status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-05'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}] }, 
-        { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'}, status: 'Completed', startDate: new Date('2024-07-06'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}, { name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] }
-    ] },
+    { id: '1', name: 'Project Initiation', status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}] },
+    { id: '1.1', name: 'Feasibility Study', successor: {id: '1.2', name: 'Project Charter'}, status: 'Completed', startDate: new Date('2024-07-01'), endDate: new Date('2024-07-05'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}] }, 
+    { id: '1.2', name: 'Project Charter', predecessor: {id: '1.1', name: 'Feasibility Study'}, successor: {id: '2.1', name: 'Schematic Design'}, status: 'Completed', startDate: new Date('2024-07-06'), endDate: new Date('2024-07-10'), progress: 100, resources: [{ name: 'A. Johnson', avatar: 'https://picsum.photos/seed/10/32/32'}, { name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] },
     { id: '2', name: 'Design & Planning', status: 'In Progress', startDate: new Date('2024-07-11'), endDate: new Date('2024-08-20'), progress: 75, resources: [{ name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}, { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32'}], children: [
         { id: '2.1', name: 'Schematic Design', predecessor: {id: '1.2', name: 'Project Charter'}, successor: {id: '2.2', name: 'Permit Application'}, status: 'Completed', startDate: new Date('2024-07-11'), endDate: new Date('2024-08-05'), progress: 100, resources: [{ name: 'B. Miller', avatar: 'https://picsum.photos/seed/11/32/32'}] }, 
         { id: '2.2', name: 'Permit Application', predecessor: {id: '2.1', name: 'Schematic Design'}, successor: {id: '3.1', name: 'Foundation'}, status: 'In Progress', startDate: new Date('2024-08-06'), endDate: new Date('2024-08-20'), progress: 60, resources: [{ name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/32/32'}] }
@@ -102,7 +104,7 @@ const initialWbsItems: WbsItem[] = [
 
 export default function ProgramOfWorksPage() {
   const [wbsItems, setWbsItems] = useState<WbsItem[]>(initialWbsItems);
-  const [selectedItem, setSelectedItem] = useState<WbsItem | null>(wbsItems[0] ?? null);
+  const [selectedItem, setSelectedItem] = useState<WbsItem | null>(null);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     '1': true,
     '2': true,
@@ -110,10 +112,23 @@ export default function ProgramOfWorksPage() {
   });
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
+    setSelectedItem(flattenWbs(initialWbsItems)[0] ?? null)
   }, []);
+
+  const flattenWbs = (items: WbsItem[]): WbsItem[] => {
+    return items.reduce((acc, item) => {
+      acc.push(item);
+      if (item.children) {
+        acc.push(...flattenWbs(item.children));
+      }
+      return acc;
+    }, [] as WbsItem[]);
+  };
 
 
   const toggleExpand = (id: string) => {
@@ -185,22 +200,34 @@ export default function ProgramOfWorksPage() {
     }
   };
 
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast({
+        title: 'Import Successful',
+        description: `"${file.name}" is being processed. The program will be updated shortly.`,
+      });
+    }
+    if (event.target) {
+        event.target.value = '';
+    }
+  };
+
+
   const WbsItemRow = ({ item, level }: { item: WbsItem, level: number }) => {
     const isExpanded = expandedItems[item.id] ?? false;
 
     return (
-      <div>
+      <>
         <div 
           className={`flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-pointer ${selectedItem?.id === item.id ? 'bg-muted' : ''}`}
           style={{ paddingLeft: `${level * 1.5}rem`}}
           onClick={() => handleSelectItem(item)}
         >
           {item.children && item.children.length > 0 ? (
-            isExpanded ? (
-              <ChevronDown className="h-4 w-4 shrink-0" onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }} />
-            ) : (
-              <ChevronRight className="h-4 w-4 shrink-0" onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }} />
-            )
+            <div className="w-4" onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }}>
+                {isExpanded ? ( <ChevronDown className="h-4 w-4 shrink-0" /> ) : ( <ChevronRight className="h-4 w-4 shrink-0" /> )}
+            </div>
           ) : (
             <span className='w-4'></span>
           )}
@@ -216,7 +243,7 @@ export default function ProgramOfWorksPage() {
             ))}
           </div>
         )}
-      </div>
+      </>
     );
   };
 
@@ -348,6 +375,53 @@ export default function ProgramOfWorksPage() {
           <p className="text-muted-foreground">Project: Downtown Skyscraper</p>
         </div>
         <div className="flex items-center gap-2">
+            <input type="file" ref={importInputRef} className="hidden" onChange={handleFileImport} accept=".mpp,.mpt,.xlsx,.csv,.pdf,.xer,.xml" />
+             <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Import Program</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Import Program of Works</DialogTitle>
+                        <DialogDescription>
+                            Upload your project schedule file. Our AI will automatically process and validate it.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                         <div
+                            className="flex items-center justify-center w-full"
+                            onClick={() => importInputRef.current?.click()}
+                        >
+                            <Label htmlFor="program-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p className="text-xs text-muted-foreground">MPP, XER, XLSX, PDF, XML, etc.</p>
+                                </div>
+                            </Label>
+                        </div>
+                        <Card className="bg-ai-accent/10 border-ai-accent/50">
+                            <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                                <Lightbulb className="h-5 w-5 text-ai-accent" />
+                                <div>
+                                    <CardTitle className="text-base">AI-Powered Processing</CardTitle>
+                                    <CardDescription className="text-ai-accent/90">
+                                        Your file will be automatically analyzed for:
+                                    </CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                               <ul className="list-disc list-inside text-sm space-y-1">
+                                    <li>Data validation (dates, durations, relationships)</li>
+                                    <li>Resource and dependency extraction</li>
+                                    <li>Risk identification for unusual dependencies</li>
+                                    <li>Optimization suggestions</li>
+                               </ul>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </DialogContent>
+            </Dialog>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
                 <Button variant="secondary"><Plus className="mr-2 h-4 w-4" /> Add Work Package</Button>
@@ -376,7 +450,7 @@ export default function ProgramOfWorksPage() {
             <CardContent>
               <div className="space-y-1">
                 {wbsItems.map(item => (
-                  <WbsItemRow key={item.id} item={item} level={0} />
+                  <WbsItemRow key={item.id} item={item} level={item.id.split('.').length-1} />
                 ))}
               </div>
             </CardContent>
