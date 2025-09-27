@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Upload,
   Lightbulb,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -524,19 +525,36 @@ export default function ProgramOfWorksPage() {
                                     <DialogTrigger asChild>
                                         <Button variant="outline" size="sm" disabled={!selectedItem}><GitMerge className="mr-2 h-4 w-4" /> Visualize</Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-3xl">
+                                    <DialogContent className="max-w-4xl">
                                         <DialogHeader>
                                             <DialogTitle>Dependency Visualization</DialogTitle>
                                             <DialogDescription>
                                                 Visual flow of the direct dependencies for: <span className="font-semibold">{selectedItem.name}</span>
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="py-8 flex items-center justify-center gap-2">
-                                            <DependencyNode item={selectedItem.predecessor} type="Predecessor" />
-                                            <ArrowRight className="h-8 w-8 text-muted-foreground mx-2" />
-                                            <DependencyNode item={{id: selectedItem.id, name: selectedItem.name}} type="Current" />
-                                            <ArrowRight className="h-8 w-8 text-muted-foreground mx-2" />
-                                            <DependencyNode item={selectedItem.successor} type="Successor" />
+                                        <div className="py-8">
+                                            <div className="flex items-center justify-center">
+                                                <DependencyNode item={selectedItem.predecessor} type="Predecessor" />
+                                                <div className="relative mx-2">
+                                                    <ArrowRight className="h-8 w-8 text-muted-foreground" />
+                                                    <Badge variant="outline" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs">FS</Badge>
+                                                </div>
+                                                <DependencyNode item={{id: selectedItem.id, name: selectedItem.name}} type="Current" />
+                                                <div className="relative mx-2">
+                                                    <ArrowRight className="h-8 w-8 text-muted-foreground" />
+                                                    <Badge variant="outline" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs">FS</Badge>
+                                                </div>
+                                                <DependencyNode item={selectedItem.successor} type="Successor" />
+                                            </div>
+                                             <Card className="mt-6 bg-ai-accent/10 border-ai-accent/50">
+                                                <CardHeader className="flex-row items-center gap-2 space-y-0">
+                                                    <Lightbulb className="h-5 w-5 text-ai-accent" />
+                                                    <CardTitle className="text-base">AI Recommendations</CardTitle>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <p className="text-sm">Consider a <strong>Start-to-Start</strong> relationship with 'Successor Task' and a 2-day lead time to accelerate the schedule. This could save an estimated 3 project days.</p>
+                                                </CardContent>
+                                            </Card>
                                         </div>
                                     </DialogContent>
                                 </Dialog>
@@ -715,6 +733,8 @@ export default function ProgramOfWorksPage() {
     </div>
   );
 }
+
+    
 
     
 
