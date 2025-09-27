@@ -202,6 +202,9 @@ const documentHistory = [
 ];
 
 
+let uploadIdCounter = 0;
+const getUploadId = () => `UPL-${Date.now()}-${uploadIdCounter++}`;
+
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
   const [documents, setDocuments] = useState<DocumentStructure>(initialDocumentStructure);
@@ -217,7 +220,7 @@ export default function DocumentLibraryPage() {
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files).map((file, index) => ({
-        id: `UPL-${Date.now()}-${index}-${Math.random()}`,
+        id: getUploadId(),
         name: file.name,
         type: file.type.split('/')[1]?.toUpperCase() || 'Document',
         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
