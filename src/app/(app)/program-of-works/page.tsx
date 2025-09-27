@@ -19,6 +19,7 @@ import {
   Upload,
   Lightbulb,
   AlertTriangle,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -522,7 +523,7 @@ export default function ProgramOfWorksPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                        <Card>
+                         <Card>
                             <CardHeader>
                                 <CardTitle className='text-base'>Material Specifications</CardTitle>
                             </CardHeader>
@@ -580,8 +581,19 @@ export default function ProgramOfWorksPage() {
                                                     <Lightbulb className="h-5 w-5 text-ai-accent" />
                                                     <CardTitle className="text-base">AI Recommendations</CardTitle>
                                                 </CardHeader>
-                                                <CardContent>
-                                                    <p className="text-sm">Consider a <strong>Start-to-Start</strong> relationship with 'Successor Task' and a 2-day lead time to accelerate the schedule. This could save an estimated 3 project days.</p>
+                                                <CardContent className="space-y-3">
+                                                    <div className="flex items-start gap-3">
+                                                      <Lightbulb className="h-5 w-5 text-ai-accent flex-shrink-0" />
+                                                      <p className="text-sm">
+                                                        <strong>Schedule Optimization:</strong> Consider a <strong>Start-to-Start</strong> relationship with 'Successor Task' and a 2-day lead time to fast-track the schedule. This could save an estimated 3 project days.
+                                                      </p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3">
+                                                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                                                      <p className="text-sm">
+                                                        <strong>Quality Integration:</strong> Insert a 'Rebar Inspection' quality checkpoint after this task and before 'Concrete Pouring' to ensure compliance and reduce rework risk.
+                                                      </p>
+                                                    </div>
                                                 </CardContent>
                                             </Card>
                                         </div>
