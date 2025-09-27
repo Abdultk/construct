@@ -61,6 +61,8 @@ import {
   TrendingUp,
   FileBarChart2,
   Presentation,
+  Shield,
+  Fingerprint,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -100,6 +102,7 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lightbulb } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 
 type Document = {
@@ -207,6 +210,7 @@ export default function DocumentLibraryPage() {
   const { toast } = useToast();
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -822,6 +826,119 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
     );
 };
 
+const SecurityDialog = ({ doc }: { doc: Document | null }) => {
+    if (!doc) return null;
+    const accessList = [
+        { name: 'Alice Johnson', role: 'Project Manager', avatar: 'https://picsum.photos/seed/10/40/40', permissions: ['View', 'Edit', 'Share', 'Download'] },
+        { name: 'Client ABC Corp.', role: 'Client', avatar: 'https://picsum.photos/seed/31/40/40', permissions: ['View', 'Comment'] },
+        { name: 'MEP Subcontractor', role: 'Subcontractor', avatar: 'https://picsum.photos/seed/35/40/40', permissions: ['View'] },
+    ];
+    const auditTrail = [
+      { user: 'Alice Johnson', action: 'Viewed document', time: '2 hours ago' },
+      { user: 'B. Miller', action: 'Edited content', time: '5 hours ago' },
+      { user: 'Client ABC Corp.', action: 'Added a comment', time: '1 day ago' },
+    ];
+
+    return (
+        <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Security Settings</DialogTitle>
+                <DialogDescription>
+                    Manage access and data protection for: <span className="font-semibold">{doc.name}</span>
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto pr-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Access Control</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>User / Role</TableHead>
+                                    <TableHead>Permissions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {accessList.map(item => (
+                                    <TableRow key={item.name}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-9 w-9">
+                                                    <AvatarImage src={item.avatar} />
+                                                    <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-medium">{item.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{item.role}</p>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {item.permissions.map(p => <Badge key={p} variant="outline">{p}</Badge>)}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                         </Table>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Data Protection</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                            <Label htmlFor="watermark-switch" className="flex flex-col gap-y-1">
+                                <span>Dynamic Watermarking</span>
+                                <span className="font-normal text-xs text-muted-foreground">Embeds user and time info on view/print.</span>
+                            </Label>
+                            <Switch id="watermark-switch" />
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                            <Label htmlFor="encryption-switch" className="flex flex-col gap-y-1">
+                                <span>End-to-End Encryption</span>
+                                <span className="font-normal text-xs text-muted-foreground">Secures data in transit and at rest.</span>
+                            </Label>
+                            <Switch id="encryption-switch" defaultChecked disabled />
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                            <Label htmlFor="download-switch" className="flex flex-col gap-y-1">
+                                <span>Restrict Downloading</span>
+                                 <span className="font-normal text-xs text-muted-foreground">Prevents users from saving offline copies.</span>
+                            </Label>
+                            <Switch id="download-switch" />
+                        </div>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Audit Trail</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {auditTrail.map((log, index) => (
+                            <div key={index} className="flex items-center gap-3 text-sm border-b last:border-b-0 py-2">
+                                <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                                <p className="flex-1"><span className="font-semibold">{log.user}</span> {log.action}</p>
+                                <p className="text-xs text-muted-foreground">{log.time}</p>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button>Save Settings</Button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    );
+};
+
+
 return (
     <div className="flex flex-1 flex-col gap-4">
         {/* Header */}
@@ -986,6 +1103,7 @@ return (
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}>Review</DropdownMenuItem>
                                                                       <DropdownMenuItem>Download</DropdownMenuItem>
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
+                                                                      <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security</DropdownMenuItem>
                                                                       <DropdownMenuSeparator />
                                                                       <DropdownMenuItem>Archive</DropdownMenuItem>
                                                                       <DropdownMenuSeparator />
@@ -1014,6 +1132,9 @@ return (
         </Dialog>
         <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
             <HistoryDialog doc={selectedDoc} />
+        </Dialog>
+         <Dialog open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
+            <SecurityDialog doc={selectedDoc} />
         </Dialog>
     </div>
 );
