@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload, ChevronDown } from 'lucide-react';
+import { Upload, ChevronDown, Link as LinkIcon, Building2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
@@ -54,6 +54,7 @@ export default function SettingsPage() {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="space-y-4">
           <Card>
@@ -284,6 +285,33 @@ export default function SettingsPage() {
                     <Button>Save BOQ Preferences</Button>
                 </CardFooter>
             </Card>
+        </TabsContent>
+         <TabsContent value="integrations" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Integrations</CardTitle>
+              <CardDescription>
+                Connect your ConstructAI account with other services.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Building2 className="h-8 w-8" />
+                        <div>
+                            <CardTitle className="text-base">Microsoft 365</CardTitle>
+                            <CardDescription>Sync documents with SharePoint and OneDrive.</CardDescription>
+                        </div>
+                    </div>
+                    <Button>
+                        <LinkIcon className="mr-2 h-4 w-4" />
+                        Connect
+                    </Button>
+                </CardHeader>
+              </Card>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
