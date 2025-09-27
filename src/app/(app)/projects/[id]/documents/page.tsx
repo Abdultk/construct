@@ -2,6 +2,7 @@
 
 'use client';
 
+import * as React from 'react';
 import {
   Table,
   TableBody,
@@ -318,18 +319,18 @@ export default function DocumentLibraryPage() {
     };
 
     const knowledgeGraphIntegrations = [
-        { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
-        { type: 'Resource', id: 'TEAM-STR', name: 'Structural Team' },
-        { type: 'Progress', id: 'DEL-002', name: 'Foundation Completion' },
-        { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
-        { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' },
-        { type: 'Testing', id: 'TST-CNC-005', name: 'Concrete Strength Test Report' },
-        { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
-        { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
-        { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
-        { type: 'Issues', id: 'RFI-012', name: 'RFI-012_Response.pdf' },
-        { type: 'Compliance', id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf' },
-        { type: 'Change Order', id: 'CR-0012', name: 'Substitute roofing material' },
+      { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
+      { type: 'Resource', id: 'TEAM-STR', name: 'Structural Team' },
+      { type: 'Progress', id: 'DEL-002', name: 'Foundation Completion' },
+      { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
+      { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' },
+      { type: 'Testing', id: 'TST-CNC-005', name: 'Concrete Strength Test Report' },
+      { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
+      { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
+      { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
+      { type: 'Issues', id: 'RFI-012', name: 'RFI-012_Response.pdf' },
+      { type: 'Compliance', id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf' },
+      { type: 'Change Order', id: 'CR-0012', name: 'Substitute roofing material' },
     ];
 
     const usageAnalytics = {
