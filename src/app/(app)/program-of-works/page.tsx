@@ -519,6 +519,31 @@ export default function ProgramOfWorksPage() {
                             </Card>
                         </div>
                         <Card>
+                            <CardHeader>
+                                <CardTitle className='text-base'>Material Specifications</CardTitle>
+                            </CardHeader>
+                            <CardContent className='space-y-4'>
+                               {selectedItem?.materials && selectedItem.materials.length > 0 ? (
+                                 selectedItem.materials.map((mat, index) => (
+                                    <div key={index} className="p-3 rounded-md border text-sm">
+                                        <div className="flex items-center gap-2 font-semibold">
+                                            <ToyBrick className="h-4 w-4 text-muted-foreground" />
+                                            <span>{mat.name}</span>
+                                        </div>
+                                        <div className="pl-6">
+                                            <p><strong>Qty:</strong> {mat.quantity}</p>
+                                            <p><strong>Spec:</strong> {mat.spec}</p>
+                                        </div>
+                                    </div>
+                                 ))
+                               ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    {selectedItem ? 'No materials specified for this package.' : 'Select a package to see materials.'}
+                                </p>
+                               )}
+                            </CardContent>
+                          </Card>
+                        <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle className='text-base'>Dependencies</CardTitle>
                                 <Dialog>
@@ -703,41 +728,10 @@ export default function ProgramOfWorksPage() {
                )}
             </CardContent>
           </Card>
-           <Card>
-            <CardHeader>
-              <CardTitle>Material Specifications</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-               {selectedItem?.materials && selectedItem.materials.length > 0 ? (
-                 selectedItem.materials.map((mat, index) => (
-                    <div key={index} className="p-3 rounded-md border text-sm">
-                        <div className="flex items-center gap-2 font-semibold">
-                            <ToyBrick className="h-4 w-4 text-muted-foreground" />
-                            <span>{mat.name}</span>
-                        </div>
-                        <div className="pl-6">
-                            <p><strong>Qty:</strong> {mat.quantity}</p>
-                            <p><strong>Spec:</strong> {mat.spec}</p>
-                        </div>
-                    </div>
-                 ))
-               ) : (
-                <p className="text-sm text-muted-foreground">
-                    {selectedItem ? 'No materials specified for this package.' : 'Select a package to see materials.'}
-                </p>
-               )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
   );
 }
-
-    
-
-    
-
-    
 
     
