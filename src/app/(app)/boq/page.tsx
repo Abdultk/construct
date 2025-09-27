@@ -578,18 +578,18 @@ export default function BoqDataGridPage() {
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
                             <Wand2 className="h-5 w-5 text-ai-accent" />
-                            How It Works
+                            Advanced Generation Logic
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm">
-                            Our AI analyzes your BOQ items using a vast knowledge base of construction methodologies. It will:
+                            Our AI analyzes your BOQ using a vast construction knowledge base. It will:
                         </p>
                         <ul className="list-disc list-inside text-sm space-y-1 mt-2">
-                            <li>Classify items into a logical work breakdown structure.</li>
-                            <li>Sequence activities and create dependencies based on industry best practices.</li>
-                            <li>Estimate durations and resource requirements for each activity.</li>
-                            <li>Generate a complete, editable Program of Works for your project.</li>
+                            <li><strong>Sequence Intelligence:</strong> Logically order activities based on trade dependencies, spatial constraints, and resource availability.</li>
+                            <li><strong>Dependency Generation:</strong> Automatically create finish-to-start, start-to-start, and other complex relationships.</li>
+                            <li><strong>Estimate Durations:</strong> Calculate realistic task durations using quantity, productivity rates, complexity factors, and risk buffers.</li>
+                            <li><strong>Generate a Hierarchical WBS:</strong> Create a complete, multi-level program from project phases down to detailed sub-tasks.</li>
                         </ul>
                     </CardContent>
                 </Card>
