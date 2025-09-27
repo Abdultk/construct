@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package, Palette, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package, Palette, Image as ImageIcon, Building, Home, HardHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,10 +46,31 @@ const projectThemes = [
     { name: 'Mono', colors: ['bg-gray-800', 'bg-gray-200', 'bg-gray-400'] },
 ];
 
+const templates = [
+  {
+    name: 'Commercial High-Rise',
+    icon: Building,
+    description: 'A standard template for multi-story commercial building projects.',
+    includes: ['Standard WBS', 'BOQ Template', 'Core Team Roles', 'Document Set'],
+  },
+  {
+    name: 'Residential Development',
+    icon: Home,
+    description: 'For single-family or multi-family housing projects.',
+    includes: ['Phased WBS', 'Cost Codes', 'Standard Roles', 'Permit Docs'],
+  },
+  {
+    name: 'Infrastructure Project',
+    icon: HardHat,
+    description: 'Template for large-scale infrastructure like bridges or roads.',
+    includes: ['Regulatory WBS', 'CESMM4 BOQ', 'Compliance Docs'],
+  },
+];
+
 
 export default function ProjectSetupPage() {
   const [step, setStep] = React.useState(1);
-  const totalSteps = 4;
+  const totalSteps = 5;
   const router = useRouter();
   const { toast } = useToast();
 
@@ -70,16 +91,19 @@ export default function ProjectSetupPage() {
   const [selectedTheme, setSelectedTheme] = React.useState('Default');
 
   // Step 2 State
+  const [selectedTemplate, setSelectedTemplate] = React.useState('Commercial High-Rise');
+
+  // Step 3 State
   const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
   const [newMemberEmail, setNewMemberEmail] = React.useState('');
   const [newMemberRole, setNewMemberRole] = React.useState('');
 
-  // Step 3 State
+  // Step 4 State
   const [boqFile, setBoqFile] = React.useState<File | null>(null);
   const [wbsFile, setWbsFile] = React.useState<File | null>(null);
   const [selectedStandard, setSelectedStandard] = React.useState('Auto-Detect');
 
-  // Step 4 State
+  // Step 5 State
   const [budgetAllocation, setBudgetAllocation] = React.useState({
     materials: '40',
     labor: '35',
@@ -210,9 +234,10 @@ export default function ProjectSetupPage() {
             <CardTitle>New Project Setup</CardTitle>
             <CardDescription>
                 {step === 1 && "Start by providing the basic details of your new project."}
-                {step === 2 && "Assign team members and define their roles for this project."}
-                {step === 3 && "Import your Bill of Quantities (BOQ) or Work Breakdown Structure (WBS) for AI-powered validation and analysis."}
-                {step === 4 && "Review and establish the project baseline, including budget, milestones, and initial risk assessment."}
+                {step === 2 && "Choose a template to kickstart your project with a predefined structure."}
+                {step === 3 && "Assign team members and define their roles for this project."}
+                {step === 4 && "Import your Bill of Quantities (BOQ) or Work Breakdown Structure (WBS) for AI-powered validation and analysis."}
+                {step === 5 && "Review and establish the project baseline, including budget, milestones, and initial risk assessment."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -390,6 +415,41 @@ export default function ProjectSetupPage() {
             )}
             {step === 2 && (
               <div className="space-y-6">
+                <Card className="border-ai-accent/50 bg-ai-accent/10">
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <Lightbulb className="h-6 w-6 text-ai-accent" />
+                    <div>
+                      <h4 className="font-semibold">AI Recommended: Commercial High-Rise</h4>
+                      <p className="text-sm text-muted-foreground">Based on your project type ('{projectType || 'Commercial'}') and scope, this template is the best fit.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {templates.map((template) => (
+                    <Card
+                      key={template.name}
+                      className={cn("cursor-pointer", selectedTemplate === template.name ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50')}
+                      onClick={() => setSelectedTemplate(template.name)}
+                    >
+                      <CardHeader>
+                        <template.icon className="w-8 h-8 mb-2 text-primary" />
+                        <CardTitle>{template.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">{template.description}</p>
+                      </CardContent>
+                      <CardFooter>
+                         <div className="flex flex-wrap gap-2">
+                            {template.includes.map(item => <Badge key={item} variant="secondary">{item}</Badge>)}
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            {step === 3 && (
+              <div className="space-y-6">
                 <div className="space-y-4 rounded-lg border p-4">
                   <h3 className="font-semibold">Invite Team Members</h3>
                   <div className="flex flex-col md:flex-row gap-4">
@@ -456,7 +516,7 @@ export default function ProjectSetupPage() {
                 </div>
               </div>
             )}
-             {step === 3 && (
+             {step === 4 && (
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -531,7 +591,7 @@ export default function ProjectSetupPage() {
                      <p className="text-xs text-muted-foreground text-center">Our AI will automatically validate your documents for inconsistencies and potential cost-saving opportunities.</p>
                 </div>
             )}
-            {step === 4 && (
+            {step === 5 && (
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -690,5 +750,3 @@ export default function ProjectSetupPage() {
     </div>
   );
 }
-
-    
