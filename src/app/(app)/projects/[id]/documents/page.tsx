@@ -105,7 +105,7 @@ import { Lightbulb } from 'lucide-react';
 type Document = {
   id: string;
   name: string;
-  type: 'Document' | 'CAD' | 'Report' | 'Archive' | 'Folder' | 'Permit' | 'Spreadsheet' | 'Minutes' | 'Standard' | 'Template' | 'Presentation' | string;
+  type: 'Document' | 'CAD' | 'Report' | 'Archive' | 'Permit' | 'Spreadsheet' | 'Minutes' | 'Standard' | 'Template' | 'Presentation' | string;
   size: string;
   lastModified: string;
   discipline: 'Architectural' | 'Structural' | 'MEP' | 'Civil' | 'Commercial' | 'General';
