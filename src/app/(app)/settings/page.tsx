@@ -294,7 +294,7 @@ export default function SettingsPage() {
                 Connect your ConstructAI account with other services.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -305,6 +305,28 @@ export default function SettingsPage() {
                         </div>
                     </div>
                     <Button>
+                        <LinkIcon className="mr-2 h-4 w-4" />
+                        Connect
+                    </Button>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.832 3.003l7.168 12.417-3.584 6.208H6.584L3 15.42l3.584-6.209L10.168 3l3.664.003z" fill="#FBBC04"/>
+                            <path d="M10.168 3L6.584 9.211 3 15.42l1.792 3.104h3.584l3.584-6.209L8.376 6.107l1.792-3.104z" fill="#00832D"/>
+                            <path d="M10.168 3l-1.792 3.103L3 15.42h7.168l3.584-6.209L10.168 3z" fill="#34A853"/>
+                            <path d="M17.416 9.211l-3.584 6.209L10.25 21.628h10.752l3-5.197-6.584-7.22z" fill="#4285F4"/>
+                            <path d="M17.416 9.211L13.832 3h3.584l6.584 11.41-3 5.198h-7.168l3.584-6.209z" fill="#34A853"/>
+                            <path d="M17.416 9.211l-3.584 6.209h7.168l-3.584-6.209z" fill="#1A73E8"/>
+                        </svg>
+                        <div>
+                            <CardTitle className="text-base">Google Workspace</CardTitle>
+                            <CardDescription>Sync documents with Google Drive, Docs, and Sheets.</CardDescription>
+                        </div>
+                    </div>
+                    <Button variant="outline">
                         <LinkIcon className="mr-2 h-4 w-4" />
                         Connect
                     </Button>
