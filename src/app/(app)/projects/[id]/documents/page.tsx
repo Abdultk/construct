@@ -407,6 +407,7 @@ export default function DocumentLibraryPage() {
                             <AvatarFallback>+2</AvatarFallback>
                         </Avatar>
                     </div>
+                    <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
                     <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download Marked-up PDF</Button>
                 </div>
             </DialogHeader>
