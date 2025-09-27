@@ -202,7 +202,7 @@ export default function DocumentLibraryPage() {
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files).map((file, index) => ({
-        id: `UPL-${Date.now()}-${index}`,
+        id: `UPL-${Date.now()}-${index}-${Math.random()}`,
         name: file.name,
         type: file.type.split('/')[1]?.toUpperCase() || 'Document',
         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
@@ -910,20 +910,16 @@ return (
                                         <TableBody>
                                             {subCategories.map((category) => (
                                                 <React.Fragment key={category.name}>
-                                                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                                        <td className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
+                                                    <TableRow>
+                                                        <TableCell className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
                                                             <Folder className="h-5 w-5 text-primary" />
                                                             <span>{category.name}</span>
-                                                        </td>
-                                                        <td className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></td>
-                                                        <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
-                                                    </tr>
+                                                        </TableCell>
+                                                        <TableCell className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></TableCell>
+                                                        <TableCell colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></TableCell>
+                                                    </TableRow>
                                                     
                                                     {category.documents.map((doc) => {
-                                                      const ReviewDialog = <Dialog><DialogTrigger asChild><span/></DialogTrigger><RealTimeReviewDialog doc={doc} /></Dialog>
-                                                      const HistoryDialogComponent = <Dialog><DialogTrigger asChild><span/></DialogTrigger><HistoryDialog doc={doc} /></Dialog>
-                                                      const ArchiveDialog = <Dialog><DialogTrigger asChild><span/></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent></Dialog>
-                                                      
                                                       return(
                                                         <TableRow key={doc.id}>
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
