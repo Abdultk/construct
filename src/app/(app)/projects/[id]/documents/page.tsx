@@ -378,6 +378,7 @@ export default function DocumentLibraryPage() {
         }
 
         try {
+            await msalInstance.initialize();
             await msalInstance.loginPopup({
                 scopes: ["Files.ReadWrite.All", "offline_access"],
             });
