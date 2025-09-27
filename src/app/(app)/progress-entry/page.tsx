@@ -32,7 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useState, useRef }from 'react';
+import { useState, useRef, ChangeEvent }from 'react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -82,7 +82,7 @@ export default function ProgressEntryPage() {
     );
   };
   
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setAttachments(prev => [...prev, ...Array.from(event.target.files!)]);
       toast({
@@ -334,8 +334,3 @@ export default function ProgressEntryPage() {
     </div>
   );
 }
-
-
-
-
-    
