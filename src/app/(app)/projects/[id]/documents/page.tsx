@@ -72,7 +72,9 @@ import {
   List,
   ListOrdered,
   Pilcrow,
-  File,
+  File as FileIcon,
+  Loader2,
+  MessageCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -311,6 +313,8 @@ export default function DocumentLibraryPage() {
              return <Presentation className="h-5 w-5 text-orange-500" />;
         case 'pdf':
              return <FileText className="h-5 w-5 text-red-500" />;
+        case 'docx':
+            return <FileText className="h-5 w-5 text-blue-700" />;
         default: return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
@@ -339,9 +343,17 @@ export default function DocumentLibraryPage() {
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
     const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
-    const [comments, setComments] = useState<LiveComment[]>([]);
-    const [newComment, setNewComment] = useState("");
-    const [newCommentType, setNewCommentType] = useState<LiveComment['type']>('Comment');
+    const [isEditorLoading, setIsEditorLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        if (doc) {
+            setIsEditorLoading(true);
+            const timer = setTimeout(() => {
+                setIsEditorLoading(false);
+            }, 1500); // Simulate network latency for fetching the edit URL
+            return () => clearTimeout(timer);
+        }
+    }, [doc]);
 
     if (!doc) return null;
 
@@ -351,95 +363,33 @@ export default function DocumentLibraryPage() {
         { id: 'charlie', name: 'Charlie Davis', avatar: 'https://picsum.photos/seed/12/40/40' }
     ];
 
-    const handleSendComment = () => {
-        if (newComment.trim()) {
-            setComments(prev => [...prev, {
-                id: `comment-${Date.now()}`,
-                user: { name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
-                text: newComment,
-                timestamp: 'Just now',
-                type: newCommentType,
-                status: 'Open'
-            }]);
-            setNewComment("");
-            setNewCommentType('Comment');
-        }
-    }
-    
-    const toggleCommentStatus = (id: string) => {
-        setComments(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Open' ? 'Resolved' : 'Open' } : c));
-    }
-    
-    const getCommentIcon = (type: LiveComment['type']) => {
-        switch(type) {
-            case 'Action Item': return <ListTodo className="h-4 w-4 text-blue-500" />;
-            case 'Question': return <HelpCircle className="h-4 w-4 text-yellow-500" />;
-            default: return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
-        }
-    }
-
-    const renderCommentWithMentions = (text: string) => {
-        const mentionRegex = /@(\w+\s?\w*)/g;
-        const parts = text.split(mentionRegex);
-        return parts.map((part, index) => {
-            const isMention = index % 2 === 1;
-            const collaborator = isMention ? collaborators.find(c => c.name.toLowerCase().replace(' ', '') === part.toLowerCase().replace(' ', '')) : null;
-            if (isMention && collaborator) {
-                return <span key={index} className="text-primary font-semibold bg-primary/10 p-0.5 rounded-sm">@{collaborator.name}</span>
-            }
-            return part;
-        });
-    }
-
-    const knowledgeGraphEntities = {
-        'Materials': ['Concrete Grade C40', 'Reinforcement Steel B500B'],
-        'Equipment': ['Tower Crane TC-1', 'Concrete Pump P-02'],
-        'Locations': ['Level 10-15', 'Core Shaft B'],
-    };
-
-    const knowledgeGraphDependencies = {
-        'Upstream': [{id: 'STR-PLN-002', name: 'Structural Plan v2'}],
-        'Downstream': [{id: 'MEP-DWD-005', name: 'MEP Coordination Drawing'}, {id: 'BOQ-v1.3', name: 'Bill of Quantities v1.3'}],
-    };
-
-    const knowledgeGraphIntegrations = [
-      { type: 'Schedule', id: 'TSK-105', name: 'Foundation Pouring' },
-      { type: 'Resource', id: 'TEAM-STR', name: 'Structural Team' },
-      { type: 'Progress', id: 'DEL-002', name: 'Foundation Completion' },
-      { type: 'Cost', id: 'C-3100', name: 'Concrete Works' },
-      { type: 'Quality', id: 'QCL-002', name: 'Concrete Pour Checklist' },
-      { type: 'Testing', id: 'TST-CNC-005', name: 'Concrete Strength Test Report' },
-      { type: 'BIM Model', id: 'BM-L10-STR-001', name: 'Beam B-101' },
-      { type: 'ERP', id: 'PO-2024-754', name: 'Purchase Order for Steel' },
-      { type: 'Asset Registry', id: 'AHU-01', name: 'Air Handling Unit 01' },
-      { type: 'Issues', id: 'RFI-012', name: 'RFI-012_Response.pdf' },
-      { type: 'Compliance', id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf' },
-      { type: 'Change Order', id: 'CR-0012', name: 'Substitute roofing material' },
-    ];
-
-    const usageAnalytics = {
-      views: '128',
-      uniqueViewers: '15',
-      shares: '5',
-      comments: comments.length,
-    };
-    
-    const contentAnalytics = {
-      revisions: documentHistory.length,
-      status: 'Under Review',
-      age: '12 days',
-    };
-
     const getEditorInterface = () => {
         const fileExtension = doc.name.split('.').pop()?.toLowerCase();
         
+        if (isEditorLoading) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <p className="mt-4 text-sm text-muted-foreground">Generating secure editing session...</p>
+                </div>
+            )
+        }
+
         switch(fileExtension) {
             case 'docx':
+            case 'xlsx':
+            case 'pptx':
                  return (
-                    <div className="bg-muted rounded-md h-full overflow-auto flex flex-col border">
-                      <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-                        <p>Embedded Microsoft 365 editor for <strong>{doc.name}</strong> would be displayed here.</p>
-                      </div>
+                    <div className="bg-background h-full w-full border rounded-md overflow-hidden">
+                        <iframe 
+                            src="about:blank" // In a real app, this would be the webUrl from Graph API
+                            width="100%" 
+                            height="100%" 
+                            frameBorder="0"
+                            title={`Microsoft 365 Editor for ${doc.name}`}
+                        >
+                            <p>Your browser does not support iframes. Please open the document in a new tab.</p>
+                        </iframe>
                     </div>
                   );
             case 'pdf':
@@ -487,189 +437,11 @@ export default function DocumentLibraryPage() {
                         </Avatar>
                     </div>
                     <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
-                    <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download Marked-up PDF</Button>
+                    <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download</Button>
                 </div>
             </DialogHeader>
-            <div className="grid grid-cols-12 gap-4 h-full py-4 overflow-hidden">
-                <div className="col-span-9 flex flex-col gap-4">
-                    <div className="grid grid-cols-12 gap-2">
-                        <div className="col-span-3">
-                             <Card className="h-full">
-                                <CardHeader className="p-2">
-                                    <CardTitle className="text-base">Markup Tools</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-2 grid grid-cols-2 gap-2">
-                                    <Button variant="outline" className="flex-col h-16"><Pen className="h-5 w-5" /> Pen</Button>
-                                    <Button variant="outline" className="flex-col h-16"><Highlighter className="h-5 w-5" /> Highlight</Button>
-                                    <Button variant="outline" className="flex-col h-16"><Type className="h-5 w-5" /> Text</Button>
-                                    <Button variant="outline" className="flex-col h-16"><Square className="h-5 w-5" /> Shape</Button>
-                                </CardContent>
-                            </Card>
-                        </div>
-                        <div className="col-span-9">
-                            <Card>
-                                <Tabs defaultValue="entities">
-                                    <CardHeader className="p-2">
-                                        <CardTitle className="text-base">Knowledge Graph</CardTitle>
-                                        <TabsList className="grid w-full grid-cols-5 h-8">
-                                            <TabsTrigger value="entities" className="h-6">Entities</TabsTrigger>
-                                            <TabsTrigger value="dependencies" className="h-6">Dependencies</TabsTrigger>
-                                            <TabsTrigger value="integrations" className="h-6">Integrations</TabsTrigger>
-                                            <TabsTrigger value="analytics" className="h-6">Analytics</TabsTrigger>
-                                            <TabsTrigger value="related" className="h-6">Related</TabsTrigger>
-                                        </TabsList>
-                                    </CardHeader>
-                                    <CardContent className="p-2 h-36 overflow-y-auto">
-                                        <TabsContent value="entities">
-                                             <div className="space-y-2">
-                                                {Object.entries(knowledgeGraphEntities).map(([category, items]) => (
-                                                    <div key={category}>
-                                                        <p className="text-xs font-semibold text-muted-foreground">{category}</p>
-                                                        <div className="flex flex-wrap gap-1 mt-1">
-                                                            {items.map(item => <Badge key={item} variant="outline">{item}</Badge>)}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </TabsContent>
-                                        <TabsContent value="dependencies">
-                                            <div className="space-y-2">
-                                                 <div>
-                                                    <p className="text-xs font-semibold text-muted-foreground">Upstream (Influences this doc)</p>
-                                                    {knowledgeGraphDependencies.Upstream.map(dep => (
-                                                        <Button key={dep.id} variant="link" className="p-0 h-auto text-sm">{dep.name}</Button>
-                                                    ))}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-semibold text-muted-foreground">Downstream (Affected by this doc)</p>
-                                                    {knowledgeGraphDependencies.Downstream.map(dep => (
-                                                         <Button key={dep.id} variant="link" className="p-0 h-auto text-sm block">{dep.name}</Button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </TabsContent>
-                                        <TabsContent value="related">
-                                            <Button variant="link" className="p-0 h-auto text-sm block">TEC-MS-001 - Method Statement - Concrete.pdf</Button>
-                                            <Button variant="link" className="p-0 h-auto text-sm block">COM-RFI-012_Response.pdf</Button>
-                                        </TabsContent>
-                                        <TabsContent value="integrations">
-                                            <div className="space-y-2">
-                                                {knowledgeGraphIntegrations.map(item => (
-                                                    <div key={item.id}>
-                                                        <p className="text-xs font-semibold text-muted-foreground">{item.type} Integration</p>
-                                                        <Button variant="link" className="p-0 h-auto text-sm flex items-center gap-1">
-                                                            <LinkIcon className="h-3 w-3"/>
-                                                            {item.name} ({item.id})
-                                                        </Button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </TabsContent>
-                                        <TabsContent value="analytics">
-                                            <div className="space-y-2">
-                                                <div>
-                                                    <p className="text-xs font-semibold text-muted-foreground">Usage Analytics</p>
-                                                    <div className="grid grid-cols-4 gap-x-2 text-center mt-1">
-                                                        <div className="font-medium">{usageAnalytics.views}<span className="text-xs text-muted-foreground block">Views</span></div>
-                                                        <div className="font-medium">{usageAnalytics.uniqueViewers}<span className="text-xs text-muted-foreground block">Viewers</span></div>
-                                                        <div className="font-medium">{usageAnalytics.comments}<span className="text-xs text-muted-foreground block">Comments</span></div>
-                                                        <div className="font-medium">{usageAnalytics.shares}<span className="text-xs text-muted-foreground block">Shares</span></div>
-                                                    </div>
-                                                </div>
-                                                 <div>
-                                                    <p className="text-xs font-semibold text-muted-foreground">Content Analytics</p>
-                                                    <div className="grid grid-cols-3 gap-x-2 text-center mt-1">
-                                                        <div className="font-medium">{contentAnalytics.revisions}<span className="text-xs text-muted-foreground block">Revisions</span></div>
-                                                        <div className="font-medium">{contentAnalytics.status}<span className="text-xs text-muted-foreground block">Status</span></div>
-                                                        <div className="font-medium">{contentAnalytics.age}<span className="text-xs text-muted-foreground block">Age</span></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </TabsContent>
-                                    </CardContent>
-                                </Tabs>
-                            </Card>
-                        </div>
-                    </div>
-                     <div className="flex-1 h-full overflow-auto">
-                       {getEditorInterface()}
-                    </div>
-                </div>
-                <div className="col-span-3 flex flex-col h-full">
-                    <Card className="flex-1 flex flex-col">
-                        <CardHeader className="p-4 border-b">
-                            <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Live Comments</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                            {comments.length > 0 ? (
-                                comments.map(comment => (
-                                    <div key={comment.id} className={cn("p-2 rounded-md", comment.status === 'Resolved' ? 'bg-green-500/10' : '')}>
-                                        <div className="flex items-start gap-3">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={comment.user.avatar} />
-                                                <AvatarFallback>{comment.user.name.slice(0,2)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-semibold">{comment.user.name}</span>
-                                                    <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                                                </div>
-                                                <div className="text-sm mt-1">{renderCommentWithMentions(comment.text)}</div>
-                                            </div>
-                                        </div>
-                                         <div className="mt-2 flex items-center justify-between pl-11">
-                                            <div className="flex items-center gap-2">
-                                                {getCommentIcon(comment.type)}
-                                                <span className="text-xs font-medium">{comment.type}</span>
-                                            </div>
-                                            <Button variant="ghost" size="sm" onClick={() => toggleCommentStatus(comment.id)}>
-                                                {comment.status === 'Open' ? <CheckCircle className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                                                {comment.status === 'Open' ? 'Resolve' : 'Re-open'}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-center text-muted-foreground pt-10">
-                                    <MessageSquare className="mx-auto h-8 w-8" />
-                                    <p className="mt-2 text-sm">No comments yet.</p>
-                                </div>
-                            )}
-                        </CardContent>
-                        <CardFooter className="p-2 border-t">
-                             <div className="relative w-full">
-                                <Input 
-                                    placeholder="Add a comment... Type @ to mention" 
-                                    className="pr-10" 
-                                    value={newComment} 
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSendComment()}
-                                />
-                                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        {getCommentIcon(newCommentType)}
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent>
-                                      <DropdownMenuLabel>Comment Type</DropdownMenuLabel>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuRadioGroup value={newCommentType} onValueChange={(v) => setNewCommentType(v as LiveComment['type'])}>
-                                        <DropdownMenuRadioItem value="Comment">Comment</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Action Item">Action Item</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Question">Question</DropdownMenuRadioItem>
-                                      </DropdownMenuRadioGroup>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSendComment}>
-                                      <Send className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                </div>
+            <div className="h-full py-4 overflow-hidden">
+                {getEditorInterface()}
             </div>
         </DialogContent>
     );
@@ -1213,6 +985,7 @@ return (
 
 
     
+
 
 
 
