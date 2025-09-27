@@ -1079,7 +1079,11 @@ return (
                                                     
                                                     {category.documents.map((doc) => {
                                                       return(
-                                                        <TableRow key={doc.id}>
+                                                        <TableRow 
+                                                            key={doc.id} 
+                                                            className="cursor-pointer"
+                                                            onClick={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}
+                                                        >
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
                                                                 {getFileIcon(doc.type)}
                                                                 <span>{doc.name}</span>
@@ -1095,7 +1099,7 @@ return (
                                                             <TableCell>
                                                               <DropdownMenu>
                                                                   <DropdownMenuTrigger asChild>
-                                                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                                                                           <MoreVertical className="h-4 w-4" />
                                                                       </Button>
                                                                   </DropdownMenuTrigger>
