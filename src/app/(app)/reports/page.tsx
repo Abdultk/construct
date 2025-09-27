@@ -306,8 +306,8 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-500 mt-0.5" />
                   <div>
                     <p className="font-semibold">Risk: Schedule Delay</p>
                     <p className="text-sm text-muted-foreground">
@@ -318,8 +318,8 @@ export default function ReportsPage() {
                 </div>
               </div>
               <div className="rounded-lg border border-blue-500/50 bg-blue-500/10 p-4">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 flex-shrink-0 text-blue-500 mt-0.5" />
                   <div>
                     <p className="font-semibold">Opportunity: Cost Saving</p>
                     <p className="text-sm text-muted-foreground">
@@ -330,8 +330,8 @@ export default function ReportsPage() {
                 </div>
               </div>
               <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500 mt-0.5" />
                   <div>
                     <p className="font-semibold">Positive Trend: Safety</p>
                     <p className="text-sm text-muted-foreground">
@@ -350,7 +350,7 @@ export default function ReportsPage() {
                 {reportTemplates.map(template => (
                     <Button key={template.title} variant="outline" className="h-20 flex-col items-start p-3 gap-1">
                         <template.icon className="h-5 w-5 mb-1" />
-                        <span className="text-xs font-semibold">{template.title}</span>
+                        <span className="text-xs font-semibold text-left">{template.title}</span>
                     </Button>
                 ))}
             </CardContent>
@@ -389,5 +389,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-
-    
