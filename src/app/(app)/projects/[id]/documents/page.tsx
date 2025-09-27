@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -63,6 +62,7 @@ import {
   Presentation,
   Shield,
   Fingerprint,
+  ScanText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -203,7 +203,7 @@ const documentHistory = [
 
 
 let uploadIdCounter = 0;
-const getUploadId = () => `UPL-${Date.now()}-${uploadIdCounter++}`;
+const getUploadId = () => `UPL-${uploadIdCounter++}`;
 
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
@@ -274,6 +274,14 @@ export default function DocumentLibraryPage() {
         description: `Syncing with ${platform}. You will be notified upon completion.`,
     })
   }
+
+  const handleOcr = (docName: string) => {
+    toast({
+        title: 'OCR Process Started',
+        description: `Extracting text from ${docName}. The document will be searchable shortly.`,
+    })
+  }
+
 
   const getFileIcon = (docType: string) => {
     switch (docType) {
@@ -1112,6 +1120,9 @@ return (
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security</DropdownMenuItem>
                                                                       <DropdownMenuSeparator />
+                                                                      <DropdownMenuItem onSelect={() => handleOcr(doc.name)}>
+                                                                          <ScanText className="mr-2 h-4 w-4" /> Extract Text (OCR)
+                                                                      </DropdownMenuItem>
                                                                       <DropdownMenuItem>Archive</DropdownMenuItem>
                                                                       <DropdownMenuSeparator />
                                                                       <DropdownMenuItem className="text-destructive">
@@ -1146,3 +1157,6 @@ return (
     </div>
 );
 }
+
+
+    
