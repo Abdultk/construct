@@ -114,7 +114,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lightbulb } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import * as msal from '@azure/msal-browser';
 
 
 type Document = {
@@ -212,24 +211,6 @@ const documentHistory = [
     status: 'Approved',
   },
 ];
-
-
-const msalConfig = {
-  auth: {
-    clientId: "YOUR_CLIENT_ID_REPLACE_ME",
-    authority: "https://login.microsoftonline.com/YOUR_TENANT_ID_REPLACE_ME",
-    redirectUri: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
-  },
-   cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
-  },
-};
-
-let msalInstance: msal.PublicClientApplication | null = null;
-if (typeof window !== 'undefined') {
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-}
 
 
 export default function DocumentLibraryPage() {
@@ -360,76 +341,45 @@ export default function DocumentLibraryPage() {
   }
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
-    const [isMicrosoftAuthenticated, setIsMicrosoftAuthenticated] = useState(false);
-    const [isEditorLoading, setIsEditorLoading] = React.useState(false);
-    const { toast } = useToast();
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [accessUrl, setAccessUrl] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        if (!isReviewOpen) {
-            setIsMicrosoftAuthenticated(false);
-            setIsEditorLoading(false);
+        if (doc) {
+            setIsLoading(true);
+            setAccessUrl(null);
+            // Simulate fetching the WOPI URL from the backend
+            const timer = setTimeout(() => {
+                const wopiSrc = `https://your-wopi-host.com/wopi/files/${doc.id}`;
+                const token = 'DUMMY_ACCESS_TOKEN'; // This would be a real, short-lived JWT
+                setAccessUrl(`https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${token}`);
+                setIsLoading(false);
+            }, 1500);
+            return () => clearTimeout(timer);
         }
-    }, [isReviewOpen]);
-
-    const handleMicrosoftSignIn = async () => {
-        if (!msalInstance) {
-            toast({ variant: 'destructive', title: 'MSAL not initialized.' });
-            return;
-        }
-
-        try {
-            await msalInstance.initialize();
-            await msalInstance.loginPopup({
-                scopes: ["Files.ReadWrite.All", "offline_access"],
-            });
-            toast({ title: "Login Successful", description: "You have successfully signed in with Microsoft." });
-            setIsMicrosoftAuthenticated(true);
-            setIsEditorLoading(true);
-            setTimeout(() => {
-                setIsEditorLoading(false);
-            }, 1500); // Simulate API call to get edit URL
-        } catch (error) {
-            console.error(error);
-            toast({ variant: "destructive", title: "Login Failed", description: "Could not sign in with Microsoft." });
-        }
-    };
-
+    }, [doc]);
+    
     if (!doc) return null;
 
     const fileExtension = doc.name.split('.').pop()?.toLowerCase();
     const isOfficeDoc = ['docx', 'xlsx', 'pptx'].includes(fileExtension || '');
     const isPdf = fileExtension === 'pdf';
-
-    const getEditorContent = () => {
-        if (!isMicrosoftAuthenticated && (isOfficeDoc || isPdf)) {
-            return (
-                <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border p-8 text-center">
-                    <Building2 className="h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Authentication Required</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Please sign in with your Microsoft account to edit this document.
-                    </p>
-                    <Button className="mt-4" onClick={handleMicrosoftSignIn}>
-                        Sign in with Microsoft
-                    </Button>
-                </div>
-            )
-        }
-
-        if (isEditorLoading) {
-            return (
+    
+    const getEditorInterface = () => {
+        if (isLoading && isOfficeDoc) {
+             return (
                 <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     <p className="mt-4 text-sm text-muted-foreground">Generating secure editing session...</p>
                 </div>
             );
         }
-        
-        if (isOfficeDoc) {
-             return (
+
+        if (accessUrl && isOfficeDoc) {
+            return (
                 <div className="bg-background h-full w-full border rounded-md overflow-hidden">
                     <iframe 
-                        src="about:blank"
+                        src={accessUrl}
                         width="100%" 
                         height="100%" 
                         frameBorder="0"
@@ -441,15 +391,15 @@ export default function DocumentLibraryPage() {
                 </div>
             );
         }
-
+        
         if (isPdf) {
             return (
                 <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
                     <div className="p-2 bg-white border-b flex items-center gap-2">
-                            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
                         </svg>
-                            <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
+                        <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
                     </div>
                     <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
                         <p>Embedded Adobe PDF editor for <strong>{doc.name}</strong> would be displayed here.</p>
@@ -466,7 +416,7 @@ export default function DocumentLibraryPage() {
                 )}
             </div>
         );
-    };
+    }
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
@@ -477,7 +427,7 @@ export default function DocumentLibraryPage() {
                 </div>
             </DialogHeader>
             <div className="h-full py-4 overflow-hidden">
-                {getEditorContent()}
+                {getEditorInterface()}
             </div>
         </DialogContent>
     );
