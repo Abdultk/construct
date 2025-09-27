@@ -201,6 +201,35 @@ export default function DocumentLibraryPage() {
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
+      const newFiles = Array.from(files).map((file, index) => ({
+        id: `UPL-${Date.now()}-${index}`,
+        name: file.name,
+        type: file.type.split('/')[1]?.toUpperCase() || 'Document',
+        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        lastModified: new Date().toISOString().split('T')[0],
+        discipline: 'General' as const,
+        status: 'Draft' as const,
+        revision: '1.0.0',
+      }));
+
+      setDocuments(prevDocs => {
+        const newDocs = { ...prevDocs };
+        const projectDocs = newDocs["Project Documentation"] || [];
+        let uploadsCategory = projectDocs.find(cat => cat.name === 'Uploads');
+
+        if (uploadsCategory) {
+          uploadsCategory.documents.push(...newFiles);
+        } else {
+          projectDocs.push({
+            name: 'Uploads',
+            documents: newFiles,
+          });
+        }
+        
+        newDocs["Project Documentation"] = projectDocs;
+        return newDocs;
+      });
+
       toast({
         title: 'Upload Successful',
         description: `${files.length} file(s) have been added.`,
@@ -582,7 +611,7 @@ export default function DocumentLibraryPage() {
     const canGenerateReport = selectedVersions.length > 0;
 
     return (
-        <>
+        <React.Fragment>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Version History: {doc.name}</DialogTitle>
@@ -638,7 +667,7 @@ export default function DocumentLibraryPage() {
              <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
                 <ComparisonReportDialog versions={selectedVersions} />
             </Dialog>
-        </>
+        </React.Fragment>
     );
 };
 
@@ -890,7 +919,12 @@ return (
                                                         <td colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></td>
                                                     </tr>
                                                     
-                                                    {category.documents.map((doc) => (
+                                                    {category.documents.map((doc) => {
+                                                      const ReviewDialog = <Dialog><DialogTrigger asChild><span/></DialogTrigger><RealTimeReviewDialog doc={doc} /></Dialog>
+                                                      const HistoryDialogComponent = <Dialog><DialogTrigger asChild><span/></DialogTrigger><HistoryDialog doc={doc} /></Dialog>
+                                                      const ArchiveDialog = <Dialog><DialogTrigger asChild><span/></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent></Dialog>
+                                                      
+                                                      return(
                                                         <TableRow key={doc.id}>
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
                                                                 {getFileIcon(doc.type)}
@@ -905,44 +939,37 @@ return (
                                                             <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
                                                             <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
                                                             <TableCell>
-                                                                <Dialog>
-                                                                    <DropdownMenu>
-                                                                        <DropdownMenuTrigger asChild>
-                                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                                <MoreVertical className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </DropdownMenuTrigger>
-                                                                        <DropdownMenuContent align="end">
-                                                                            <DialogTrigger asChild>
-                                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
-                                                                            </DialogTrigger>
-                                                                            <DropdownMenuItem>Download</DropdownMenuItem>
-                                                                            <DialogTrigger asChild>
-                                                                                <DropdownMenuItem>View History</DropdownMenuItem>
-                                                                            </DialogTrigger>
-                                                                            <DropdownMenuSeparator />
-                                                                            <DialogTrigger asChild>
-                                                                                <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                                            </DialogTrigger>
-                                                                            <DropdownMenuSeparator />
-                                                                            <DropdownMenuItem className="text-destructive">
-                                                                                Delete
-                                                                            </DropdownMenuItem>
-                                                                        </DropdownMenuContent>
-                                                                    </DropdownMenu>
-                                                                    <HistoryDialog doc={doc} />
-                                                                </Dialog>
-                                                                <Dialog>
-                                                                    <DialogTrigger asChild><span/></DialogTrigger>
-                                                                    <RealTimeReviewDialog doc={doc} />
-                                                                </Dialog>
-                                                                <Dialog>
-                                                                    <DialogTrigger asChild><span/></DialogTrigger>
-                                                                    <DialogContent><DialogHeader><DialogTitle>Archive {doc.name}?</DialogTitle><DialogDescription>This will move the document to the archive. It can be restored later.</DialogDescription></DialogHeader><DialogFooter><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><DialogClose asChild><Button>Archive</Button></DialogClose></DialogFooter></DialogContent>
-                                                                </Dialog>
+                                                              <Dialog>
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                            <MoreVertical className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end">
+                                                                        <DialogTrigger asChild>
+                                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
+                                                                        </DialogTrigger>
+                                                                        <DropdownMenuItem>Download</DropdownMenuItem>
+                                                                        <DialogTrigger asChild>
+                                                                            <DropdownMenuItem>View History</DropdownMenuItem>
+                                                                        </DialogTrigger>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DialogTrigger asChild>
+                                                                            <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                                        </DialogTrigger>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DropdownMenuItem className="text-destructive">
+                                                                            Delete
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                                <RealTimeReviewDialog doc={doc} />
+                                                              </Dialog>
                                                             </TableCell>
                                                         </TableRow>
-                                                    ))}
+                                                      )
+                                                    })}
                                                 </React.Fragment>
                                             ))}
                                         </TableBody>
