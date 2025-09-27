@@ -212,8 +212,8 @@ export default function DocumentLibraryPage() {
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).map((file) => ({
-        id: `UPL-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      const newFiles = Array.from(files).map((file, index) => ({
+        id: `UPL-${Date.now()}-${index}`,
         name: file.name,
         type: file.type.split('/')[1]?.toUpperCase() || 'Document',
         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
@@ -260,6 +260,13 @@ export default function DocumentLibraryPage() {
       setNewFolderName('');
     }
   };
+  
+  const handleSync = (platform: string) => {
+    toast({
+        title: 'Synchronization Started',
+        description: `Syncing with ${platform}. You will be notified upon completion.`,
+    })
+  }
 
   const getFileIcon = (docType: string) => {
     switch (docType) {
@@ -840,6 +847,23 @@ return (
                     className="hidden"
                     onChange={handleFileUpload}
                 />
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <RefreshCw className="mr-2 h-4 w-4" /> Sync
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Cloud Platforms</DropdownMenuLabel>
+                        <DropdownMenuItem onSelect={() => handleSync('SharePoint')}>SharePoint</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleSync('Google Drive')}>Google Drive</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleSync('Dropbox')}>Dropbox</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Industry Software</DropdownMenuLabel>
+                         <DropdownMenuItem onSelect={() => handleSync('Procore')}>Procore</DropdownMenuItem>
+                         <DropdownMenuItem onSelect={() => handleSync('BIM 360')}>Autodesk BIM 360</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload File
                 </Button>
