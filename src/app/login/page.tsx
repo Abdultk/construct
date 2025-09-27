@@ -4,8 +4,6 @@ import Image from "next/image"
 import Link from "next/link"
 import * as React from "react"
 import { Eye, EyeOff, ShieldCheck } from "lucide-react"
-import * as msal from "@azure/msal-browser";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,49 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Logo } from "@/components/logo"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-
-const msalConfig = {
-  auth: {
-    clientId: "YOUR_CLIENT_ID", // This should be replaced with your actual Client ID
-    authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // This should be replaced with your Tenant ID
-    redirectUri: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
-  },
-  cache: {
-    cacheLocation: "sessionStorage", // This configures where your cache will be stored
-    storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
-  },
-};
-
-const msalInstance = new msal.PublicClientApplication(msalConfig);
 
 export default function LoginPage() {
   const loginHeroImage = PlaceHolderImages.find(p => p.id === 'login-hero');
   const [showPassword, setShowPassword] = React.useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
-
-  const handleMicrosoftSignIn = async () => {
-    try {
-      await msalInstance.loginPopup({
-        scopes: ["Files.ReadWrite.All", "offline_access"],
-      });
-      // On successful login, you would typically handle the token and user info.
-      // For this prototype, we'll just redirect to the dashboard.
-       toast({
-        title: "Login Successful",
-        description: "You have successfully signed in with Microsoft.",
-      });
-      router.push('/dashboard');
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "Could not sign in with Microsoft. Please try again.",
-      });
-    }
-  };
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
@@ -124,7 +83,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full font-bold">
               Sign In
             </Button>
-            <Button variant="outline" className="w-full" onClick={handleMicrosoftSignIn}>
+            <Button variant="outline" className="w-full">
               Sign In with Microsoft
             </Button>
             <div className="flex items-center justify-center">

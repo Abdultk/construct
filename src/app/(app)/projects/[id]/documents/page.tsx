@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -115,6 +114,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lightbulb } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import * as msal from '@azure/msal-browser';
 
 
 type Document = {
@@ -212,6 +212,24 @@ const documentHistory = [
     status: 'Approved',
   },
 ];
+
+
+const msalConfig = {
+  auth: {
+    clientId: "YOUR_CLIENT_ID_REPLACE_ME",
+    authority: "https://login.microsoftonline.com/YOUR_TENANT_ID_REPLACE_ME",
+    redirectUri: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
+  },
+   cache: {
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
+  },
+};
+
+let msalInstance: msal.PublicClientApplication | null = null;
+if (typeof window !== 'undefined') {
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+}
 
 
 export default function DocumentLibraryPage() {
@@ -342,80 +360,112 @@ export default function DocumentLibraryPage() {
   }
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
-    const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
-    const [isEditorLoading, setIsEditorLoading] = React.useState(true);
+    const [isMicrosoftAuthenticated, setIsMicrosoftAuthenticated] = useState(false);
+    const [isEditorLoading, setIsEditorLoading] = React.useState(false);
+    const { toast } = useToast();
 
     React.useEffect(() => {
-        if (doc) {
-            setIsEditorLoading(true);
-            const timer = setTimeout(() => {
-                setIsEditorLoading(false);
-            }, 1500); // Simulate network latency for fetching the edit URL
-            return () => clearTimeout(timer);
+        if (!isReviewOpen) {
+            setIsMicrosoftAuthenticated(false);
+            setIsEditorLoading(false);
         }
-    }, [doc]);
+    }, [isReviewOpen]);
+
+    const handleMicrosoftSignIn = async () => {
+        if (!msalInstance) {
+            toast({ variant: 'destructive', title: 'MSAL not initialized.' });
+            return;
+        }
+
+        try {
+            await msalInstance.loginPopup({
+                scopes: ["Files.ReadWrite.All", "offline_access"],
+            });
+            toast({ title: "Login Successful", description: "You have successfully signed in with Microsoft." });
+            setIsMicrosoftAuthenticated(true);
+            setIsEditorLoading(true);
+            setTimeout(() => {
+                setIsEditorLoading(false);
+            }, 1500); // Simulate API call to get edit URL
+        } catch (error) {
+            console.error(error);
+            toast({ variant: "destructive", title: "Login Failed", description: "Could not sign in with Microsoft." });
+        }
+    };
 
     if (!doc) return null;
 
-    const collaborators = [
-        { id: 'jane', name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
-        { id: 'bob', name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/40/40' },
-        { id: 'charlie', name: 'Charlie Davis', avatar: 'https://picsum.photos/seed/12/40/40' }
-    ];
+    const fileExtension = doc.name.split('.').pop()?.toLowerCase();
+    const isOfficeDoc = ['docx', 'xlsx', 'pptx'].includes(fileExtension || '');
+    const isPdf = fileExtension === 'pdf';
 
-    const getEditorInterface = () => {
-        const fileExtension = doc.name.split('.').pop()?.toLowerCase();
-        
+    const getEditorContent = () => {
+        if (!isMicrosoftAuthenticated && (isOfficeDoc || isPdf)) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border p-8 text-center">
+                    <Building2 className="h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Authentication Required</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Please sign in with your Microsoft account to edit this document.
+                    </p>
+                    <Button className="mt-4" onClick={handleMicrosoftSignIn}>
+                        Sign in with Microsoft
+                    </Button>
+                </div>
+            )
+        }
+
         if (isEditorLoading) {
             return (
                 <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     <p className="mt-4 text-sm text-muted-foreground">Generating secure editing session...</p>
                 </div>
-            )
+            );
+        }
+        
+        if (isOfficeDoc) {
+             return (
+                <div className="bg-background h-full w-full border rounded-md overflow-hidden">
+                    <iframe 
+                        src="about:blank"
+                        width="100%" 
+                        height="100%" 
+                        frameBorder="0"
+                        title={`Microsoft 365 Editor for ${doc.name}`}
+                        className='bg-white'
+                    >
+                        <p>Your browser does not support iframes. Please open the document in a new tab.</p>
+                    </iframe>
+                </div>
+            );
         }
 
-        switch(fileExtension) {
-            case 'docx':
-            case 'xlsx':
-            case 'pptx':
-                 return (
-                    <div className="bg-background h-full w-full border rounded-md overflow-hidden">
-                        <iframe 
-                            src="about:blank" // In a real app, this would be the webUrl from Graph API
-                            width="100%" 
-                            height="100%" 
-                            frameBorder="0"
-                            title={`Microsoft 365 Editor for ${doc.name}`}
-                        >
-                            <p>Your browser does not support iframes. Please open the document in a new tab.</p>
-                        </iframe>
+        if (isPdf) {
+            return (
+                <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
+                    <div className="p-2 bg-white border-b flex items-center gap-2">
+                            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
+                        </svg>
+                            <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
                     </div>
-                  );
-            case 'pdf':
-                 return (
-                    <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
-                        <div className="p-2 bg-white border-b flex items-center gap-2">
-                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
-                            </svg>
-                             <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
-                        </div>
-                        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-                            <p>Embedded Adobe PDF editor for <strong>{doc.name}</strong> would be displayed here.</p>
-                        </div>
+                    <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
+                        <p>Embedded Adobe PDF editor for <strong>{doc.name}</strong> would be displayed here.</p>
                     </div>
-                )
-            default:
-                return (
-                     <div className="bg-muted rounded-md h-full overflow-auto">
-                        {docPreviewImage && (
-                            <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
-                        )}
-                    </div>
-                )
+                </div>
+            );
         }
-    }
+
+        const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
+        return (
+            <div className="bg-muted rounded-md h-full overflow-auto">
+                {docPreviewImage && (
+                    <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
+                )}
+            </div>
+        );
+    };
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
@@ -424,24 +474,9 @@ export default function DocumentLibraryPage() {
                     <DialogTitle>{doc.name} (Rev. {doc.revision})</DialogTitle>
                     <DialogDescription>Real-time collaborative review session.</DialogDescription>
                 </div>
-                 <div className="flex items-center gap-4">
-                    <div className="flex items-center -space-x-2">
-                        {collaborators.map(c => (
-                            <Avatar key={c.name} className="border-2 border-background">
-                                <AvatarImage src={c.avatar} />
-                                <AvatarFallback>{c.name.slice(0,2)}</AvatarFallback>
-                            </Avatar>
-                        ))}
-                         <Avatar className="border-2 border-background">
-                            <AvatarFallback>+2</AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <Button variant="outline"><Share2 className="mr-2 h-4 w-4" /> Share</Button>
-                    <Button variant="secondary"><DownloadCloud className="mr-2 h-4 w-4" /> Download</Button>
-                </div>
             </DialogHeader>
             <div className="h-full py-4 overflow-hidden">
-                {getEditorInterface()}
+                {getEditorContent()}
             </div>
         </DialogContent>
     );
@@ -982,12 +1017,3 @@ return (
     </div>
 );
 }
-
-
-    
-
-
-
-
-
-
