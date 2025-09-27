@@ -204,6 +204,9 @@ export default function DocumentLibraryPage() {
   const [newFolderName, setNewFolderName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -292,11 +295,13 @@ export default function DocumentLibraryPage() {
     }
   }
 
-  const RealTimeReviewDialog = ({ doc }: { doc: Document }) => {
+  const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
     const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
     const [comments, setComments] = useState<LiveComment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [newCommentType, setNewCommentType] = useState<LiveComment['type']>('Comment');
+
+    if (!doc) return null;
 
     const collaborators = [
         { id: 'jane', name: 'Jane Doe', avatar: 'https://picsum.photos/seed/2/40/40' },
@@ -387,7 +392,7 @@ export default function DocumentLibraryPage() {
         <DialogContent className="max-w-7xl h-[90vh]">
             <DialogHeader className="flex-row items-center justify-between pr-8">
                 <div className="space-y-1">
-                    <DialogTitle>{doc.name}</DialogTitle>
+                    <DialogTitle>{doc.name} (Rev. {doc.revision})</DialogTitle>
                     <DialogDescription>Real-time collaborative review session.</DialogDescription>
                 </div>
                  <div className="flex items-center gap-4">
@@ -592,11 +597,13 @@ export default function DocumentLibraryPage() {
     );
   }
 
-  const HistoryDialog = ({ doc }: { doc: Document }) => {
+  const HistoryDialog = ({ doc }: { doc: Document | null }) => {
     const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [isReportOpen, setIsReportOpen] = useState(false);
     
+    if (!doc) return null;
+
     const handleVersionSelect = (version: string) => {
         setSelectedVersions(prev => {
             if (prev.includes(version)) {
@@ -804,7 +811,7 @@ const ComparisonReportDialog = ({ versions }: { versions: string[] }) => {
             </DialogFooter>
         </DialogContent>
     );
-}
+};
 
 return (
     <div className="flex flex-1 flex-col gap-4">
@@ -942,33 +949,24 @@ return (
                                                             <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
                                                             <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
                                                             <TableCell>
-                                                              <Dialog>
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                            <MoreVertical className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DialogTrigger asChild>
-                                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Review</DropdownMenuItem>
-                                                                        </DialogTrigger>
-                                                                        <DropdownMenuItem>Download</DropdownMenuItem>
-                                                                        <DialogTrigger asChild>
-                                                                            <DropdownMenuItem>View History</DropdownMenuItem>
-                                                                        </DialogTrigger>
-                                                                        <DropdownMenuSeparator />
-                                                                        <DialogTrigger asChild>
-                                                                            <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                                        </DialogTrigger>
-                                                                        <DropdownMenuSeparator />
-                                                                        <DropdownMenuItem className="text-destructive">
-                                                                            Delete
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                                <RealTimeReviewDialog doc={doc} />
-                                                              </Dialog>
+                                                              <DropdownMenu>
+                                                                  <DropdownMenuTrigger asChild>
+                                                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                          <MoreVertical className="h-4 w-4" />
+                                                                      </Button>
+                                                                  </DropdownMenuTrigger>
+                                                                  <DropdownMenuContent align="end">
+                                                                      <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}>Review</DropdownMenuItem>
+                                                                      <DropdownMenuItem>Download</DropdownMenuItem>
+                                                                      <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
+                                                                      <DropdownMenuSeparator />
+                                                                      <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                                      <DropdownMenuSeparator />
+                                                                      <DropdownMenuItem className="text-destructive">
+                                                                          Delete
+                                                                      </DropdownMenuItem>
+                                                                  </DropdownMenuContent>
+                                                              </DropdownMenu>
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
@@ -983,6 +981,13 @@ return (
                 </Accordion>
             </CardContent>
         </Card>
+
+        <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+            <RealTimeReviewDialog doc={selectedDoc} />
+        </Dialog>
+        <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+            <HistoryDialog doc={selectedDoc} />
+        </Dialog>
     </div>
 );
 }
