@@ -99,6 +99,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lightbulb } from 'lucide-react';
 
 
 type Document = {
@@ -935,7 +936,8 @@ return (
                                                         <TableCell colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></TableCell>
                                                     </TableRow>
                                                     
-                                                    {category.documents.map((doc) => (
+                                                    {category.documents.map((doc) => {
+                                                      return(
                                                         <TableRow key={doc.id}>
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
                                                                 {getFileIcon(doc.type)}
@@ -970,7 +972,7 @@ return (
                                                               </DropdownMenu>
                                                             </TableCell>
                                                         </TableRow>
-                                                    ))}
+                                                    )})}
                                                 </React.Fragment>
                                             ))}
                                         </TableBody>
