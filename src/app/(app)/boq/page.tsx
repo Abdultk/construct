@@ -22,6 +22,7 @@ import {
   BookCheck,
   MoreHorizontal,
   Trash2,
+  Network,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -82,6 +83,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import Link from 'next/link';
 
 
 type BoqItem = {
@@ -545,6 +547,95 @@ export default function BoqDataGridPage() {
         return 'destructive';
     }
   };
+  
+    const GenerateProgramDialog = () => {
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generationComplete, setGenerationComplete] = useState(false);
+
+    const handleGenerate = () => {
+      setIsGenerating(true);
+      setGenerationComplete(false);
+      setTimeout(() => {
+        setIsGenerating(false);
+        setGenerationComplete(true);
+        toast({
+            title: 'Generation Successful',
+            description: 'The Program of Works has been generated from the BOQ.',
+        });
+      }, 2500);
+    };
+
+    return (
+        <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+                <DialogTitle>AI-Powered Program Generation</DialogTitle>
+                <DialogDescription>
+                    Generate a full Work Breakdown Structure (WBS) and schedule from this Bill of Quantities.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                 <Card className="bg-ai-accent/10 border-ai-accent/50">
+                    <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                            <Wand2 className="h-5 w-5 text-ai-accent" />
+                            How It Works
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm">
+                            Our AI analyzes your BOQ items using a vast knowledge base of construction methodologies. It will:
+                        </p>
+                        <ul className="list-disc list-inside text-sm space-y-1 mt-2">
+                            <li>Classify items into a logical work breakdown structure.</li>
+                            <li>Sequence activities and create dependencies based on industry best practices.</li>
+                            <li>Estimate durations and resource requirements for each activity.</li>
+                            <li>Generate a complete, editable Program of Works for your project.</li>
+                        </ul>
+                    </CardContent>
+                </Card>
+
+                {isGenerating && (
+                    <div className="flex items-center justify-center gap-2 p-4">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <p className="text-sm text-muted-foreground">AI is generating your program... this may take a moment.</p>
+                    </div>
+                )}
+                
+                {generationComplete && (
+                    <Card className="border-green-500 bg-green-500/10">
+                        <CardHeader className="flex flex-row items-center gap-3">
+                            <CheckCircle className="h-6 w-6 text-green-700" />
+                            <div>
+                                <CardTitle>Generation Complete!</CardTitle>
+                                <CardDescription>Your new Program of Works is ready.</CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                             <DialogClose asChild>
+                                <Button asChild className="w-full">
+                                    <Link href="/program-of-works">
+                                        View Program of Works
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                             </DialogClose>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+            {!generationComplete && (
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={handleGenerate} disabled={isGenerating}>
+                        {isGenerating ? 'Generating...' : 'Generate Program'}
+                    </Button>
+                </DialogFooter>
+            )}
+        </DialogContent>
+    );
+  };
 
 
   return (
@@ -567,13 +658,13 @@ export default function BoqDataGridPage() {
             <Button variant="outline" className="hidden sm:flex" onClick={handleExport}>
                 <Download className="mr-2 h-4 w-4" /> Export
             </Button>
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <Dialog>
             <DialogTrigger asChild>
-                <Button variant="secondary">
-                    <Plus className="mr-2 h-4 w-4" /> Add Item
+                <Button>
+                    <Network className="mr-2 h-4 w-4" /> Generate Program
                 </Button>
             </DialogTrigger>
-            <AddItemForm />
+            <GenerateProgramDialog />
           </Dialog>
         </div>
       </div>
@@ -718,8 +809,8 @@ export default function BoqDataGridPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedItem(item)}>View Details</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>Edit</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setIsAddOpen(true)}>Add Sub-Item</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setIsEditOpen(true)}>Edit</DropdownMenuItem>
                               <DropdownMenuSeparator />
                                <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-destructive">
@@ -865,6 +956,9 @@ export default function BoqDataGridPage() {
           </Card>
         </div>
       </div>
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <AddItemForm />
+      </Dialog>
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         {selectedItem && <EditItemForm item={selectedItem} />}
       </Dialog>
