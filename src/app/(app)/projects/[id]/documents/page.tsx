@@ -212,9 +212,6 @@ const documentHistory = [
 ];
 
 
-let uploadIdCounter = 0;
-const getUploadId = () => `UPL-${++uploadIdCounter}`;
-
 export default function DocumentLibraryPage() {
   const params = useParams<{ id: string }>();
   const [documents, setDocuments] = useState<DocumentStructure>(initialDocumentStructure);
@@ -225,6 +222,12 @@ export default function DocumentLibraryPage() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const uploadIdCounter = useRef(0);
+
+  const getUploadId = () => {
+    uploadIdCounter.current += 1;
+    return `UPL-${uploadIdCounter.current}`;
+  };
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -1253,4 +1256,5 @@ return (
 
 
     
+
 
