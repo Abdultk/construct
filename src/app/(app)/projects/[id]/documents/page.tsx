@@ -65,6 +65,14 @@ import {
   Fingerprint,
   ScanText,
   Building2,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  List,
+  ListOrdered,
+  Pilcrow,
+  File,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -427,16 +435,52 @@ export default function DocumentLibraryPage() {
             case 'xlsx':
             case 'pptx':
                 return (
-                    <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
-                        <div className="p-2 bg-white border-b flex items-center gap-2">
-                             <Building2 className="h-6 w-6 text-blue-600" />
-                             <h3 className="font-semibold text-blue-800">Microsoft 365</h3>
+                    <div className="bg-white rounded-md h-full overflow-hidden flex flex-col border">
+                      {/* Mock Word Ribbon */}
+                      <div className="p-2 bg-gray-100 border-b flex items-center gap-4 text-gray-700">
+                        <Button variant="ghost" size="sm" className="flex items-center gap-1"><File className="h-4 w-4" />File</Button>
+                        <Separator orientation="vertical" className="h-6" />
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><Underline className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><Strikethrough className="h-4 w-4" /></Button>
                         </div>
-                        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-                            <p>Embedded Microsoft 365 editor for <strong>{doc.name}</strong> would be displayed here.</p>
+                        <Separator orientation="vertical" className="h-6" />
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><ListOrdered className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8"><List className="h-4 w-4" /></Button>
                         </div>
+                        <Separator orientation="vertical" className="h-6" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8"><Pilcrow className="h-4 w-4" /></Button>
+                      </div>
+                      {/* Mock Document Content */}
+                      <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16 bg-gray-50">
+                        <div className="max-w-4xl mx-auto bg-white p-12 shadow-md">
+                          <h1 className="text-2xl font-bold font-headline mb-4">Method Statement: Concrete Pouring</h1>
+                          <p className="text-sm mb-4"><strong>Document ID:</strong> TEC-MS-001<br /><strong>Revision:</strong> 1.2.0</p>
+                          <h2 className="text-lg font-semibold mt-6 mb-2">1. Scope</h2>
+                          <p className="text-sm leading-relaxed">This method statement outlines the procedures for the safe and efficient pouring of Grade C35/45 concrete for the main foundation slab as per drawing STR-FDN-002.</p>
+                          <h2 className="text-lg font-semibold mt-6 mb-2">2. Pre-Pour Checklist</h2>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            <li>All formwork has been inspected and approved.</li>
+                            <li>Reinforcement steel has been checked for correct placement and cover.</li>
+                            <li>All embedments (e.g., conduits, pipes) are correctly positioned and secured.</li>
+                          </ul>
+                          <div className="mt-8 p-4 bg-yellow-100 border border-yellow-300 rounded-md">
+                            <p className="text-sm font-semibold text-yellow-800">Comment from B. Miller:</p>
+                            <p className="text-sm text-yellow-700">Please verify that the latest slump test results are attached to this document before proceeding.</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Mock Status Bar */}
+                      <div className="p-1 bg-gray-100 border-t text-xs text-gray-600 flex justify-end gap-4 px-4">
+                        <span>Page 1 of 1</span>
+                        <span>128 Words</span>
+                        <span>English (US)</span>
+                      </div>
                     </div>
-                )
+                  )
             case 'pdf':
                  return (
                     <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
@@ -1209,3 +1253,4 @@ return (
 
 
     
+
