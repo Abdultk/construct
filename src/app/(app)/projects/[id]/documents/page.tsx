@@ -140,7 +140,11 @@ const initialDocumentStructure: DocumentStructure = {
   "Reference Documentation": [
     { name: 'Standards & Codes', documents: [{ id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0.0' }] },
     { name: 'Procedures & Guidelines', documents: [{ id: 'REF-PRO-001', name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20', discipline: 'General', status: 'Approved', revision: '3.0.0' }] },
-    { name: 'Templates & Forms', documents: [{ id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Templates & Forms', documents: [
+        { id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+        { id: 'REF-TPL-002', name: 'Specification_Template_CSI.docx', type: 'Template', size: '250 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+        { id: 'REF-TPL-003', name: 'Meeting_Minutes_Template.docx', type: 'Template', size: '95 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' }
+    ]},
   ],
   "Communication Documentation": [
     { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
@@ -201,8 +205,8 @@ export default function DocumentLibraryPage() {
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).map((file, index) => ({
-        id: `UPL-${Date.now()}-${index}-${Math.random()}`,
+      const newFiles = Array.from(files).map((file) => ({
+        id: `UPL-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         name: file.name,
         type: file.type.split('/')[1]?.toUpperCase() || 'Document',
         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
@@ -919,8 +923,7 @@ return (
                                                         <TableCell colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></TableCell>
                                                     </TableRow>
                                                     
-                                                    {category.documents.map((doc) => {
-                                                      return(
+                                                    {category.documents.map((doc) => (
                                                         <TableRow key={doc.id}>
                                                             <TableCell className="pl-12 font-medium flex items-center gap-2">
                                                                 {getFileIcon(doc.type)}
@@ -964,8 +967,7 @@ return (
                                                               </Dialog>
                                                             </TableCell>
                                                         </TableRow>
-                                                      )
-                                                    })}
+                                                    ))}
                                                 </React.Fragment>
                                             ))}
                                         </TableBody>
