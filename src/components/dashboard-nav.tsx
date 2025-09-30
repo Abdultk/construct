@@ -20,8 +20,6 @@ export function DashboardNav() {
     { href: "/field-dashboard", label: "Field", icon: HardHat },
     { href: "/budget-establishment", label: "Budget", icon: DollarSign },
     { href: "/cost-tracking", label: "Cost Tracking", icon: ListFilter },
-    { href: "/ai-insights", label: "AI Insights", icon: TrendingUp },
-    { href: "/ai-assistant", label: "AI Assistant", icon: Bot },
     { href: "/progress-entry", label: "Progress Entry", icon: Edit },
     { href: "/payment-certificate", label: "Payments", icon: FileCheck },
     { href: "/safety-dashboard", label: "Safety", icon: Shield },
