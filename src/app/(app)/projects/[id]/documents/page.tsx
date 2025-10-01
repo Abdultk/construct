@@ -341,41 +341,22 @@ export default function DocumentLibraryPage() {
   }
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [accessUrl, setAccessUrl] = React.useState<string | null>(null);
-
-    React.useEffect(() => {
-        if (doc) {
-            setIsLoading(true);
-            setAccessUrl(null);
-            // Simulate fetching the WOPI URL from the backend
-            const timer = setTimeout(() => {
-                const wopiSrc = `https://your-wopi-host.com/wopi/files/${doc.id}`;
-                const token = 'DUMMY_ACCESS_TOKEN'; // This would be a real, short-lived JWT
-                setAccessUrl(`https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${token}`);
-                setIsLoading(false);
-            }, 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [doc]);
-    
     if (!doc) return null;
 
     const fileExtension = doc.name.split('.').pop()?.toLowerCase();
     const isOfficeDoc = ['docx', 'xlsx', 'pptx'].includes(fileExtension || '');
     const isPdf = fileExtension === 'pdf';
     
+    // Simulate fetching the WOPI URL from the backend
+    const [accessUrl, setAccessUrl] = React.useState('');
+    React.useEffect(() => {
+        const wopiSrc = `https://your-wopi-host.com/wopi/files/${doc.id}`;
+        const token = 'DUMMY_ACCESS_TOKEN'; // This would be a real, short-lived JWT
+        setAccessUrl(`https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${token}`);
+    }, [doc]);
+    
     const getEditorInterface = () => {
-        if (isLoading && isOfficeDoc) {
-             return (
-                <div className="flex flex-col items-center justify-center h-full bg-muted rounded-md border">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="mt-4 text-sm text-muted-foreground">Generating secure editing session...</p>
-                </div>
-            );
-        }
-
-        if (accessUrl && isOfficeDoc) {
+        if (isOfficeDoc) {
             return (
                 <div className="bg-background h-full w-full border rounded-md overflow-hidden">
                     <iframe 
