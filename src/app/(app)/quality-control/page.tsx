@@ -45,7 +45,7 @@ type Defect = {
   id: string;
   area: string;
   description: string;
-  severity: 'High' | 'Medium' | 'Low';
+  priority: 'High' | 'Medium' | 'Low';
   status: 'Open' | 'In Progress' | 'Resolved';
   assignee: { name: string; avatar: string; };
   assigner: { name: string; avatar: string; };
@@ -75,13 +75,13 @@ export default function QualityControlPage() {
   const [newInspectionDate, setNewInspectionDate] = React.useState<Date>();
   
   const [defects] = React.useState<Defect[]>([
-    { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', severity: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-05'},
-    { id: 'NCF-002', area: 'Facade - Panel 7B', description: 'Incorrect panel alignment.', severity: 'Medium', status: 'In Progress', assignee: { name: 'D. Green', avatar: 'https://picsum.photos/seed/13/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-10'},
-    { id: 'NCF-003', area: 'Lobby - Drywall', description: 'Minor surface scratches near entrance.', severity: 'Low', status: 'Resolved', assignee: { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/100/100'}, assigner: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100' }, dueDate: '2024-07-30'},
+    { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', priority: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-05'},
+    { id: 'NCF-002', area: 'Facade - Panel 7B', description: 'Incorrect panel alignment.', priority: 'Medium', status: 'In Progress', assignee: { name: 'D. Green', avatar: 'https://picsum.photos/seed/13/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-10'},
+    { id: 'NCF-003', area: 'Lobby - Drywall', description: 'Minor surface scratches near entrance.', priority: 'Low', status: 'Resolved', assignee: { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/100/100'}, assigner: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100' }, dueDate: '2024-07-30'},
   ]);
   
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [severityFilter, setSeverityFilter] = React.useState<string[]>([]);
+  const [priorityFilter, setPriorityFilter] = React.useState<string[]>([]);
   const [statusFilter, setStatusFilter] = React.useState<string[]>([]);
   
   const filteredDefects = React.useMemo(() => {
@@ -91,15 +91,15 @@ export default function QualityControlPage() {
           typeof val === 'string' && val.toLowerCase().includes(searchTerm.toLowerCase())
         ) || defect.assignee.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesSeverity = severityFilter.length === 0 || severityFilter.includes(defect.severity);
+      const matchesPriority = priorityFilter.length === 0 || priorityFilter.includes(defect.priority);
       const matchesStatus = statusFilter.length === 0 || statusFilter.includes(defect.status);
       
-      return matchesSearch && matchesSeverity && matchesStatus;
+      return matchesSearch && matchesPriority && matchesStatus;
     });
-  }, [defects, searchTerm, severityFilter, statusFilter]);
+  }, [defects, searchTerm, priorityFilter, statusFilter]);
 
-  const toggleFilter = (filterType: 'severity' | 'status', value: string) => {
-    const setter = filterType === 'severity' ? setSeverityFilter : setStatusFilter;
+  const toggleFilter = (filterType: 'priority' | 'status', value: string) => {
+    const setter = filterType === 'priority' ? setPriorityFilter : setStatusFilter;
     setter(prev => 
       prev.includes(value) 
         ? prev.filter(v => v !== value)
@@ -108,12 +108,12 @@ export default function QualityControlPage() {
   };
   
   const clearFilters = () => {
-    setSeverityFilter([]);
+    setPriorityFilter([]);
     setStatusFilter([]);
   };
 
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
       case 'High': return 'destructive';
       case 'Medium': return 'default';
       default: return 'secondary';
@@ -129,19 +129,19 @@ export default function QualityControlPage() {
     }
   };
 
-   const defectsBySeverity = React.useMemo(() => {
+   const defectsByPriority = React.useMemo(() => {
     const data = defects.reduce((acc, defect) => {
-      if (!acc[defect.severity]) {
-        acc[defect.severity] = 0;
+      if (!acc[defect.priority]) {
+        acc[defect.priority] = 0;
       }
-      acc[defect.severity]++;
+      acc[defect.priority]++;
       return acc;
     }, {} as Record<string, number>);
 
     return [
-      { severity: 'High', count: data.High || 0, fill: 'hsl(var(--destructive))' },
-      { severity: 'Medium', count: data.Medium || 0, fill: 'hsl(var(--primary))' },
-      { severity: 'Low', count: data.Low || 0, fill: 'hsl(var(--secondary))' },
+      { priority: 'High', count: data.High || 0, fill: 'hsl(var(--destructive))' },
+      { priority: 'Medium', count: data.Medium || 0, fill: 'hsl(var(--primary))' },
+      { priority: 'Low', count: data.Low || 0, fill: 'hsl(var(--secondary))' },
     ];
   }, [defects]);
 
@@ -389,11 +389,11 @@ export default function QualityControlPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>Severity</DropdownMenuSubTrigger>
+                            <DropdownMenuSubTrigger>Priority</DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
-                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'High')}>High</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'Medium')}>Medium</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => toggleFilter('severity', 'Low')}>Low</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('priority', 'High')}>High</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('priority', 'Medium')}>Medium</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toggleFilter('priority', 'Low')}>Low</DropdownMenuItem>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
                         <DropdownMenuSub>
@@ -418,7 +418,7 @@ export default function QualityControlPage() {
                   <TableHead className="w-12"><Checkbox /></TableHead>
                   <TableHead>ID</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Severity</TableHead>
+                  <TableHead>Priority</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Assigner</TableHead>
                   <TableHead>Assignee</TableHead>
@@ -435,7 +435,7 @@ export default function QualityControlPage() {
                       <p className="font-semibold">{defect.description}</p>
                       <p className="text-xs text-muted-foreground">{defect.area}</p>
                     </TableCell>
-                    <TableCell><Badge variant={getSeverityBadge(defect.severity)}>{defect.severity}</Badge></TableCell>
+                    <TableCell><Badge variant={getPriorityBadge(defect.priority)}>{defect.priority}</Badge></TableCell>
                     <TableCell><Badge variant={getStatusBadge(defect.status)}>{defect.status}</Badge></TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -536,14 +536,14 @@ export default function QualityControlPage() {
               <CardHeader>
                 <CardTitle>Reporting &amp; Analytics</CardTitle>
                 <CardDescription>
-                  Visualize defect trends by severity.
+                  Visualize defect trends by priority.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                   <RechartsBarChart
                     accessibilityLayer
-                    data={defectsBySeverity}
+                    data={defectsByPriority}
                     margin={{
                       top: 5,
                       right: 5,
@@ -553,7 +553,7 @@ export default function QualityControlPage() {
                   >
                     <CartesianGrid vertical={false} />
                     <XAxis
-                      dataKey="severity"
+                      dataKey="priority"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
@@ -569,8 +569,8 @@ export default function QualityControlPage() {
                       content={<ChartTooltipContent hideLabel />}
                     />
                     <RechartsBar dataKey="count" radius={4}>
-                      {defectsBySeverity.map((item) => (
-                        <div key={item.severity} />
+                      {defectsByPriority.map((item) => (
+                        <div key={item.priority} />
                       ))}
                     </RechartsBar>
                   </RechartsBarChart>

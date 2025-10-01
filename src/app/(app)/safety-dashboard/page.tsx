@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -85,7 +86,7 @@ type Inspection = {
 type OpenIssue = {
     id: string;
     description: string;
-    severity: 'High' | 'Medium' | 'Low';
+    priority: 'High' | 'Medium' | 'Low';
     assignee: string;
 };
 
@@ -103,8 +104,8 @@ export default function SafetyDashboardPage() {
   const sitePlanImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [openIssues, setOpenIssues] = useState<OpenIssue[]>([
-      { id: 'NCF-001', description: 'Leaking pipe joint at column C4.', severity: 'High', assignee: 'Bob Miller' },
-      { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', severity: 'Medium', assignee: 'Diana Green' },
+      { id: 'NCF-001', description: 'Leaking pipe joint at column C4.', priority: 'High', assignee: 'Bob Miller' },
+      { id: 'NCF-002', description: 'Incorrect panel alignment on facade.', priority: 'Medium', assignee: 'Diana Green' },
   ]);
 
   const nearMisses: NearMiss[] = [
@@ -113,8 +114,8 @@ export default function SafetyDashboardPage() {
   ];
   const [selectedNearMiss, setSelectedNearMiss] = useState<NearMiss | null>(null);
 
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
       case 'High': return 'destructive';
       case 'Medium': return 'default';
       default: return 'secondary';
@@ -466,7 +467,7 @@ export default function SafetyDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-headline">{openIssues.length}</div>
-            <p className="text-xs text-muted-foreground">{openIssues.filter(i => i.severity === 'High').length} High, {openIssues.filter(i => i.severity === 'Medium').length} Medium</p>
+            <p className="text-xs text-muted-foreground">{openIssues.filter(i => i.priority === 'High').length} High, {openIssues.filter(i => i.priority === 'Medium').length} Medium</p>
           </CardContent>
         </Card>
         <Card>
@@ -668,10 +669,10 @@ export default function SafetyDashboardPage() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="severity">Severity</Label>
+                          <Label htmlFor="priority">Priority</Label>
                           <Select>
-                            <SelectTrigger id="severity">
-                              <SelectValue placeholder="Select severity" />
+                            <SelectTrigger id="priority">
+                              <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="low">Low (Minor)</SelectItem>
@@ -882,10 +883,10 @@ export default function SafetyDashboardPage() {
                     <Input id="hazard-location" placeholder="e.g., Floor 5, near column G-8" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="hazard-severity">Severity Level</Label>
+                    <Label htmlFor="hazard-priority">Priority Level</Label>
                      <Select>
-                      <SelectTrigger id="hazard-severity">
-                        <SelectValue placeholder="Select severity..." />
+                      <SelectTrigger id="hazard-priority">
+                        <SelectValue placeholder="Select priority..." />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="low">Low</SelectItem>
@@ -945,7 +946,7 @@ export default function SafetyDashboardPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Issue</TableHead>
-                            <TableHead>Severity</TableHead>
+                            <TableHead>Priority</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -957,7 +958,7 @@ export default function SafetyDashboardPage() {
                                     <p className="text-xs text-muted-foreground">{item.description}</p>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={getSeverityBadge(item.severity)}>{item.severity}</Badge>
+                                    <Badge variant={getPriorityBadge(item.priority)}>{item.priority}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
                                      <Button variant="destructive" size="sm" onClick={() => handleResolveIssue(item.id)}>Resolve</Button>
