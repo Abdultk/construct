@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical, CalendarIcon, ChevronDown } from 'lucide-react';
+import { Plus, Filter, Search, ListChecks, Bug, BarChart, HardHat, ShieldCheck, Percent, MoreVertical, CalendarIcon, ChevronDown, Wand2, Lightbulb, Loader2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -64,6 +64,7 @@ export default function QualityControlPage() {
   const [isCreateChecklistOpen, setIsCreateChecklistOpen] = React.useState(false);
   const [newChecklistTitle, setNewChecklistTitle] = React.useState("");
   const [newChecklistItems, setNewChecklistItems] = React.useState("");
+  const [isGenerating, setIsGenerating] = React.useState(false);
   
   const [isNewInspectionOpen, setIsNewInspectionOpen] = React.useState(false);
   const [newInspectionType, setNewInspectionType] = React.useState('');
@@ -149,10 +150,23 @@ export default function QualityControlPage() {
     },
   };
 
+  const handleAiGenerateChecklist = async () => {
+    if (!newChecklistTitle) return;
+    setIsGenerating(true);
+    // In a real app, this would be a call to a Genkit flow
+    setTimeout(() => {
+        const generatedItems = "Verify formwork is clean and correctly oiled.\nCheck rebar placement, size, and spacing against approved drawings.\nConfirm concrete mix design matches specification (e.g., C35/45).\nMonitor and record slump test results for each batch.\nEnsure proper and thorough vibration to eliminate air pockets.";
+        setNewChecklistItems(generatedItems);
+        setIsGenerating(false);
+        toast({
+            title: 'AI Checklist Generated',
+            description: 'The checklist items have been generated based on your title.',
+        });
+    }, 1500);
+  };
+
   const handleCreateChecklist = () => {
     if (newChecklistTitle && newChecklistItems) {
-      // In a real app, you'd save this to a backend.
-      // For now, we just show a toast.
       toast({
         title: 'Checklist Created',
         description: `"${newChecklistTitle}" has been created successfully.`,
@@ -169,8 +183,11 @@ export default function QualityControlPage() {
         title: 'Inspection Created',
         description: `A new ${newInspectionType.toLowerCase()} inspection has been scheduled for ${format(newInspectionDate, 'PPP')}.`,
       });
+      toast({
+        title: 'Notification Sent',
+        description: `An alert for this inspection has been sent to ${newInspectionInspector}.`,
+      });
       setIsNewInspectionOpen(false);
-      // Reset form fields
       setNewInspectionType('');
       setNewInspectionLocation('');
       setNewInspectionInspector('');
@@ -184,6 +201,18 @@ export default function QualityControlPage() {
         });
     }
   };
+
+  const applyAiSuggestion = () => {
+    setNewInspectionType('Rebar Placement Inspection');
+    setNewInspectionLocation('Foundation - Sector A');
+    setNewInspectionInspector('Bob Miller');
+    setNewInspectionChecklist('Concrete Pour Checklist');
+    setNewInspectionDate(new Date());
+    toast({
+        title: 'AI Suggestion Applied',
+        description: 'The inspection form has been pre-filled.',
+    });
+  }
 
 
   return (
@@ -213,6 +242,20 @@ export default function QualityControlPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
+                        <Card className="bg-ai-accent/10 border-ai-accent/50">
+                          <CardHeader className="flex-row items-start gap-3 space-y-0 pb-2">
+                              <Lightbulb className="h-5 w-5 text-ai-accent flex-shrink-0" />
+                              <div>
+                                  <CardTitle className="text-base">AI Suggestion</CardTitle>
+                                  <CardDescription className="text-ai-accent/90">
+                                      The 'Foundation' work package is nearing completion. It is recommended to schedule a 'Rebar Placement Inspection'.
+                                  </CardDescription>
+                              </div>
+                          </CardHeader>
+                          <CardContent>
+                              <Button size="sm" onClick={applyAiSuggestion}>Apply Suggestion</Button>
+                          </CardContent>
+                        </Card>
                         <div className="space-y-2">
                             <Label htmlFor="inspection-type">Inspection Type</Label>
                             <Input id="inspection-type" placeholder="e.g., Final Paint Inspection" value={newInspectionType} onChange={(e) => setNewInspectionType(e.target.value)} />
@@ -451,7 +494,20 @@ export default function QualityControlPage() {
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="checklist-title">Checklist Title</Label>
-                                    <Input id="checklist-title" placeholder="e.g., HVAC Installation Checklist" value={newChecklistTitle} onChange={(e) => setNewChecklistTitle(e.target.value)} />
+                                    <div className="relative">
+                                      <Input id="checklist-title" placeholder="e.g., Concrete Pour Pre-inspection" value={newChecklistTitle} onChange={(e) => setNewChecklistTitle(e.target.value)} />
+                                      {newChecklistTitle && (
+                                        <Button
+                                          size="sm"
+                                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7"
+                                          onClick={handleAiGenerateChecklist}
+                                          disabled={isGenerating}
+                                        >
+                                          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                          <span className="ml-2">AI Generate</span>
+                                        </Button>
+                                      )}
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="checklist-items">Checklist Items</Label>
