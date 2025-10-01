@@ -1,7 +1,7 @@
 
 'use client';
 
-import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users, FileText, Check } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users, FileText, Check, Package, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,19 +16,37 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 
 const steps = [
     { id: 1, name: 'Transmittal Details' },
     { id: 2, name: 'Select Documents' },
     { id: 3, name: 'Manage Recipients' },
+    { id: 4, name: 'Review & Submit' },
 ];
 
 export default function NewTransmittalPage() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [attachments, setAttachments] = useState<File[]>([]);
+  
+  // Step 1 State
+  const [subject, setSubject] = useState('For Approval: Structural Drawings - Phase 2');
+  const [purpose, setPurpose] = useState('for-approval');
+  const [dueDate, setDueDate] = useState<Date>(new Date());
+  const [remarks, setRemarks] = useState('');
+  const [template, setTemplate] = useState('');
+
+  // Step 2 State
+  const [attachments, setAttachments] = useState<File[]>([
+    new File([], 'STR-DWG-005_Rev2.pdf'),
+    new File([], 'STR-DWG-006_Rev1.pdf'),
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [dueDate, setDueDate] = useState<Date>();
+
+  // Step 3 State
+  const [recipientsTo, setRecipientsTo] = useState<string>('architect');
+  const [recipientsCc, setRecipientsCc] = useState<string>('qs');
+
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -95,14 +113,28 @@ export default function NewTransmittalPage() {
                     <CardDescription>Select the purpose, priority, and workflow for this transmittal.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                     <div className="space-y-2">
+                        <Label htmlFor="transmittal-template">Template (Optional)</Label>
+                        <Select value={template} onValueChange={setTemplate}>
+                            <SelectTrigger id="transmittal-template">
+                                <SelectValue placeholder="Start with a template..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="shop-drawing">Shop Drawing Submittal</SelectItem>
+                                <SelectItem value="rfi-response">RFI Response</SelectItem>
+                                <SelectItem value="weekly-progress">Weekly Progress Submittal</SelectItem>
+                                <SelectItem value="closeout-package">Closeout Package</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="transmittal-subject">Subject</Label>
-                        <Input id="transmittal-subject" placeholder="e.g., For Approval: Structural Drawings - Phase 2" />
+                        <Input id="transmittal-subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
                     </div>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <div className="space-y-2">
                             <Label htmlFor="transmittal-type">Purpose of Submission</Label>
-                            <Select>
+                            <Select value={purpose} onValueChange={setPurpose}>
                                 <SelectTrigger id="transmittal-type">
                                 <SelectValue placeholder="Select purpose..." />
                                 </SelectTrigger>
@@ -143,7 +175,7 @@ export default function NewTransmittalPage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="transmittal-remarks">Remarks</Label>
-                        <Textarea id="transmittal-remarks" placeholder="Add any comments or instructions for the recipient..." rows={4} />
+                        <Textarea id="transmittal-remarks" placeholder="Add any comments or instructions for the recipient..." rows={4} value={remarks} onChange={(e) => setRemarks(e.target.value)} />
                     </div>
                 </CardContent>
             </Card>
@@ -194,7 +226,7 @@ export default function NewTransmittalPage() {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="recipients-to">To</Label>
-                        <Select>
+                        <Select value={recipientsTo} onValueChange={setRecipientsTo}>
                             <SelectTrigger id="recipients-to">
                                 <SelectValue placeholder="Select primary recipients..." />
                             </SelectTrigger>
@@ -207,7 +239,7 @@ export default function NewTransmittalPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="recipients-cc">Cc (Carbon Copy)</Label>
-                        <Select>
+                        <Select value={recipientsCc} onValueChange={setRecipientsCc}>
                             <SelectTrigger id="recipients-cc">
                                 <SelectValue placeholder="Select others to notify..." />
                             </SelectTrigger>
@@ -217,6 +249,50 @@ export default function NewTransmittalPage() {
                             </SelectContent>
                         </Select>
                     </div>
+                </CardContent>
+            </Card>
+         )}
+         {currentStep === 4 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Check className="h-5 w-5" />Step 4: Review & Submit</CardTitle>
+                    <CardDescription>Review the transmittal details before sending.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-4 rounded-md border p-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div><p className="text-muted-foreground">Subject</p><p className="font-semibold">{subject}</p></div>
+                            <div><p className="text-muted-foreground">Purpose</p><p className="font-semibold">{purpose.replace('-',' ')}</p></div>
+                            <div><p className="text-muted-foreground">Due Date</p><p className="font-semibold">{dueDate ? format(dueDate, "PPP") : 'N/A'}</p></div>
+                        </div>
+                        {remarks && <div><p className="text-muted-foreground text-sm">Remarks</p><p className="font-semibold text-sm">{remarks}</p></div>}
+                    </div>
+
+                     <Card>
+                        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4" /> Documents ({attachments.length})</CardTitle></CardHeader>
+                        <CardContent className="space-y-2">
+                             {attachments.map((file, index) => (
+                                <div key={index} className="flex items-center gap-2 p-2 rounded-md border bg-muted/50">
+                                    <FileText className="h-4 w-4" />
+                                    <span className="text-sm">{file.name}</span>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> Recipients</CardTitle></CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                             <div className="flex items-center gap-2">
+                                <p className="text-muted-foreground w-12">To:</p>
+                                <div className="flex items-center gap-2"><User className="h-4 w-4" /><span>Lead Architect (Bob Miller)</span></div>
+                             </div>
+                             <div className="flex items-center gap-2">
+                                <p className="text-muted-foreground w-12">Cc:</p>
+                                <div className="flex items-center gap-2"><User className="h-4 w-4" /><span>Quantity Surveyor</span></div>
+                             </div>
+                        </CardContent>
+                    </Card>
                 </CardContent>
             </Card>
          )}
@@ -234,5 +310,3 @@ export default function NewTransmittalPage() {
     </div>
   );
 }
-
-    
