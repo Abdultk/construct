@@ -207,7 +207,7 @@ export default function PaymentCertificatePage() {
                 <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                         <p className="text-muted-foreground">To:</p>
-                        <p className="font-semibold">Client Name Inc.</p>
+                        <p className="font-semibold">Client ABC Corp.</p>
                         <p>456 Business Ave.</p>
                     </div>
                     <div>
