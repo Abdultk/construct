@@ -100,11 +100,11 @@ export function Header() {
               BOQ
             </Link>
              <Link
-              href="/wbs"
+              href="/program-of-works"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Network className="h-5 w-5" />
-              WBS
+              Program of Works
             </Link>
              <Link
               href="/change-orders"
