@@ -342,73 +342,157 @@ export default function DocumentLibraryPage() {
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
     if (!doc) return null;
-
+    
     const fileExtension = doc.name.split('.').pop()?.toLowerCase();
-    const isOfficeDoc = ['docx', 'xlsx', 'pptx'].includes(fileExtension || '');
     const isPdf = fileExtension === 'pdf';
     
-    // Simulate fetching the WOPI URL from the backend
     const [accessUrl, setAccessUrl] = React.useState('');
+    const [liveComments, setLiveComments] = useState<LiveComment[]>([
+        { id: 'c1', user: { name: 'Client', avatar: 'https://picsum.photos/seed/31/40/40'}, text: 'Is this load-bearing wall correctly specified?', type: 'Question', status: 'Open', timestamp: '2h ago' },
+        { id: 'c2', user: { name: 'You', avatar: 'https://picsum.photos/seed/10/40/40'}, text: 'Assign @Structural to verify beam specs.', type: 'Action Item', status: 'Open', timestamp: '1h ago' }
+    ]);
+    const [newComment, setNewComment] = useState('');
+
     React.useEffect(() => {
         const wopiSrc = `https://your-wopi-host.com/wopi/files/${doc.id}`;
-        const token = 'DUMMY_ACCESS_TOKEN'; // This would be a real, short-lived JWT
+        const token = 'DUMMY_ACCESS_TOKEN';
         setAccessUrl(`https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${token}`);
     }, [doc]);
+
+    const handleAddComment = () => {
+        if (!newComment.trim()) return;
+        const newLiveComment: LiveComment = {
+            id: `c${Date.now()}`,
+            user: { name: 'You', avatar: 'https://picsum.photos/seed/10/40/40' },
+            text: newComment,
+            type: 'Comment',
+            status: 'Open',
+            timestamp: 'Just now',
+        };
+        setLiveComments(prev => [...prev, newLiveComment]);
+        setNewComment('');
+    };
     
     const getEditorInterface = () => {
-        if (isOfficeDoc) {
-            return (
-                <div className="bg-background h-full w-full border rounded-md overflow-hidden">
-                    <iframe 
-                        src={accessUrl}
-                        width="100%" 
-                        height="100%" 
-                        frameBorder="0"
-                        title={`Microsoft 365 Editor for ${doc.name}`}
-                        className='bg-white'
-                    >
-                        <p>Your browser does not support iframes. Please open the document in a new tab.</p>
-                    </iframe>
-                </div>
-            );
-        }
-        
         if (isPdf) {
+             const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
             return (
-                <div className="bg-muted rounded-md h-full overflow-auto flex flex-col">
-                    <div className="p-2 bg-white border-b flex items-center gap-2">
-                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14.86.917H9.14L3.454 11.08h5.686L3.454 21.244h17.092L14.86.917z" fill="#FF0000"/>
-                        </svg>
-                        <h3 className="font-semibold text-red-800">Adobe Creative Cloud</h3>
-                    </div>
-                    <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-                        <p>Embedded Adobe PDF editor for <strong>{doc.name}</strong> would be displayed here.</p>
-                    </div>
+                <div className="bg-muted rounded-md h-full overflow-auto">
+                    {docPreviewImage && (
+                        <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
+                    )}
                 </div>
             );
         }
 
-        const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
         return (
-            <div className="bg-muted rounded-md h-full overflow-auto">
-                {docPreviewImage && (
-                    <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
-                )}
+            <div className="bg-background h-full w-full border rounded-md overflow-hidden">
+                <div className="flex flex-col items-center justify-center h-full bg-muted text-center text-muted-foreground p-4">
+                    <p>Embedded Microsoft 365 editor for <strong>{doc.name}</strong> would be displayed here.</p>
+                </div>
             </div>
         );
     }
+    
+     const getCommentIcon = (type: LiveComment['type']) => {
+      switch (type) {
+        case 'Question': return <HelpCircle className="h-4 w-4 text-blue-500" />;
+        case 'Action Item': return <ListTodo className="h-4 w-4 text-orange-500" />;
+        default: return <MessageSquare className="h-4 w-4 text-muted-foreground" />;
+      }
+    };
 
     return (
         <DialogContent className="max-w-7xl h-[90vh]">
-            <DialogHeader className="flex-row items-center justify-between pr-8">
-                <div className="space-y-1">
-                    <DialogTitle>{doc.name} (Rev. {doc.revision})</DialogTitle>
-                    <DialogDescription>Real-time collaborative review session.</DialogDescription>
+            <div className="grid grid-cols-12 gap-4 h-full">
+                <div className="col-span-8 flex flex-col gap-2 h-full">
+                    <DialogHeader className="flex-row items-center justify-between pr-8 h-14">
+                        <div className="space-y-1">
+                            <DialogTitle>{doc.name} (Rev. {doc.revision})</DialogTitle>
+                            <DialogDescription>Real-time collaborative review session.</DialogDescription>
+                        </div>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-hidden">
+                        {getEditorInterface()}
+                    </div>
                 </div>
-            </DialogHeader>
-            <div className="h-full py-4 overflow-hidden">
-                {getEditorInterface()}
+                <div className="col-span-4 h-full flex flex-col border-l pl-4">
+                    <Tabs defaultValue="comments" className="flex flex-col h-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="comments">Comments & Tasks</TabsTrigger>
+                            <TabsTrigger value="ai-assistant">AI Assistant</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="comments" className="flex-1 overflow-y-auto space-y-4 pt-4">
+                             {liveComments.map(comment => (
+                                <div key={comment.id} className="flex items-start gap-3 text-sm">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={comment.user.avatar} />
+                                        <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 rounded-md bg-muted p-2">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <p className="font-semibold">{comment.user.name}</p>
+                                            <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            {getCommentIcon(comment.type)}
+                                            <p>{comment.text}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </TabsContent>
+                         <TabsContent value="ai-assistant" className="flex-1 overflow-y-auto space-y-4 pt-4">
+                            <Card className="bg-ai-accent/10 border-ai-accent/50">
+                                <CardHeader className="flex-row items-center gap-2 space-y-0">
+                                    <Lightbulb className="h-5 w-5 text-ai-accent" />
+                                    <CardTitle className="text-base">Predictive Analysis</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm">
+                                     <div className="flex items-center justify-between">
+                                        <span>First-Time Approval Probability</span>
+                                        <span className="font-bold text-lg">85%</span>
+                                    </div>
+                                    <Separator />
+                                     <div>
+                                        <p className="font-semibold">Review Bottleneck Prediction</p>
+                                        <p className="text-muted-foreground">High probability of delay with <span className="text-foreground font-medium">Structural Engineer</span> review (Est. +2 days).</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-muted/50">
+                                <CardHeader className="flex-row items-center gap-2 space-y-0">
+                                    <Lightbulb className="h-5 w-5 text-foreground" />
+                                    <CardTitle className="text-base">Smart Recommendations</CardTitle>
+                                </CardHeader>
+                                 <CardContent className="space-y-3 text-sm">
+                                    <div>
+                                        <p className="font-semibold">Language Clarity</p>
+                                        <p className="text-muted-foreground">Section 3.1 contains ambiguous phrase "as soon as practical." Suggest replacing with a specific timeframe.</p>
+                                    </div>
+                                    <Separator />
+                                     <div>
+                                        <p className="font-semibold">Missing Information</p>
+                                        <p className="text-muted-foreground">The document references Drawing 'STR-DWG-007' which is not attached to this transmittal.</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                         </TabsContent>
+                        <div className="mt-auto pt-4 border-t">
+                            <div className="relative">
+                                <Textarea 
+                                    placeholder="Add a comment or create a task..." 
+                                    className="pr-10" 
+                                    value={newComment} 
+                                    onChange={e => setNewComment(e.target.value)}
+                                />
+                                <Button type="button" size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={handleAddComment}>
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </Tabs>
+                </div>
             </div>
         </DialogContent>
     );
