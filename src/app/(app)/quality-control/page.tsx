@@ -48,6 +48,7 @@ type Defect = {
   severity: 'High' | 'Medium' | 'Low';
   status: 'Open' | 'In Progress' | 'Resolved';
   assignee: { name: string; avatar: string; };
+  assigner: { name: string; avatar: string; };
   dueDate: string;
 };
 
@@ -74,9 +75,9 @@ export default function QualityControlPage() {
   const [newInspectionDate, setNewInspectionDate] = React.useState<Date>();
   
   const [defects] = React.useState<Defect[]>([
-    { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', severity: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, dueDate: '2024-08-05'},
-    { id: 'NCF-002', area: 'Facade - Panel 7B', description: 'Incorrect panel alignment.', severity: 'Medium', status: 'In Progress', assignee: { name: 'D. Green', avatar: 'https://picsum.photos/seed/13/100/100'}, dueDate: '2024-08-10'},
-    { id: 'NCF-003', area: 'Lobby - Drywall', description: 'Minor surface scratches near entrance.', severity: 'Low', status: 'Resolved', assignee: { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/100/100'}, dueDate: '2024-07-30'},
+    { id: 'NCF-001', area: 'Floor 3 - Plumbing', description: 'Leaking pipe joint at column C4.', severity: 'High', status: 'Open', assignee: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-05'},
+    { id: 'NCF-002', area: 'Facade - Panel 7B', description: 'Incorrect panel alignment.', severity: 'Medium', status: 'In Progress', assignee: { name: 'D. Green', avatar: 'https://picsum.photos/seed/13/100/100'}, assigner: { name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/10/100/100' }, dueDate: '2024-08-10'},
+    { id: 'NCF-003', area: 'Lobby - Drywall', description: 'Minor surface scratches near entrance.', severity: 'Low', status: 'Resolved', assignee: { name: 'C. Davis', avatar: 'https://picsum.photos/seed/12/100/100'}, assigner: { name: 'Bob Miller', avatar: 'https://picsum.photos/seed/11/100/100' }, dueDate: '2024-07-30'},
   ]);
   
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -419,6 +420,7 @@ export default function QualityControlPage() {
                   <TableHead>Description</TableHead>
                   <TableHead>Severity</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Assigner</TableHead>
                   <TableHead>Assignee</TableHead>
                   <TableHead>Due Date</TableHead>
                    <TableHead className="w-12"></TableHead>
@@ -435,6 +437,15 @@ export default function QualityControlPage() {
                     </TableCell>
                     <TableCell><Badge variant={getSeverityBadge(defect.severity)}>{defect.severity}</Badge></TableCell>
                     <TableCell><Badge variant={getStatusBadge(defect.status)}>{defect.status}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                         <Avatar className="h-6 w-6">
+                            <AvatarImage src={defect.assigner.avatar} />
+                            <AvatarFallback>{defect.assigner.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{defect.assigner.name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                          <Avatar className="h-6 w-6">
