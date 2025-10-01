@@ -82,6 +82,8 @@ export default function ProjectSetupPage() {
   const [projectDescription, setProjectDescription] = React.useState('');
   const [projectScope, setProjectScope] = React.useState('');
   const [projectDeliverables, setProjectDeliverables] = React.useState('');
+  const [siteSafetyPlan, setSiteSafetyPlan] = React.useState('');
+  const [siteSafetyRules, setSiteSafetyRules] = React.useState('');
   const [clientInfo, setClientInfo] = React.useState('');
   const [contractType, setContractType] = React.useState('');
   const [contractValue, setContractValue] = React.useState('');
@@ -320,6 +322,14 @@ export default function ProjectSetupPage() {
                  <div className="space-y-2">
                     <Label htmlFor="project-deliverables">Key Deliverables</Label>
                     <Textarea id="project-deliverables" placeholder="List the main project deliverables." value={projectDeliverables} onChange={e => setProjectDeliverables(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="site-safety-plan">Site Safety Plan</Label>
+                    <Textarea id="site-safety-plan" placeholder="Outline the key components of the site safety plan..." value={siteSafetyPlan} onChange={e => setSiteSafetyPlan(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="site-safety-rules">Site Safety Rules</Label>
+                    <Textarea id="site-safety-rules" placeholder="List the main safety rules for the site (e.g., Hard hats required at all times)." value={siteSafetyRules} onChange={e => setSiteSafetyRules(e.target.value)} />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
