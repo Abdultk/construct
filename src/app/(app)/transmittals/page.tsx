@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Send, Filter, MoreHorizontal, ArrowUpDown, Clock, CheckCircle, Search, ChevronDown, Archive, XCircle, MessageSquare, AlertCircle } from "lucide-react"
+import { Send, Filter, MoreHorizontal, ArrowUpDown, Clock, CheckCircle, Search, ChevronDown, Archive, XCircle, MessageSquare, AlertCircle, Percent, Hourglass, BarChart as BarChartIcon } from "lucide-react"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import * as React from "react"
 import { Input } from "@/components/ui/input"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
 
 type Transmittal = {
   id: string;
@@ -78,7 +80,32 @@ export default function TransmittalsPage() {
                 return { icon: Clock, variant: 'outline' as const };
         }
     }
+    
+    const pipelineData = React.useMemo(() => {
+        const statuses = ['Draft', 'Sent', 'Overdue', 'Responded'];
+        return statuses.map(status => ({
+            status,
+            count: transmittals.filter(t => t.status === status).length,
+        }));
+    }, [transmittals]);
 
+    const chartConfig = {
+      count: {
+        label: "Count",
+      },
+      Sent: {
+        color: "hsl(var(--primary))",
+      },
+      Overdue: {
+        color: "hsl(var(--destructive))",
+      },
+      Responded: {
+        color: "hsl(var(--secondary))",
+      },
+       Draft: {
+        color: "hsl(var(--muted-foreground))",
+      },
+    }
 
   return (
     <div className="flex flex-col gap-4">
@@ -88,10 +115,6 @@ export default function TransmittalsPage() {
             <p className="text-muted-foreground">Track all formal document submissions and responses.</p>
         </div>
         <div className="flex items-center gap-2">
-            <div className="relative hidden md:block">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search transmittals..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
             <Button asChild>
                 <Link href="/transmittals/new">
                     <Send className="mr-2 h-4 w-4" />
@@ -101,12 +124,61 @@ export default function TransmittalsPage() {
         </div>
       </div>
       
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Responses</CardTitle>
+            <Hourglass className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">2</div>
+            <p className="text-xs text-muted-foreground">Awaiting action from recipients</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Overdue Items</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">1</div>
+            <p className="text-xs text-muted-foreground">Past response due date</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
+            <Percent className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">50%</div>
+            <p className="text-xs text-muted-foreground">Of all responded items</p>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Response Time</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">3.5 Days</div>
+            <p className="text-xs text-muted-foreground">For last 30 days</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
       <CardHeader>
         <CardTitle>Transmittal Log</CardTitle>
-        <CardDescription>
-            A history of all document transmittals for the project.
-        </CardDescription>
+        <div className="flex items-center justify-between">
+            <CardDescription>
+                A history of all document transmittals for the project.
+            </CardDescription>
+            <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search transmittals..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
