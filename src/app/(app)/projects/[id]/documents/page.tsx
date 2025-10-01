@@ -665,9 +665,9 @@ const SecurityDialog = ({ doc }: { doc: Document | null }) => {
     return (
         <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Security Settings</DialogTitle>
+                <DialogTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Security & Compliance</DialogTitle>
                 <DialogDescription>
-                    Manage access and data protection for: <span className="font-semibold">{doc.name}</span>
+                    Manage access, data protection, and view audit history for: <span className="font-semibold">{doc.name}</span>
                 </DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto pr-4">
@@ -929,7 +929,7 @@ return (
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}>Review</DropdownMenuItem>
                                                                       <DropdownMenuItem>Download</DropdownMenuItem>
                                                                       <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
-                                                                      <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security</DropdownMenuItem>
+                                                                      <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security & Compliance</DropdownMenuItem>
                                                                       <DropdownMenuSeparator />
                                                                       <DropdownMenuItem onSelect={() => handleOcr(doc.name)}>
                                                                           <ScanText className="mr-2 h-4 w-4" /> Extract Text (OCR)
