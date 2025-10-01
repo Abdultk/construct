@@ -62,6 +62,7 @@ type Transaction = {
   project: string;
   projectId: string;
   category: 'Materials' | 'Labor' | 'Equipment' | 'Subcontractor';
+  description: string;
   wbs: string;
   amount: number;
   status: 'Approved' | 'Pending' | 'Rejected';
@@ -71,14 +72,14 @@ type Transaction = {
 };
 
 const allTransactions: Transaction[] = [
-    { id: 'TRN001', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Materials', wbs: '3.2.1', amount: 75000, status: 'Approved', date: '2024-07-15', isAnomaly: false },
-    { id: 'TRN002', project: 'Suburban Housing', projectId: 'proj-002', category: 'Labor', wbs: '4.1.2', amount: 120000, status: 'Pending', date: '2024-07-14', isAnomaly: true, anomalyReason: 'Amount is 50% higher than category average for this project.' },
-    { id: 'TRN003', project: 'Interstate Bridge', projectId: 'proj-003', category: 'Equipment', wbs: '2.3.1', amount: 25000, status: 'Approved', date: '2024-07-13', isAnomaly: false },
-    { id: 'TRN004', project: 'Hospital Wing', projectId: 'proj-004', category: 'Subcontractor', wbs: '5.5.4', amount: 200000, status: 'Rejected', date: '2024-07-12', isAnomaly: false },
-    { id: 'TRN005', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Labor', wbs: '4.1.1', amount: 35000, status: 'Approved', date: '2024-07-11', isAnomaly: false },
-    { id: 'TRN006', project: 'Suburban Housing', projectId: 'proj-002', category: 'Materials', wbs: '3.1.1', amount: 55000, status: 'Approved', date: '2024-07-10', isAnomaly: true, anomalyReason: 'This purchase deviates from the typical procurement cycle.' },
-    { id: 'TRN007', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Equipment', wbs: '2.4.1', amount: 15000, status: 'Approved', date: '2024-06-25', isAnomaly: false },
-    { id: 'TRN008', project: 'Coastal Wind Farm', projectId: 'proj-005', category: 'Subcontractor', wbs: '6.1.1', amount: 550000, status: 'Approved', date: '2024-06-20', isAnomaly: false },
+    { id: 'TRN001', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Materials', description: 'Purchase of structural steel beams', wbs: '3.2.1', amount: 75000, status: 'Approved', date: '2024-07-15', isAnomaly: false },
+    { id: 'TRN002', project: 'Suburban Housing', projectId: 'proj-002', category: 'Labor', description: 'Overtime pay for foundation crew', wbs: '4.1.2', amount: 120000, status: 'Pending', date: '2024-07-14', isAnomaly: true, anomalyReason: 'Amount is 50% higher than category average for this project.' },
+    { id: 'TRN003', project: 'Interstate Bridge', projectId: 'proj-003', category: 'Equipment', description: 'Rental of heavy-duty crane', wbs: '2.3.1', amount: 25000, status: 'Approved', date: '2024-07-13', isAnomaly: false },
+    { id: 'TRN004', project: 'Hospital Wing', projectId: 'proj-004', category: 'Subcontractor', description: 'Payment for HVAC installation (Milestone 1)', wbs: '5.5.4', amount: 200000, status: 'Rejected', date: '2024-07-12', isAnomaly: false },
+    { id: 'TRN005', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Labor', description: 'Weekly payroll for site workers', wbs: '4.1.1', amount: 35000, status: 'Approved', date: '2024-07-11', isAnomaly: false },
+    { id: 'TRN006', project: 'Suburban Housing', projectId: 'proj-002', category: 'Materials', description: 'Emergency purchase of waterproofing membrane', wbs: '3.1.1', amount: 55000, status: 'Approved', date: '2024-07-10', isAnomaly: true, anomalyReason: 'This purchase deviates from the typical procurement cycle.' },
+    { id: 'TRN007', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Equipment', description: 'Generator fuel delivery', wbs: '2.4.1', amount: 15000, status: 'Approved', date: '2024-06-25', isAnomaly: false },
+    { id: 'TRN008', project: 'Coastal Wind Farm', projectId: 'proj-005', category: 'Subcontractor', description: 'Payment for turbine foundation casting', wbs: '6.1.1', amount: 550000, status: 'Approved', date: '2024-06-20', isAnomaly: false },
 ];
 
 function CostTrackingContent() {
@@ -352,6 +353,10 @@ function CostTrackingContent() {
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="space-y-1"><div className="text-muted-foreground">Date</div><div className="font-medium">{selectedTransaction?.date}</div></div>
                     <div className="space-y-1 col-span-2"><div className="text-muted-foreground">Amount</div><div className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</div></div>
+                </div>
+                 <div className="space-y-1 text-sm">
+                    <div className="text-muted-foreground">Description</div>
+                    <div className="font-medium">{selectedTransaction?.description}</div>
                 </div>
                 {selectedTransaction && (
                   <Button variant="outline" size="sm" asChild>
