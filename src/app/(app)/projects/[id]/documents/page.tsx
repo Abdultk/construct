@@ -343,21 +343,11 @@ export default function DocumentLibraryPage() {
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
     if (!doc) return null;
     
-    const fileExtension = doc.name.split('.').pop()?.toLowerCase();
-    const isPdf = fileExtension === 'pdf';
-    
-    const [accessUrl, setAccessUrl] = React.useState('');
     const [liveComments, setLiveComments] = useState<LiveComment[]>([
         { id: 'c1', user: { name: 'Client', avatar: 'https://picsum.photos/seed/31/40/40'}, text: 'Is this load-bearing wall correctly specified?', type: 'Question', status: 'Open', timestamp: '2h ago' },
         { id: 'c2', user: { name: 'You', avatar: 'https://picsum.photos/seed/10/40/40'}, text: 'Assign @Structural to verify beam specs.', type: 'Action Item', status: 'Open', timestamp: '1h ago' }
     ]);
     const [newComment, setNewComment] = useState('');
-
-    React.useEffect(() => {
-        const wopiSrc = `https://your-wopi-host.com/wopi/files/${doc.id}`;
-        const token = 'DUMMY_ACCESS_TOKEN';
-        setAccessUrl(`https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${token}`);
-    }, [doc]);
 
     const handleAddComment = () => {
         if (!newComment.trim()) return;
@@ -374,21 +364,27 @@ export default function DocumentLibraryPage() {
     };
     
     const getEditorInterface = () => {
-        if (isPdf) {
-             const docPreviewImage = PlaceHolderImages.find(p => p.id === 'site-plan-map');
-            return (
-                <div className="bg-muted rounded-md h-full overflow-auto">
-                    {docPreviewImage && (
-                        <Image src={docPreviewImage.imageUrl} alt="Document Preview" width={1000} height={1414} className="p-4" data-ai-hint={docPreviewImage.imageHint} />
-                    )}
-                </div>
-            );
-        }
+        const wopiSrc = `https://<your-wopi-host>/wopi/files/${doc.id}`;
+        const accessToken = '<jwt_or_opaque_token>';
+        const accessUrl = `https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${accessToken}`;
 
         return (
-            <div className="bg-background h-full w-full border rounded-md overflow-hidden">
-                <div className="flex flex-col items-center justify-center h-full bg-muted text-center text-muted-foreground p-4">
-                    <p>Embedded Microsoft 365 editor for <strong>{doc.name}</strong> would be displayed here.</p>
+            <div className="bg-background h-full w-full border rounded-md overflow-hidden flex flex-col">
+                {/* Editor Toolbar Placeholder */}
+                <div className="p-2 border-b bg-muted/50 flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="h-7 w-7"><Bold className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7"><Italic className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7"><Underline className="h-4 w-4" /></Button>
+                    <Separator orientation="vertical" className="h-6" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7"><Highlighter className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7"><MessageSquare className="h-4 w-4" /></Button>
+                </div>
+                {/* Editor Body Placeholder */}
+                <div className="flex-1 p-4 overflow-y-auto prose prose-sm max-w-none">
+                    <h3 className="font-bold">Architectural Plans - General Notes</h3>
+                    <p>1. All dimensions are in millimeters unless otherwise stated.</p>
+                    <p>2. This drawing is to be read in conjunction with all relevant structural, MEP, and specialist drawings.</p>
+                    <p className="p-2 bg-yellow-200/50 rounded-md border border-yellow-500/50">3. <span className="font-bold">Load-bearing wall specification to be confirmed by structural engineer.</span> Refer to drawing STR-DWG-007 for details.</p>
                 </div>
             </div>
         );
