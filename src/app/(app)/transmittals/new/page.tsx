@@ -1,7 +1,7 @@
 
 'use client';
 
-import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users, FileText, Check, Package, User } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users, FileText, Check, Package, User, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 const steps = [
     { id: 1, name: 'Transmittal Details' },
@@ -24,6 +27,21 @@ const steps = [
     { id: 3, name: 'Manage Recipients' },
     { id: 4, name: 'Review & Submit' },
 ];
+
+type LibraryDoc = {
+  id: string;
+  name: string;
+  revision: string;
+  status: string;
+};
+
+const documentLibrary: LibraryDoc[] = [
+    { id: 'STR-DWG-005', name: 'STR-DWG-005_Rev2.pdf', revision: '2.0', status: 'Approved' },
+    { id: 'STR-DWG-006', name: 'STR-DWG-006_Rev1.pdf', revision: '1.0', status: 'Approved' },
+    { id: 'ARC-PLN-010', name: 'ARC-PLN-010_Rev4.dwg', revision: '4.0', status: 'Under Review' },
+    { id: 'SPE-GEN-001', name: 'General Specifications.docx', revision: '3.1', status: 'Approved' },
+];
+
 
 export default function NewTransmittalPage() {
   const { toast } = useToast();
@@ -37,10 +55,7 @@ export default function NewTransmittalPage() {
   const [template, setTemplate] = useState('');
 
   // Step 2 State
-  const [attachments, setAttachments] = useState<File[]>([
-    new File([], 'STR-DWG-005_Rev2.pdf'),
-    new File([], 'STR-DWG-006_Rev1.pdf'),
-  ]);
+  const [selectedDocs, setSelectedDocs] = useState<LibraryDoc[]>([documentLibrary[0], documentLibrary[1]]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Step 3 State
@@ -50,12 +65,28 @@ export default function NewTransmittalPage() {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      setAttachments(prev => [...prev, ...Array.from(event.target.files!)]);
+      const newFiles = Array.from(event.target.files).map(file => ({
+        id: `upl-${file.name}`,
+        name: file.name,
+        revision: '1.0',
+        status: 'New'
+      }));
+      const uniqueNewFiles = newFiles.filter(nf => !selectedDocs.some(sd => sd.name === nf.name));
+      setSelectedDocs(prev => [...prev, ...uniqueNewFiles]);
     }
   };
+  
+  const handleSelectDoc = (doc: LibraryDoc, checked: boolean | 'indeterminate') => {
+      if (checked) {
+          setSelectedDocs(prev => [...prev, doc]);
+      } else {
+          setSelectedDocs(prev => prev.filter(d => d.id !== doc.id));
+      }
+  }
 
-  const handleRemoveFile = (fileName: string) => {
-    setAttachments(prev => prev.filter(file => file.name !== fileName));
+
+  const handleRemoveFile = (docId: string) => {
+    setSelectedDocs(prev => prev.filter(doc => doc.id !== docId));
   };
   
   const handleSubmit = () => {
@@ -166,7 +197,7 @@ export default function NewTransmittalPage() {
                                 <Calendar
                                     mode="single"
                                     selected={dueDate}
-                                    onSelect={setDueDate}
+                                    onSelect={(d) => d && setDueDate(d)}
                                     initialFocus
                                 />
                                 </PopoverContent>
@@ -184,7 +215,7 @@ export default function NewTransmittalPage() {
              <Card>
                 <CardHeader>
                     <CardTitle>Step 2: Document Selection</CardTitle>
-                    <CardDescription>Attach the documents to be transmitted from your project library.</CardDescription>
+                    <CardDescription>Attach documents from your project library or upload new files.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <input
@@ -194,23 +225,60 @@ export default function NewTransmittalPage() {
                         multiple
                         onChange={handleFileChange}
                     />
-                    <div className="min-h-[200px] rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-4">
-                        <div className="space-y-2 w-full">
-                            {attachments.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between p-2 rounded-md border bg-background">
-                                <div className="flex items-center gap-2 truncate">
-                                <Paperclip className="h-4 w-4" />
-                                <span className="text-sm truncate">{file.name}</span>
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(file.name)}>
-                                <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                            ))}
+                     <div className="min-h-[200px] rounded-lg border flex flex-col">
+                        <div className="p-2 border-b">
+                            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                                <Plus className="mr-2 h-4 w-4" /> Add/Upload Document
+                            </Button>
                         </div>
-                         <Button variant="outline" className="mt-4" onClick={() => fileInputRef.current?.click()}>
-                            <Plus className="mr-2 h-4 w-4" /> Add Document
-                        </Button>
+                         <div className="flex-1 p-2 max-h-80 overflow-y-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-10"></TableHead>
+                                        <TableHead>Document Name</TableHead>
+                                        <TableHead>Revision</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {documentLibrary.map((doc) => (
+                                        <TableRow key={doc.id}>
+                                            <TableCell>
+                                                <Checkbox 
+                                                    checked={selectedDocs.some(d => d.id === doc.id)}
+                                                    onCheckedChange={(checked) => handleSelectDoc(doc, checked)}
+                                                />
+                                            </TableCell>
+                                            <TableCell className="font-medium">{doc.name}</TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline">{doc.revision}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={doc.status === 'Approved' ? 'secondary' : 'default'}>{doc.status}</Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                         </div>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-sm mb-2">Selected for Transmittal ({selectedDocs.length})</h4>
+                        <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                             {selectedDocs.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/50">
+                                    <div className="flex items-center gap-2 truncate">
+                                    <Paperclip className="h-4 w-4" />
+                                    <span className="text-sm truncate">{doc.name}</span>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(doc.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                            {selectedDocs.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No documents selected.</p>}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -269,12 +337,12 @@ export default function NewTransmittalPage() {
                     </div>
 
                      <Card>
-                        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4" /> Documents ({attachments.length})</CardTitle></CardHeader>
+                        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4" /> Documents ({selectedDocs.length})</CardTitle></CardHeader>
                         <CardContent className="space-y-2">
-                             {attachments.map((file, index) => (
+                             {selectedDocs.map((doc, index) => (
                                 <div key={index} className="flex items-center gap-2 p-2 rounded-md border bg-muted/50">
                                     <FileText className="h-4 w-4" />
-                                    <span className="text-sm">{file.name}</span>
+                                    <span className="text-sm">{doc.name}</span>
                                 </div>
                             ))}
                         </CardContent>
