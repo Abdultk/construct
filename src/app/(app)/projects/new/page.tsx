@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package, Palette, Image as ImageIcon, Building, Home, HardHat } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, DollarSign, Upload, Users, List, GanttChartSquare, Trash2, UserPlus, CheckCircle, Lightbulb, ShieldAlert, BarChart3, FileIcon, ChevronDown, BookCheck, FileText, Package, Palette, Image as ImageIcon, Building, Home, HardHat, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -90,6 +90,8 @@ export default function ProjectSetupPage() {
   const [endDate, setEndDate] = React.useState<Date>();
   const [projectPicture, setProjectPicture] = React.useState<File | null>(null);
   const [selectedTheme, setSelectedTheme] = React.useState('Default');
+  const [emergencyContact, setEmergencyContact] = React.useState('');
+  const [nearestHospital, setNearestHospital] = React.useState('');
 
   // Step 2 State
   const [selectedTemplate, setSelectedTemplate] = React.useState('Commercial High-Rise');
@@ -338,6 +340,19 @@ export default function ProjectSetupPage() {
                                 <SelectItem value="unit-price">Unit Price</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="emergency-contact">Emergency Contact</Label>
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input id="emergency-contact" type="tel" placeholder="e.g., +1 (555) 123-4567" className="pl-8" value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="nearest-hospital">Nearest Hospital</Label>
+                        <Input id="nearest-hospital" placeholder="Name or address of nearest hospital" value={nearestHospital} onChange={e => setNearestHospital(e.target.value)} />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
