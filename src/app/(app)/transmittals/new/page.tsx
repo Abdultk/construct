@@ -1,15 +1,13 @@
 
 'use client';
 
-import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Paperclip, Trash2, CalendarIcon, Users, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useState, useRef, ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -17,9 +15,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Progress } from '@/components/ui/progress';
+
+const steps = [
+    { id: 1, name: 'Transmittal Details' },
+    { id: 2, name: 'Select Documents' },
+    { id: 3, name: 'Manage Recipients' },
+];
 
 export default function NewTransmittalPage() {
   const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(1);
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dueDate, setDueDate] = useState<Date>();
@@ -41,6 +47,11 @@ export default function NewTransmittalPage() {
     });
   }
 
+  const nextStep = () => setCurrentStep(prev => (prev < steps.length ? prev + 1 : prev));
+  const prevStep = () => setCurrentStep(prev => (prev > 1 ? prev - 1 : prev));
+
+  const progressValue = (currentStep / steps.length) * 100;
+
   return (
     <div className="flex flex-1 flex-col gap-4 max-w-4xl mx-auto w-full">
       {/* Header */}
@@ -56,19 +67,34 @@ export default function NewTransmittalPage() {
             <p className="text-muted-foreground">Project: Downtown Skyscraper</p>
           </div>
         </div>
-        <Button onClick={handleSubmit}>
+        <Button onClick={handleSubmit} disabled={currentStep !== steps.length}>
           <Send className="mr-2 h-4 w-4" /> Send Transmittal
         </Button>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Main Form */}
-        <div className="col-span-12 lg:col-span-8 space-y-6">
+       {/* Stepper */}
+      <div className="space-y-4">
+        <Progress value={progressValue} className="h-2" />
+        <div className="flex justify-between">
+            {steps.map(step => (
+                 <div key={step.id} className="flex items-center gap-2">
+                    <div className={cn("h-6 w-6 rounded-full flex items-center justify-center text-xs", currentStep >= step.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                        {currentStep > step.id ? <Check className="h-4 w-4" /> : step.id}
+                    </div>
+                    <span className={cn("text-sm", currentStep >= step.id ? "font-semibold" : "text-muted-foreground")}>{step.name}</span>
+                 </div>
+            ))}
+        </div>
+      </div>
+
+      <div className="flex-1">
+        {currentStep === 1 && (
             <Card>
                 <CardHeader>
-                    <CardTitle>Transmittal Details</CardTitle>
+                    <CardTitle>Step 1: Transmittal Details</CardTitle>
+                    <CardDescription>Select the purpose, priority, and workflow for this transmittal.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="transmittal-subject">Subject</Label>
                         <Input id="transmittal-subject" placeholder="e.g., For Approval: Structural Drawings - Phase 2" />
@@ -121,11 +147,12 @@ export default function NewTransmittalPage() {
                     </div>
                 </CardContent>
             </Card>
-
-            <Card>
+        )}
+        {currentStep === 2 && (
+             <Card>
                 <CardHeader>
-                    <CardTitle>Documents</CardTitle>
-                    <CardDescription>Attach the documents to be transmitted.</CardDescription>
+                    <CardTitle>Step 2: Document Selection</CardTitle>
+                    <CardDescription>Attach the documents to be transmitted from your project library.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <input
@@ -135,35 +162,36 @@ export default function NewTransmittalPage() {
                         multiple
                         onChange={handleFileChange}
                     />
-                    <div className="space-y-2">
-                        {attachments.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 rounded-md border">
-                            <div className="flex items-center gap-2 truncate">
-                            <Paperclip className="h-4 w-4" />
-                            <span className="text-sm truncate">{file.name}</span>
+                    <div className="min-h-[200px] rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-4">
+                        <div className="space-y-2 w-full">
+                            {attachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 rounded-md border bg-background">
+                                <div className="flex items-center gap-2 truncate">
+                                <Paperclip className="h-4 w-4" />
+                                <span className="text-sm truncate">{file.name}</span>
+                                </div>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(file.name)}>
+                                <Trash2 className="h-4 w-4" />
+                                </Button>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(file.name)}>
-                            <Trash2 className="h-4 w-4" />
-                            </Button>
+                            ))}
                         </div>
-                        ))}
+                         <Button variant="outline" className="mt-4" onClick={() => fileInputRef.current?.click()}>
+                            <Plus className="mr-2 h-4 w-4" /> Add Document
+                        </Button>
                     </div>
-                    <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
-                        <Plus className="mr-2 h-4 w-4" /> Add Document
-                    </Button>
                 </CardContent>
             </Card>
-        </div>
-
-        {/* Right Panel */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
+        )}
+         {currentStep === 3 && (
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" /> Recipients
+                        <Users className="h-5 w-5" /> Step 3: Recipient Management
                     </CardTitle>
+                    <CardDescription>Choose recipients by role or individual contact.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="recipients-to">To</Label>
                         <Select>
@@ -191,8 +219,20 @@ export default function NewTransmittalPage() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+         )}
       </div>
+
+       <div className="flex justify-between mt-4">
+        <Button variant="outline" onClick={prevStep} disabled={currentStep === 1}>
+          Previous
+        </Button>
+        <Button onClick={nextStep} disabled={currentStep === steps.length}>
+          Next
+        </Button>
+      </div>
+
     </div>
   );
 }
+
+    
