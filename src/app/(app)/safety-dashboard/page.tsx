@@ -506,8 +506,8 @@ export default function SafetyDashboardPage() {
               <Image 
                 src={sitePlanImage.imageUrl}
                 alt="Site Plan"
-                layout="fill"
-                objectFit="cover"
+                fill
+                className="object-cover"
                 data-ai-hint={sitePlanImage.imageHint}
               />
             )}
@@ -737,7 +737,7 @@ export default function SafetyDashboardPage() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => handleSubmit('Incident Reported', 'The incident has been logged and the safety officer has been notified.')}>
                     <Send className="mr-2 h-4 w-4" />
                     Submit Incident Report
                   </Button>
