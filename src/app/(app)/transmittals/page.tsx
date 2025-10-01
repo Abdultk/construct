@@ -71,13 +71,13 @@ export default function TransmittalsPage() {
     const getResponseBadge = (response: string) => {
         switch (response) {
             case 'Approved':
-                return { icon: CheckCircle, variant: 'secondary' as const };
+                return { icon: CheckCircle, variant: 'secondary' as const, className: 'text-green-600' };
             case 'Approved with Comments':
-                return { icon: MessageSquare, variant: 'secondary' as const };
+                return { icon: MessageSquare, variant: 'secondary' as const, className: 'text-blue-600' };
             case 'Rejected':
-                return { icon: XCircle, variant: 'destructive' as const };
+                return { icon: XCircle, variant: 'destructive' as const, className: 'text-red-600' };
             default:
-                return { icon: Clock, variant: 'outline' as const };
+                return { icon: Clock, variant: 'outline' as const, className: 'text-muted-foreground' };
         }
     }
     
@@ -196,8 +196,7 @@ export default function TransmittalsPage() {
           </TableHeader>
           <TableBody>
             {transmittals.map((t) => {
-              const ResponseIcon = getResponseBadge(t.response).icon;
-              const responseVariant = getResponseBadge(t.response).variant;
+              const { icon: ResponseIcon, variant: responseVariant, className: responseClassName } = getResponseBadge(t.response);
               return(
                 <TableRow key={t.id}>
                     <TableCell className="font-medium font-code">{t.id}</TableCell>
@@ -212,7 +211,7 @@ export default function TransmittalsPage() {
                     </TableCell>
                     <TableCell>
                         <Badge variant={responseVariant} className="gap-1">
-                            <ResponseIcon className="h-3 w-3" />
+                            <ResponseIcon className={cn("h-3 w-3", responseClassName)} />
                             {t.response}
                         </Badge>
                     </TableCell>
