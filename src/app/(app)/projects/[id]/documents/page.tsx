@@ -364,10 +364,6 @@ export default function DocumentLibraryPage() {
     };
     
     const getEditorInterface = () => {
-        const wopiSrc = `https://<your-wopi-host>/wopi/files/${doc.id}`;
-        const accessToken = '<jwt_or_opaque_token>';
-        const accessUrl = `https://word-edit.officeapps.live.com/we/wordeditorframe.aspx?WOPISrc=${wopiSrc}&access_token=${accessToken}`;
-
         return (
             <div className="bg-background h-full w-full border rounded-md overflow-hidden flex flex-col">
                 {/* Editor Toolbar Placeholder */}
