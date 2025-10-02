@@ -74,11 +74,14 @@ import {
   Pilcrow,
   File as FileIcon,
   Loader2,
-  MessageCircle,
+  MessageCircle as MessageCircleIcon,
   Clock,
   ArchiveIcon,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  CalendarIcon,
+  Package,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -119,6 +122,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lightbulb } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 
 type Document = {
@@ -149,6 +155,8 @@ type Transmittal = {
   date: string;
   status: 'Draft' | 'Sent' | 'Overdue' | 'Responded';
   response: 'Pending' | 'Approved' | 'Approved with Comments' | 'Rejected';
+  documents: Document[];
+  remarks?: string;
 };
 
 type LiveComment = {
@@ -160,42 +168,55 @@ type LiveComment = {
   status: 'Open' | 'Resolved';
 };
 
+const documentLibrary: Document[] = [
+    { id: 'CTR-001', name: 'Main Agreement.docx', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' },
+    { id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0.0-D2' },
+    { id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.2.0' },
+    { id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'PRO-REP-001', name: 'Progress_Report_July.xlsx', type: 'Spreadsheet', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0.0' },
+    { id: 'REF-PRO-001', name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20', discipline: 'General', status: 'Approved', revision: '3.0.0' },
+    { id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'REF-TPL-002', name: 'Specification_Template_CSI.docx', type: 'Template', size: '250 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'REF-TPL-003', name: 'Meeting_Minutes_Template.docx', type: 'Template', size: '95 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.1.0' },
+    { id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' },
+    { id: 'COM-PPT-001', name: 'Monthly_Progress_Review.pptx', type: 'Presentation', size: '8.5 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' },
+    { id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' },
+    { id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' },
+];
+
+
 const initialDocumentStructure: DocumentStructure = {
   "Project Documentation": [
-    { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.docx', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' }] },
-    { name: 'Design Documents', documents: [{ id: 'ARC-DWG-001', name: 'Architectural_Plans_v3.dwg', type: 'CAD', size: '25.1 MB', lastModified: '2024-07-22', discipline: 'Architectural', status: 'Under Review', revision: '3.0.0-D2' }] },
-    { name: 'Technical Documents', documents: [{ id: 'TEC-MS-001', name: 'Method Statement - Concrete.pdf', type: 'Document', size: '1.1 MB', lastModified: '2024-07-15', discipline: 'Structural', status: 'Approved', revision: '1.2.0' }] },
-    { name: 'Regulatory Documents', documents: [{ id: 'PER-BLD-001', name: 'Building Permit BP-2023.pdf', type: 'Permit', size: '800 KB', lastModified: '2024-06-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
-    { name: 'Progress Documents', documents: [{ id: 'PRO-REP-001', name: 'Progress_Report_July.xlsx', type: 'Spreadsheet', size: '4.2 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Contract Documents', documents: documentLibrary.filter(d => d.discipline === 'Commercial') },
+    { name: 'Design Documents', documents: documentLibrary.filter(d => d.discipline === 'Architectural') },
+    { name: 'Technical Documents', documents: documentLibrary.filter(d => d.discipline === 'Structural') },
+    { name: 'Regulatory Documents', documents: documentLibrary.filter(d => d.type === 'Permit') },
+    { name: 'Progress Documents', documents: documentLibrary.filter(d => d.type === 'Spreadsheet') },
   ],
   "Reference Documentation": [
-    { name: 'Standards & Codes', documents: [{ id: 'REF-STD-001', name: 'BS_EN_1991-1-1.pdf', type: 'Standard', size: '6.8 MB', lastModified: '2023-01-01', discipline: 'Structural', status: 'Approved', revision: '1.0.0' }] },
-    { name: 'Procedures & Guidelines', documents: [{ id: 'REF-PRO-001', name: 'Safety_Manual_v3.pdf', type: 'Document', size: '1.9 MB', lastModified: '2023-05-20', discipline: 'General', status: 'Approved', revision: '3.0.0' }] },
-    { name: 'Templates & Forms', documents: [
-        { id: 'REF-TPL-001', name: 'RFI_Template.docx', type: 'Template', size: '120 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
-        { id: 'REF-TPL-002', name: 'Specification_Template_CSI.docx', type: 'Template', size: '250 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' },
-        { id: 'REF-TPL-003', name: 'Meeting_Minutes_Template.docx', type: 'Template', size: '95 KB', lastModified: '2023-02-15', discipline: 'General', status: 'Approved', revision: '1.0.0' }
-    ]},
+    { name: 'Standards & Codes', documents: documentLibrary.filter(d => d.type === 'Standard') },
+    { name: 'Procedures & Guidelines', documents: documentLibrary.filter(d => d.name.includes('Manual')) },
+    { name: 'Templates & Forms', documents: documentLibrary.filter(d => d.type === 'Template') },
   ],
   "Communication Documentation": [
-    { name: 'Correspondence', documents: [{ id: 'COR-MIN-001', name: 'Meeting_Minutes_2024-07-29.pdf', type: 'Minutes', size: '750 KB', lastModified: '2024-07-29', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
-    { name: 'RFIs (Request for Information)', documents: [{ id: 'COM-RFI-012', name: 'RFI-012_Response.pdf', type: 'Document', size: '300 KB', lastModified: '2024-07-28', discipline: 'MEP', status: 'Approved', revision: '1.1.0' }] },
-    { name: 'Submittals', documents: [{ id: 'COM-SUB-004', name: 'Submittal_HVAC-004.zip', type: 'Archive', size: '12.3 MB', lastModified: '2024-07-26', discipline: 'MEP', status: 'Under Review', revision: '1.0.0' }] },
-    { name: 'Presentations', documents: [{ id: 'COM-PPT-001', name: 'Monthly_Progress_Review.pptx', type: 'Presentation', size: '8.5 MB', lastModified: '2024-08-01', discipline: 'General', status: 'Approved', revision: '1.0.0' }] },
+    { name: 'Correspondence', documents: documentLibrary.filter(d => d.type === 'Minutes') },
+    { name: 'RFIs (Request for Information)', documents: documentLibrary.filter(d => d.name.includes('RFI')) },
+    { name: 'Submittals', documents: documentLibrary.filter(d => d.name.includes('Submittal')) },
+    { name: 'Presentations', documents: documentLibrary.filter(d => d.type === 'Presentation') },
   ],
    "Archive": [
-    { name: 'Superseded Documents', documents: [
-        { id: 'COM-BOQ-001', name: 'BOQ_v1.2.xlsx', type: 'Spreadsheet', size: '3.4 MB', lastModified: '2024-07-05', discipline: 'Commercial', status: 'Superseded', revision: '1.2.0' },
-        { id: 'ARC-DWG-001-v2', name: 'Architectural_Plans_v2.dwg', type: 'CAD', size: '22.8 MB', lastModified: '2024-07-18', discipline: 'Architectural', status: 'Archived', revision: '2.1.0' }
-    ] },
+    { name: 'Superseded Documents', documents: documentLibrary.filter(d => d.status === 'Superseded' || d.status === 'Archived') },
   ],
 };
 
 const initialTransmittals: Transmittal[] = [
-    { id: 'TRN-0023', subject: 'For Review: Updated Lobby Renderings', to: 'Client ABC Corp.', from: 'B. Miller', date: '2024-08-01', status: 'Sent', response: 'Pending' },
-    { id: 'TRN-0022', subject: 'For Approval: Structural Calculations - Phase 3', to: 'Structural Engineer', from: 'A. Johnson', date: '2024-07-28', status: 'Overdue', response: 'Pending' },
-    { id: 'TRN-0021', subject: 'Response: Approved - RFI-012', to: 'A. Johnson', from: 'MEP Consultant', date: '2024-07-27', status: 'Responded', response: 'Approved' },
-    { id: 'TRN-0020', subject: 'Response: Revise & Resubmit - Electrical Plans', to: 'A. Johnson', from: 'Lead Architect', date: '2024-07-26', status: 'Responded', response: 'Rejected' },
+    { id: 'TRN-0023', subject: 'For Review: Updated Lobby Renderings', to: 'Client ABC Corp.', from: 'B. Miller', date: '2024-08-01', status: 'Sent', response: 'Pending', documents: [documentLibrary[2]] },
+    { id: 'TRN-0022', subject: 'For Approval: Structural Calculations - Phase 3', to: 'Structural Engineer', from: 'A. Johnson', date: '2024-07-28', status: 'Overdue', response: 'Pending', documents: [documentLibrary[4]], remarks: 'Please review and approve by EOD 07/30.' },
+    { id: 'TRN-0021', subject: 'Response: Approved - RFI-012', to: 'A. Johnson', from: 'MEP Consultant', date: '2024-07-27', status: 'Responded', response: 'Approved', documents: [documentLibrary[11]] },
+    { id: 'TRN-0020', subject: 'Response: Revise & Resubmit - Electrical Plans', to: 'A. Johnson', from: 'Lead Architect', date: '2024-07-26', status: 'Responded', response: 'Rejected', documents: [] },
 ];
 
 const documentHistory = [
@@ -245,6 +266,7 @@ export default function DocumentLibraryPage() {
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
   const [isTransmittalOpen, setIsTransmittalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [selectedTransmittal, setSelectedTransmittal] = useState<Transmittal | null>(null);
   const uploadIdCounter = useRef(0);
 
   const getUploadId = () => {
@@ -876,6 +898,93 @@ const SecurityDialog = ({ doc }: { doc: Document | null }) => {
     );
 };
 
+const TransmittalDetailsDialog = ({ transmittal, isOpen, onOpenChange }: { transmittal: Transmittal | null, isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
+    if (!transmittal) return null;
+    
+    const workflowSteps = [
+        { status: 'Sent', actor: transmittal.from, date: transmittal.date, icon: Send },
+        { status: 'Received', actor: transmittal.to, date: transmittal.date, icon: User },
+        ...(transmittal.response === 'Pending' 
+            ? [{ status: 'Pending Review', actor: transmittal.to, date: null, icon: Eye }]
+            : [{ status: transmittal.response, actor: transmittal.to, date: '2024-08-02', icon: transmittal.response.includes('Approved') ? CheckCircle : XCircle }]
+        )
+    ];
+
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Transmittal Details: {transmittal.id}</DialogTitle>
+                    <DialogDescription>{transmittal.subject}</DialogDescription>
+                </DialogHeader>
+                 <div className="max-h-[70vh] overflow-y-auto pr-4 space-y-4 py-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Key Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-4 text-sm">
+                            <div><p className="text-muted-foreground">From</p><p className="font-semibold">{transmittal.from}</p></div>
+                            <div><p className="text-muted-foreground">To</p><p className="font-semibold">{transmittal.to}</p></div>
+                            <div><p className="text-muted-foreground">Sent Date</p><p className="font-semibold">{transmittal.date}</p></div>
+                            <div><p className="text-muted-foreground">Status</p><Badge variant={getTransmittalStatusBadge(transmittal.status)}>{transmittal.status}</Badge></div>
+                            <div><p className="text-muted-foreground">Response</p><Badge variant={getResponseBadge(transmittal.response).variant}>{transmittal.response}</Badge></div>
+                        </CardContent>
+                    </Card>
+                    
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Documents ({transmittal.documents.length})</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Revision</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {transmittal.documents.map(doc => (
+                                        <TableRow key={doc.id}>
+                                            <TableCell className="font-medium">{doc.name}</TableCell>
+                                            <TableCell>{doc.revision}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Approval Workflow</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-6">
+                                {workflowSteps.map((step, index) => (
+                                     <div key={index} className="flex gap-4">
+                                        <div className="flex flex-col items-center">
+                                            <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", step.date ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                <step.icon className="h-5 w-5" />
+                                            </div>
+                                            {index < workflowSteps.length - 1 && <div className="w-px flex-grow bg-border" />}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold">{step.status}</p>
+                                            <p className="text-sm text-muted-foreground">by {step.actor}</p>
+                                            {step.date && <p className="text-xs text-muted-foreground">{step.date}</p>}
+                                        </div>
+                                     </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 return (
     <div className="flex flex-1 flex-col gap-4">
@@ -1097,7 +1206,7 @@ return (
                     {initialTransmittals.map((t) => {
                     const { icon: ResponseIcon, variant: responseVariant, className: responseClassName } = getResponseBadge(t.response);
                     return(
-                        <TableRow key={t.id}>
+                        <TableRow key={t.id} className="cursor-pointer" onClick={() => setSelectedTransmittal(t)}>
                             <TableCell className="font-medium font-code">{t.id}</TableCell>
                             <TableCell>{t.subject}</TableCell>
                             <TableCell className="hidden md:table-cell">{t.to}</TableCell>
@@ -1115,12 +1224,12 @@ return (
                             <TableCell>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setSelectedTransmittal(t); }}>
                                             <MoreVertical className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={() => setSelectedTransmittal(t)}>View Details</DropdownMenuItem>
                                         <DropdownMenuItem>Download Attachments</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -1143,18 +1252,27 @@ return (
             <SecurityDialog doc={selectedDoc} />
         </Dialog>
          <Dialog open={isTransmittalOpen} onOpenChange={setIsTransmittalOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>New Transmittal</DialogTitle>
+                    <DialogDescription>
+                        This would be the form to create a new transmittal.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                    This would be the form to create a new transmittal.
+                   <p className="text-muted-foreground text-center">Form content placeholder.</p>
                 </div>
                 <DialogFooter>
                     <Button onClick={handleNewTransmittal}>Send</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+        <TransmittalDetailsDialog 
+            transmittal={selectedTransmittal} 
+            isOpen={!!selectedTransmittal} 
+            onOpenChange={(open) => { if (!open) setSelectedTransmittal(null) }} 
+        />
     </div>
 );
 }
+
