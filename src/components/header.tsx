@@ -34,7 +34,8 @@ import {
   Bot,
   Briefcase,
   Check,
-  Send
+  Send,
+  Archive,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -91,6 +92,13 @@ export function Header() {
               <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                 5
               </Badge>
+            </Link>
+             <Link
+              href="/projects/proj-001/documents"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <Archive className="h-5 w-5" />
+              Document Library
             </Link>
              <Link
               href="/boq"
