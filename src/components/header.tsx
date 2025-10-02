@@ -94,7 +94,7 @@ export function Header() {
               </Badge>
             </Link>
              <Link
-              href="/projects/proj-001/documents"
+              href="/document-library"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <Archive className="h-5 w-5" />

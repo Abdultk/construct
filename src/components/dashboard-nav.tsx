@@ -13,7 +13,7 @@ export function DashboardNav() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/projects", label: "Projects", icon: GanttChartSquare, badge: '5' },
-    { href: "/projects/proj-001/documents", label: "Document Library", icon: Archive },
+    { href: "/document-library", label: "Document Library", icon: Archive },
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/program-of-works", label: "Program of Works", icon: Network },
     { href: "/change-orders", label: "Change Orders", icon: FilePlus, badge: '3' },
@@ -38,7 +38,7 @@ export function DashboardNav() {
 
   // A sub-item that won't be displayed in the main nav, but will be used for active state
   const subNavItems = [
-      { href: "/projects/[id]/documents", label: "Documents", icon: Folder, parent: "/projects" },
+      { href: "/projects/[id]/documents", label: "Documents", icon: Folder, parent: "/document-library" },
   ]
 
   return (
