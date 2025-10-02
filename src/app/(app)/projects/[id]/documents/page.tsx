@@ -146,23 +146,6 @@ type LiveComment = {
   status: 'Open' | 'Resolved';
 };
 
-type Transmittal = {
-  id: string;
-  subject: string;
-  to: string;
-  from: string;
-  date: string;
-  status: 'Draft' | 'Sent' | 'Overdue' | 'Responded';
-  response: 'Pending' | 'Approved' | 'Approved with Comments' | 'Rejected';
-};
-
-const initialTransmittals: Transmittal[] = [
-    { id: 'TRN-0023', subject: 'For Review: Updated Lobby Renderings', to: 'Client ABC Corp.', from: 'B. Miller', date: '2024-08-01', status: 'Sent', response: 'Pending' },
-    { id: 'TRN-0022', subject: 'For Approval: Structural Calculations - Phase 3', to: 'Structural Engineer', from: 'A. Johnson', date: '2024-07-28', status: 'Overdue', response: 'Pending' },
-    { id: 'TRN-0021', subject: 'Response: Approved - RFI-012', to: 'A. Johnson', from: 'MEP Consultant', date: '2024-07-27', status: 'Responded', response: 'Approved' },
-];
-
-
 const initialDocumentStructure: DocumentStructure = {
   "Project Documentation": [
     { name: 'Contract Documents', documents: [{ id: 'CTR-001', name: 'Main Agreement.docx', type: 'Document', size: '2.5 MB', lastModified: '2024-07-10', discipline: 'Commercial', status: 'Approved', revision: '2.1.0' }] },
@@ -365,33 +348,6 @@ export default function DocumentLibraryPage() {
         default: return null;
     }
   }
-
-  const getTransmittalStatusBadge = (status: string) => {
-    switch (status) {
-    case 'Sent':
-        return 'default';
-    case 'Overdue':
-        return 'destructive';
-    case 'Responded':
-        return 'secondary';
-    default:
-        return 'outline';
-    }
-  };
-    
-  const getTransmittalResponseBadge = (response: string) => {
-      switch (response) {
-          case 'Approved':
-              return { icon: CheckCircle, variant: 'secondary' as const, className: 'text-green-600' };
-          case 'Approved with Comments':
-              return { icon: MessageSquare, variant: 'secondary' as const, className: 'text-blue-600' };
-          case 'Rejected':
-              return { icon: XCircle, variant: 'destructive' as const, className: 'text-red-600' };
-          default:
-              return { icon: Clock, variant: 'outline' as const, className: 'text-muted-foreground' };
-      }
-  }
-
 
   const RealTimeReviewDialog = ({ doc }: { doc: Document | null }) => {
     if (!doc) return null;
@@ -953,223 +909,120 @@ return (
                 </Dialog>
             </div>
         </div>
-        <Tabs defaultValue="documents">
-            <div className='flex justify-between items-center'>
-                <TabsList>
-                    <TabsTrigger value="documents">Documents</TabsTrigger>
-                    <TabsTrigger value="transmittals">Transmittals</TabsTrigger>
-                </TabsList>
-                <Dialog open={isTransmittalOpen} onOpenChange={setIsTransmittalOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="secondary">
-                            <Send className="mr-2 h-4 w-4" /> New Transmittal
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle>New Transmittal</DialogTitle>
-                            <DialogDescription>Create and send a new document transmittal.</DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <Label>Subject</Label>
-                                <Input placeholder="e.g., For Approval: Structural Drawings" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Recipients</Label>
-                                <Input placeholder="e.g., Client, Architect" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Documents</Label>
-                                <p className="text-sm text-muted-foreground">Document selection would be here.</p>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                             <Button onClick={handleNewTransmittal}>Send</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-            <TabsContent value="documents">
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input placeholder="Search documents..." className="pl-8" />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline">
-                                        <Filter className="mr-2 h-4 w-4" /> Filter
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuSub>
-                                        <DropdownMenuSubTrigger>Discipline</DropdownMenuSubTrigger>
-                                        <DropdownMenuSubContent>
-                                            <DropdownMenuItem>Architectural</DropdownMenuItem>
-                                            <DropdownMenuItem>Structural</DropdownMenuItem>
-                                            <DropdownMenuItem>MEP</DropdownMenuItem>
-                                        </DropdownMenuSubContent>
-                                    </DropdownMenuSub>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <Accordion type="multiple" defaultValue={Object.keys(documents)} className="w-full">
-                            {Object.entries(documents).map(([mainCategory, subCategories]) => (
-                                <AccordionItem key={mainCategory} value={mainCategory}>
-                                    <AccordionTrigger className="text-lg font-semibold font-headline py-4">
-                                        {mainCategory}
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="pl-4">
-                                            <Table>
-                                                <TableHeader>
+        <Card>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Search documents..." className="pl-8" />
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <Filter className="mr-2 h-4 w-4" /> Filter
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>Discipline</DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                    <DropdownMenuItem>Architectural</DropdownMenuItem>
+                                    <DropdownMenuItem>Structural</DropdownMenuItem>
+                                    <DropdownMenuItem>MEP</DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="multiple" defaultValue={Object.keys(documents)} className="w-full">
+                    {Object.entries(documents).map(([mainCategory, subCategories]) => (
+                        <AccordionItem key={mainCategory} value={mainCategory}>
+                            <AccordionTrigger className="text-lg font-semibold font-headline py-4">
+                                {mainCategory}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="pl-4">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Type</TableHead>
+                                                <TableHead className="hidden lg:table-cell">Status</TableHead>
+                                                <TableHead className="hidden xl:table-cell">Revision</TableHead>
+                                                <TableHead className="hidden md:table-cell">Last Modified</TableHead>
+                                                <TableHead className="w-12"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {subCategories.map((category) => (
+                                                <React.Fragment key={category.name}>
                                                     <TableRow>
-                                                        <TableHead>Name</TableHead>
-                                                        <TableHead className="hidden sm:table-cell">Type</TableHead>
-                                                        <TableHead className="hidden lg:table-cell">Status</TableHead>
-                                                        <TableHead className="hidden xl:table-cell">Revision</TableHead>
-                                                        <TableHead className="hidden md:table-cell">Last Modified</TableHead>
-                                                        <TableHead className="w-12"></TableHead>
+                                                        <TableCell className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
+                                                            <Folder className="h-5 w-5 text-primary" />
+                                                            <span>{category.name}</span>
+                                                        </TableCell>
+                                                        <TableCell className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></TableCell>
+                                                        <TableCell colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></TableCell>
                                                     </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {subCategories.map((category) => (
-                                                        <React.Fragment key={category.name}>
-                                                            <TableRow>
-                                                                <TableCell className="p-4 align-middle font-semibold flex items-center gap-2 bg-muted/50">
-                                                                    <Folder className="h-5 w-5 text-primary" />
-                                                                    <span>{category.name}</span>
-                                                                </TableCell>
-                                                                <TableCell className="p-4 align-middle hidden sm:table-cell bg-muted/50"><Badge variant="outline">Folder</Badge></TableCell>
-                                                                <TableCell colSpan={4} className="p-4 align-middle hidden sm:table-cell bg-muted/50"></TableCell>
-                                                            </TableRow>
-                                                            
-                                                            {category.documents.map((doc) => {
-                                                            return(
-                                                                <TableRow 
-                                                                    key={doc.id} 
-                                                                    className="cursor-pointer"
-                                                                    onClick={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}
-                                                                >
-                                                                    <TableCell className="pl-12 font-medium flex items-center gap-2">
-                                                                        {getFileIcon(doc.name.split('.').pop() || '')}
-                                                                        <span>{doc.name}</span>
-                                                                    </TableCell>
-                                                                    <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
-                                                                    <TableCell className="hidden lg:table-cell">
-                                                                        <Badge variant={getStatusBadge(doc.status)} className="capitalize">
-                                                                            {getStatusIcon(doc.status)} {doc.status}
-                                                                        </Badge>
-                                                                    </TableCell>
-                                                                    <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
-                                                                    <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
-                                                                    <TableCell>
-                                                                    <DropdownMenu>
-                                                                        <DropdownMenuTrigger asChild>
-                                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                                                                                <MoreVertical className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </DropdownMenuTrigger>
-                                                                        <DropdownMenuContent align="end">
-                                                                            <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}>Review</DropdownMenuItem>
-                                                                            <DropdownMenuItem>Download</DropdownMenuItem>
-                                                                            <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
-                                                                            <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security & Compliance</DropdownMenuItem>
-                                                                            <DropdownMenuSeparator />
-                                                                            <DropdownMenuItem onSelect={() => handleOcr(doc.name)}>
-                                                                                <ScanText className="mr-2 h-4 w-4" /> Extract Text (OCR)
-                                                                            </DropdownMenuItem>
-                                                                            <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                                            <DropdownMenuSeparator />
-                                                                            <DropdownMenuItem className="text-destructive">
-                                                                                Delete
-                                                                            </DropdownMenuItem>
-                                                                        </DropdownMenuContent>
-                                                                    </DropdownMenu>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            )})}
-                                                        </React.Fragment>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-            <TabsContent value="transmittals">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Transmittal Log</CardTitle>
-                        <CardDescription>A history of all document transmittals for this project.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead className="w-[120px]">ID</TableHead>
-                                <TableHead>Subject</TableHead>
-                                <TableHead>To</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Response</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {initialTransmittals.map((t) => {
-                                const { icon: ResponseIcon, variant: responseVariant, className: responseClassName } = getTransmittalResponseBadge(t.response);
-                                return(
-                                    <TableRow key={t.id}>
-                                        <TableCell className="font-medium font-code">{t.id}</TableCell>
-                                        <TableCell>{t.subject}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{t.to}</TableCell>
-                                        <TableCell className="hidden sm:table-cell">{t.date}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={getTransmittalStatusBadge(t.status)}>
-                                                {t.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={responseVariant} className="gap-1">
-                                                <ResponseIcon className={cn("h-3 w-3", responseClassName)} />
-                                                {t.response}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                    {t.status === 'Overdue' && <DropdownMenuItem>Send Reminder</DropdownMenuItem>}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                                })}
-                            </TableBody>
-                            </Table>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
+                                                    
+                                                    {category.documents.map((doc) => {
+                                                    return(
+                                                        <TableRow 
+                                                            key={doc.id} 
+                                                            className="cursor-pointer"
+                                                            onClick={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}
+                                                        >
+                                                            <TableCell className="pl-12 font-medium flex items-center gap-2">
+                                                                {getFileIcon(doc.name.split('.').pop() || '')}
+                                                                <span>{doc.name}</span>
+                                                            </TableCell>
+                                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">{doc.type}</Badge></TableCell>
+                                                            <TableCell className="hidden lg:table-cell">
+                                                                <Badge variant={getStatusBadge(doc.status)} className="capitalize">
+                                                                    {getStatusIcon(doc.status)} {doc.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="hidden xl:table-cell font-code">{doc.revision}</TableCell>
+                                                            <TableCell className="hidden md:table-cell">{doc.lastModified}</TableCell>
+                                                            <TableCell>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                                                                        <MoreVertical className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsReviewOpen(true); }}>Review</DropdownMenuItem>
+                                                                    <DropdownMenuItem>Download</DropdownMenuItem>
+                                                                    <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsHistoryOpen(true); }}>View History</DropdownMenuItem>
+                                                                    <DropdownMenuItem onSelect={() => { setSelectedDoc(doc); setIsSecurityOpen(true); }}>Security & Compliance</DropdownMenuItem>
+                                                                    <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onSelect={() => handleOcr(doc.name)}>
+                                                                        <ScanText className="mr-2 h-4 w-4" /> Extract Text (OCR)
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem>Archive</DropdownMenuItem>
+                                                                    <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem className="text-destructive">
+                                                                        Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )})}
+                                                </React.Fragment>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </CardContent>
+        </Card>
 
         <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
             <RealTimeReviewDialog doc={selectedDoc} />
