@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -74,7 +75,10 @@ import {
   File as FileIcon,
   Loader2,
   MessageCircle,
-  Clock
+  Clock,
+  ArchiveIcon,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -137,6 +141,16 @@ type DocumentStructure = {
   [key: string]: DocumentCategory[];
 };
 
+type Transmittal = {
+  id: string;
+  subject: string;
+  to: string;
+  from: string;
+  date: string;
+  status: 'Draft' | 'Sent' | 'Overdue' | 'Responded';
+  response: 'Pending' | 'Approved' | 'Approved with Comments' | 'Rejected';
+};
+
 type LiveComment = {
   id: string;
   user: { name: string; avatar: string; };
@@ -176,6 +190,13 @@ const initialDocumentStructure: DocumentStructure = {
     ] },
   ],
 };
+
+const initialTransmittals: Transmittal[] = [
+    { id: 'TRN-0023', subject: 'For Review: Updated Lobby Renderings', to: 'Client ABC Corp.', from: 'B. Miller', date: '2024-08-01', status: 'Sent', response: 'Pending' },
+    { id: 'TRN-0022', subject: 'For Approval: Structural Calculations - Phase 3', to: 'Structural Engineer', from: 'A. Johnson', date: '2024-07-28', status: 'Overdue', response: 'Pending' },
+    { id: 'TRN-0021', subject: 'Response: Approved - RFI-012', to: 'A. Johnson', from: 'MEP Consultant', date: '2024-07-27', status: 'Responded', response: 'Approved' },
+    { id: 'TRN-0020', subject: 'Response: Revise & Resubmit - Electrical Plans', to: 'A. Johnson', from: 'Lead Architect', date: '2024-07-26', status: 'Responded', response: 'Rejected' },
+];
 
 const documentHistory = [
   {
@@ -343,9 +364,35 @@ export default function DocumentLibraryPage() {
         case 'Approved': return <CheckCircle className="mr-2 h-4 w-4 text-green-500" />;
         case 'Under Review': return <Eye className="mr-2 h-4 w-4 text-yellow-500" />;
         case 'Draft': return <FileText className="mr-2 h-4 w-4 text-blue-500" />;
-        case 'Superseded': return <Archive className="mr-2 h-4 w-4 text-red-500" />;
-        case 'Archived': return <Archive className="mr-2 h-4 w-4 text-gray-500" />;
+        case 'Superseded': return <ArchiveIcon className="mr-2 h-4 w-4 text-red-500" />;
+        case 'Archived': return <ArchiveIcon className="mr-2 h-4 w-4 text-gray-500" />;
         default: return null;
+    }
+  }
+
+  const getTransmittalStatusBadge = (status: string) => {
+    switch (status) {
+    case 'Sent':
+        return 'default';
+    case 'Overdue':
+        return 'destructive';
+    case 'Responded':
+        return 'secondary';
+    default:
+        return 'outline';
+    }
+  };
+
+  const getResponseBadge = (response: string) => {
+    switch (response) {
+        case 'Approved':
+            return { icon: CheckCircle, variant: 'secondary' as const, className: 'text-green-600' };
+        case 'Approved with Comments':
+            return { icon: MessageSquare, variant: 'secondary' as const, className: 'text-blue-600' };
+        case 'Rejected':
+            return { icon: XCircle, variant: 'destructive' as const, className: 'text-red-600' };
+        default:
+            return { icon: Clock, variant: 'outline' as const, className: 'text-muted-foreground' };
     }
   }
 
@@ -836,7 +883,7 @@ return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
                 <Button variant="outline" size="icon" asChild>
-                    <Link href={`/projects`}>
+                    <Link href={`/document-library`}>
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -907,6 +954,9 @@ return (
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                <Button onClick={() => setIsTransmittalOpen(true)}>
+                    <Send className="mr-2 h-4 w-4" /> New Transmittal
+                </Button>
             </div>
         </div>
         <Card>
@@ -1024,6 +1074,65 @@ return (
             </CardContent>
         </Card>
 
+         <Card>
+            <CardHeader>
+                <CardTitle>Transmittals Log</CardTitle>
+                <CardDescription>
+                A history of all document transmittals for this project.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead className="w-[120px]">ID</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>To</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Response</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {initialTransmittals.map((t) => {
+                    const { icon: ResponseIcon, variant: responseVariant, className: responseClassName } = getResponseBadge(t.response);
+                    return(
+                        <TableRow key={t.id}>
+                            <TableCell className="font-medium font-code">{t.id}</TableCell>
+                            <TableCell>{t.subject}</TableCell>
+                            <TableCell className="hidden md:table-cell">{t.to}</TableCell>
+                            <TableCell>
+                                <Badge variant={getTransmittalStatusBadge(t.status)}>
+                                    {t.status}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Badge variant={responseVariant} className="gap-1">
+                                    <ResponseIcon className={cn("h-3 w-3", responseClassName)} />
+                                    {t.response}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                                        <DropdownMenuItem>Download Attachments</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                    )
+                    })}
+                </TableBody>
+                </Table>
+            </CardContent>
+            </Card>
+
         <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
             <RealTimeReviewDialog doc={selectedDoc} />
         </Dialog>
@@ -1032,6 +1141,19 @@ return (
         </Dialog>
          <Dialog open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
             <SecurityDialog doc={selectedDoc} />
+        </Dialog>
+         <Dialog open={isTransmittalOpen} onOpenChange={setIsTransmittalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>New Transmittal</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                    This would be the form to create a new transmittal.
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleNewTransmittal}>Send</Button>
+                </DialogFooter>
+            </DialogContent>
         </Dialog>
     </div>
 );
