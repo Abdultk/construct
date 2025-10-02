@@ -16,7 +16,6 @@ export function DashboardNav() {
     { href: "/boq", label: "BOQ", icon: ClipboardList },
     { href: "/program-of-works", label: "Program of Works", icon: Network },
     { href: "/change-orders", label: "Change Orders", icon: FilePlus, badge: '3' },
-    { href: "/transmittals", label: "Transmittals", icon: Send },
     { href: "/visualize-impact", label: "Impact Viz", icon: Eye },
     { href: "/field-dashboard", label: "Field", icon: HardHat },
     { href: "/budget-establishment", label: "Budget", icon: DollarSign },

@@ -117,13 +117,6 @@ export function Header() {
               </Badge>
             </Link>
             <Link
-              href="/transmittals"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Send className="h-5 w-5" />
-              Transmittals
-            </Link>
-            <Link
               href="/visualize-impact"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
             >
