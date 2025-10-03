@@ -24,7 +24,6 @@ export function DashboardNav() {
     { href: "/safety-dashboard", label: "Safety", icon: Shield },
     { href: "/quality-control", label: "Quality", icon: ClipboardCheck },
     { href: "/digital-twin", label: "Digital Twin", icon: Orbit },
-    { href: "/iot-dashboard", label: "IoT Dashboard", icon: Signal },
     { href: "/facility-performance", label: "Facility Performance", icon: LineChart },
     { href: "/asset-registry", label: "Asset Registry", icon: Library },
     { href: "/maintenance-management", label: "Maintenance", icon: Wrench },

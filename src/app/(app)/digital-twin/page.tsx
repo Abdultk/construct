@@ -25,6 +25,8 @@ import {
   Thermometer,
   Zap,
   Droplets,
+  TrendingUp,
+  BarChart,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -32,6 +34,32 @@ import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+
+const sensors = [
+    { id: 'TEMP-01', name: 'Concrete Slab Temperature', value: '25°C', status: 'Normal', trend: 'up', type: 'hvac' },
+    { id: 'VIB-02', name: 'Crane Vibration', value: '0.5g', status: 'Alert', trend: 'down', type: 'mechanical' },
+    { id: 'HUM-01', name: 'Basement Humidity', value: '60%', status: 'Normal', trend: 'stable', type: 'hvac' },
+    { id: 'STR-03', name: 'Steel Beam Strain', value: '350µε', status: 'Warning', trend: 'up', type: 'structural' },
+    { id: 'ELEC-01', name: 'Main Power Draw', value: '450kW', status: 'Normal', trend: 'stable', type: 'electrical' },
+    { id: 'PLMB-01', name: 'Water Flow Rate', value: '15L/s', status: 'Normal', trend: 'stable', type: 'plumbing' },
+];
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'Normal': return 'text-green-500';
+        case 'Warning': return 'text-yellow-500';
+        case 'Alert': return 'text-red-500';
+        default: return 'text-muted-foreground';
+    }
+}
+
+const getTrendIcon = (trend: string) => {
+    if (trend === 'up') return <TrendingUp className="h-4 w-4 text-green-500" />;
+    if (trend === 'down') return <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />;
+    return <BarChart className="h-4 w-4 text-gray-500" />;
+}
+
 
 export default function DigitalTwinViewerPage() {
     const twinImage = PlaceHolderImages.find(p => p.id === 'digital-twin-wireframe');
@@ -52,7 +80,7 @@ export default function DigitalTwinViewerPage() {
 
       <div className="grid flex-1 grid-cols-12 gap-4 overflow-hidden">
         {/* Main 3D Viewport */}
-        <div className="col-span-9 flex flex-col gap-2">
+        <div className="col-span-12 lg:col-span-8 flex flex-col gap-2">
             {/* Toolbar */}
             <Card>
                 <CardContent className="flex items-center gap-2 p-2">
@@ -83,10 +111,10 @@ export default function DigitalTwinViewerPage() {
         </div>
 
         {/* Right Panels */}
-        <div className="col-span-3 flex flex-col gap-4 overflow-y-auto">
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 overflow-y-auto pr-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5" /> Data Overlays</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5" /> Live IoT Data & Overlays</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex items-center justify-between">
@@ -110,8 +138,50 @@ export default function DigitalTwinViewerPage() {
                 </Label>
                 <Switch id="plumbing-switch" />
               </div>
+              <Separator />
+               <div className="space-y-2">
+                 {sensors.map(sensor => (
+                    <div key={sensor.id} className="p-2 border rounded-md">
+                        <div className="flex justify-between items-center text-xs">
+                            <p className="font-semibold">{sensor.name}</p>
+                            {getTrendIcon(sensor.trend)}
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                             <p className={`text-lg font-bold ${getStatusColor(sensor.status)}`}>{sensor.value}</p>
+                             <p className="text-xs text-muted-foreground">{sensor.id}</p>
+                        </div>
+                    </div>
+                ))}
+               </div>
             </CardContent>
           </Card>
+           <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        Active Alerts
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="rounded-lg border border-destructive/50 p-3">
+                        <div className="flex justify-between items-center">
+                            <p className="font-semibold text-sm">Crane Vibration Exceeds Threshold</p>
+                            <Badge variant="destructive">Critical</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Sensor VIB-02 - 2 mins ago</p>
+                    </div>
+                     <div className="rounded-lg border border-yellow-500/50 p-3">
+                        <div className="flex justify-between items-center">
+                            <p className="font-semibold text-sm">Steel Beam Strain Anomaly</p>
+                            <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-500/80">Warning</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Sensor STR-03 - 15 mins ago</p>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                        <History className="mr-2 h-4 w-4" /> View Alert History
+                    </Button>
+                </CardContent>
+            </Card>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><SlidersHorizontal className="h-5 w-5" /> Controls</CardTitle>

@@ -173,13 +173,6 @@ export function Header() {
               <Orbit className="h-5 w-5" />
               Digital Twin
             </Link>
-             <Link
-              href="/iot-dashboard"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Signal className="h-5 w-5" />
-              IoT Dashboard
-            </Link>
             <Link
               href="/facility-performance"
               className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
