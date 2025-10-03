@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -11,6 +12,7 @@ import {
   Wand2,
   X,
   Info,
+  FileCheck,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -147,8 +149,8 @@ function CostTrackingContent() {
     }
   }, [filteredTransactions]);
   
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
       setSelectedRows(new Set(filteredTransactions.map(t => t.id)));
     } else {
       setSelectedRows(new Set());
@@ -179,7 +181,8 @@ function CostTrackingContent() {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
   };
   
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | undefined) => {
+    if (!status) return 'outline';
     switch (status) {
       case 'Approved': return 'secondary';
       case 'Pending': return 'outline';
@@ -287,8 +290,7 @@ function CostTrackingContent() {
                     <h4 className="text-sm font-medium mb-2">Cost by Category</h4>
                     {analysisData.categoryBreakdown.length > 0 ? (
                         <ChartContainer config={{}} className="mx-auto aspect-square h-40">
-                        <PieChart><ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel formatter={(value) => formatCurrencyFull(value as number)} />} /><Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >{analysisData.categoryBreakdown.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill} /> ))}</Pie></PieChart>
-                        </ChartContainer>
+                        <PieChart><ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel formatter={(value) => formatCurrencyFull(value as number)} />} /><Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >{analysisData.categoryBreakdown.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill} /> ))}</Pie></ChartContainer>
                     ) : ( <p className="text-sm text-muted-foreground text-center py-8">No data to display.</p> )}
                  </div>
             </CardContent>
@@ -348,7 +350,7 @@ function CostTrackingContent() {
                     <div className="space-y-1"><div className="text-muted-foreground">Project</div><div className="font-medium">{selectedTransaction?.project}</div></div>
                     <div className="space-y-1"><div className="text-muted-foreground">Category</div><div className="font-medium">{selectedTransaction?.category}</div></div>
                     <div className="space-y-1"><div className="text-muted-foreground">WBS Code</div><div className="font-medium font-code">{selectedTransaction?.wbs}</div></div>
-                    <div className="space-y-1"><div className="text-muted-foreground">Status</div><div><Badge variant={getStatusBadge(selectedTransaction?.status || '')}>{selectedTransaction?.status}</Badge></div></div>
+                    <div className="space-y-1"><div className="text-muted-foreground">Status</div><div><Badge variant={getStatusBadge(selectedTransaction?.status)}>{selectedTransaction?.status}</Badge></div></div>
                 </div>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="space-y-1"><div className="text-muted-foreground">Date</div><div className="font-medium">{selectedTransaction?.date}</div></div>
@@ -359,11 +361,19 @@ function CostTrackingContent() {
                     <div className="font-medium">{selectedTransaction?.description}</div>
                 </div>
                 {selectedTransaction && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/projects/${selectedTransaction.projectId}/documents`}>
-                      View Related Documents
-                    </Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href={`/projects/${selectedTransaction.projectId}/documents`}>
+                        View Related Documents
+                        </Link>
+                    </Button>
+                    <Button variant="secondary" size="sm" asChild>
+                        <Link href="/payment-certificate">
+                            <FileCheck className="mr-2 h-4 w-4" />
+                            View Payment Certificate
+                        </Link>
+                    </Button>
+                  </div>
                 )}
             </div>
           </div>
@@ -375,7 +385,7 @@ function CostTrackingContent() {
 
 export default function CostTrackingPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense>
       <CostTrackingContent />
     </Suspense>
   )
