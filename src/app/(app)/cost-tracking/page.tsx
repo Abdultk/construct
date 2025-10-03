@@ -1,6 +1,9 @@
 
+
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Calendar,
   ChevronDown,
@@ -41,7 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   ChartContainer,
   ChartTooltip,
@@ -56,7 +59,6 @@ import { format } from 'date-fns';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 type Transaction = {
   id: string;
@@ -82,6 +84,18 @@ const allTransactions: Transaction[] = [
     { id: 'TRN007', project: 'Downtown Skyscraper', projectId: 'proj-001', category: 'Equipment', description: 'Generator fuel delivery', wbs: '2.4.1', amount: 15000, status: 'Approved', date: '2024-06-25', isAnomaly: false },
     { id: 'TRN008', project: 'Coastal Wind Farm', projectId: 'proj-005', category: 'Subcontractor', description: 'Payment for turbine foundation casting', wbs: '6.1.1', amount: 550000, status: 'Approved', date: '2024-06-20', isAnomaly: false },
 ];
+
+const formatCurrency = (value: number, isClient: boolean) => {
+    if (!isClient) {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+    }
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(value);
+};
+
+const formatCurrencyFull = (value: number, isClient: boolean) => {
+    if (!isClient) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+};
 
 function CostTrackingContent() {
   const searchParams = useSearchParams();
@@ -167,18 +181,6 @@ function CostTrackingContent() {
   };
 
   const isAllSelected = selectedRows.size > 0 && selectedRows.size === filteredTransactions.length;
-
-  const formatCurrency = (value: number) => {
-    if (!isClient) {
-        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-    }
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(value);
-  }
-
-  const formatCurrencyFull = (value: number) => {
-    if (!isClient) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-  };
   
   const getStatusBadge = (status: string | undefined) => {
     if (!status) return 'outline';
@@ -269,7 +271,7 @@ function CostTrackingContent() {
                 <div className="grid grid-cols-2 gap-4 text-center">
                     <div className="rounded-lg border bg-muted p-2">
                         <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
-                        <p className="text-xl font-bold">{formatCurrency(analysisData.totalAmount)}</p>
+                        <p className="text-xl font-bold">{formatCurrency(analysisData.totalAmount, isClient)}</p>
                     </div>
                      <div className="rounded-lg border bg-muted p-2">
                         <p className="text-sm font-medium text-muted-foreground">Transactions</p>
@@ -277,7 +279,7 @@ function CostTrackingContent() {
                     </div>
                      <div className="rounded-lg border bg-muted p-2">
                         <p className="text-sm font-medium text-muted-foreground">Avg. Value</p>
-                        <p className="text-xl font-bold">{formatCurrency(analysisData.averageTransactionValue)}</p>
+                        <p className="text-xl font-bold">{formatCurrency(analysisData.averageTransactionValue, isClient)}</p>
                     </div>
                      <div className="rounded-lg border bg-muted p-2">
                         <p className="text-sm font-medium text-muted-foreground">Anomalies</p>
@@ -288,7 +290,7 @@ function CostTrackingContent() {
                     <h4 className="text-sm font-medium mb-2">Cost by Category</h4>
                     {analysisData.categoryBreakdown.length > 0 ? (
                         <ChartContainer config={{}} className="mx-auto aspect-square h-40">
-                        <PieChart><ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel formatter={(value) => formatCurrencyFull(value as number)} />} /><Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >{analysisData.categoryBreakdown.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill} /> ))}</Pie></ChartContainer>
+                        <PieChart><ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel formatter={(value) => formatCurrencyFull(value as number, isClient)} />} /><Pie data={analysisData.categoryBreakdown} dataKey="value" nameKey="name" >{analysisData.categoryBreakdown.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill} /> ))}</Pie></ChartContainer>
                     ) : ( <p className="text-sm text-muted-foreground text-center py-8">No data to display.</p> )}
                  </div>
             </CardContent>
@@ -321,7 +323,7 @@ function CostTrackingContent() {
                     <TableCell className="hidden md:table-cell font-code">{transaction.wbs}</TableCell>
                     <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
                     <TableCell><Badge variant={getStatusBadge(transaction.status)}>{transaction.status}</Badge></TableCell>
-                    <TableCell className="text-right font-code">{formatCurrencyFull(transaction.amount)}</TableCell>
+                    <TableCell className="text-right font-code">{formatCurrencyFull(transaction.amount, isClient)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -352,7 +354,7 @@ function CostTrackingContent() {
                 </div>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="space-y-1"><div className="text-muted-foreground">Date</div><div className="font-medium">{selectedTransaction?.date}</div></div>
-                    <div className="space-y-1 col-span-2"><div className="text-muted-foreground">Amount</div><div className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0)}</div></div>
+                    <div className="space-y-1 col-span-2"><div className="text-muted-foreground">Amount</div><div className="font-medium text-lg font-code">{formatCurrencyFull(selectedTransaction?.amount || 0, isClient)}</div></div>
                 </div>
                  <div className="space-y-1 text-sm">
                     <div className="text-muted-foreground">Description</div>
