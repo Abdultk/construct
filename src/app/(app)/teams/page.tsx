@@ -53,6 +53,8 @@ import {
 } from '@/components/ui/select';
 import { useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 
 type TeamMember = {
   name: string;
@@ -60,6 +62,7 @@ type TeamMember = {
   role: string;
   status: 'Active' | 'Invited';
   avatar: string;
+  permissions: string[];
 };
 
 const initialTeamMembers: TeamMember[] = [
@@ -69,6 +72,7 @@ const initialTeamMembers: TeamMember[] = [
       role: 'Project Manager',
       status: 'Active',
       avatar: 'https://picsum.photos/seed/10/100/100',
+      permissions: ['Dashboard', 'Projects', 'Reports', 'Settings', 'Teams', 'Change Orders', 'Budget', 'Cost Tracking', 'Safety', 'Quality']
     },
     {
       name: 'Bob Miller',
@@ -76,6 +80,7 @@ const initialTeamMembers: TeamMember[] = [
       role: 'Site Engineer',
       status: 'Active',
       avatar: 'https://picsum.photos/seed/11/100/100',
+      permissions: ['Dashboard', 'Projects', 'Safety', 'Quality']
     },
     {
       name: 'Charlie Davis',
@@ -83,6 +88,7 @@ const initialTeamMembers: TeamMember[] = [
       role: 'Architect',
       status: 'Invited',
       avatar: 'https://picsum.photos/seed/12/100/100',
+      permissions: ['Projects', 'Document Library']
     },
     {
       name: 'Diana Green',
@@ -90,15 +96,20 @@ const initialTeamMembers: TeamMember[] = [
       role: 'Safety Officer',
       status: 'Active',
       avatar: 'https://picsum.photos/seed/13/100/100',
+      permissions: ['Safety', 'Incident Reporting', 'Reports']
     },
   ];
+
+const allModules = [
+  "Dashboard", "Projects", "Document Library", "BOQ", "Program of Works", "Change Orders", "Impact Viz", "Budget", "Cost Tracking", "Payments", "Safety", "Quality", "Digital Twin", "Facility Performance", "Asset Registry", "Maintenance", "Lifecycle Cost", "Teams", "Reports", "Settings"
+];
 
 export default function TeamsPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isManageOpen, setIsManageOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const { toast } = useToast();
 
@@ -123,16 +134,17 @@ export default function TeamsPage() {
       role,
       status: 'Invited',
       avatar: `https://picsum.photos/seed/${Math.random()}/100/100`,
+      permissions: [],
     };
     setTeamMembers(prev => [...prev, newMember]);
     setIsInviteOpen(false);
     toast({ title: 'Invitation Sent', description: `An invitation has been sent to ${email}.` });
   };
 
-  const handleEditRole = (email: string, newRole: string) => {
-    setTeamMembers(prev => prev.map(member => member.email === email ? { ...member, role: newRole } : member));
-    setIsEditOpen(false);
-    toast({ title: 'Role Updated', description: `The role for ${email} has been updated to ${newRole}.` });
+  const handleUpdateMember = (email: string, newRole: string, newPermissions: string[]) => {
+    setTeamMembers(prev => prev.map(member => member.email === email ? { ...member, role: newRole, permissions: newPermissions } : member));
+    setIsManageOpen(false);
+    toast({ title: 'Member Updated', description: `Permissions for ${email} have been updated.` });
   };
 
   const handleRemoveMember = (email: string) => {
@@ -208,37 +220,96 @@ export default function TeamsPage() {
     )
   };
 
-  const EditRoleDialog = () => {
-    const [newRole, setNewRole] = useState(selectedMember?.role || '');
+  const ManageMemberDialog = () => {
     if (!selectedMember) return null;
 
+    const [currentRole, setCurrentRole] = useState(selectedMember.role);
+    const [currentPermissions, setCurrentPermissions] = useState<string[]>(selectedMember.permissions);
+
+    const handlePermissionChange = (module: string, checked: boolean) => {
+      setCurrentPermissions(prev => 
+        checked ? [...prev, module] : prev.filter(p => p !== module)
+      );
+    }
+    
+    const handleSelectAll = (checked: boolean) => {
+      if (checked) {
+        setCurrentPermissions(allModules);
+      } else {
+        setCurrentPermissions([]);
+      }
+    }
+
+    const isAllSelected = currentPermissions.length === allModules.length;
+    const isIndeterminate = currentPermissions.length > 0 && currentPermissions.length < allModules.length;
+
     return (
-         <DialogContent className="sm:max-w-[425px]">
+         <DialogContent className="sm:max-w-xl">
             <DialogHeader>
-                <DialogTitle>Edit Role</DialogTitle>
-                <DialogDescription>Change the role for {selectedMember.name}.</DialogDescription>
+                <DialogTitle>Manage Member</DialogTitle>
+                <DialogDescription>Change the role and module permissions for {selectedMember.name}.</DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-                <p><strong>Email:</strong> {selectedMember.email}</p>
-                <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="edit-role" className="text-right">Role</Label>
-                    <Select value={newRole} onValueChange={setNewRole}>
-                        <SelectTrigger id="edit-role" className="col-span-3">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Administrator">Administrator</SelectItem>
-                            <SelectItem value="Project Manager">Project Manager</SelectItem>
-                            <SelectItem value="Site Engineer">Site Engineer</SelectItem>
-                            <SelectItem value="Architect">Architect</SelectItem>
-                            <SelectItem value="Viewer">Viewer</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <div className="space-y-6 py-4">
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                        <AvatarImage src={selectedMember.avatar} />
+                        <AvatarFallback>{selectedMember.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <p className="font-semibold">{selectedMember.name}</p>
+                        <p className="text-sm text-muted-foreground">{selectedMember.email}</p>
+                    </div>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="edit-role">Role</Label>
+                        <Select value={currentRole} onValueChange={setCurrentRole}>
+                            <SelectTrigger id="edit-role">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Administrator">Administrator</SelectItem>
+                                <SelectItem value="Project Manager">Project Manager</SelectItem>
+                                <SelectItem value="Site Engineer">Site Engineer</SelectItem>
+                                <SelectItem value="Architect">Architect</SelectItem>
+                                <SelectItem value="Viewer">Viewer</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold">Module Permissions</h4>
+                      <p className="text-sm text-muted-foreground">Grant access to specific application modules.</p>
+                    </div>
+                    <div className="flex items-center space-x-2 p-2 bg-muted rounded-md">
+                        <Checkbox 
+                          id="select-all-modules" 
+                          checked={isAllSelected} 
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all modules"
+                        />
+                        <Label htmlFor="select-all-modules" className="font-semibold">Select All Modules</Label>
+                        <Badge variant="secondary" className="ml-auto">{currentPermissions.length} / {allModules.length} selected</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 max-h-48 overflow-y-auto pr-2">
+                        {allModules.map(module => (
+                            <div key={module} className="flex items-center space-x-2">
+                                <Checkbox 
+                                    id={`perm-${module}`} 
+                                    checked={currentPermissions.includes(module)} 
+                                    onCheckedChange={(checked) => handlePermissionChange(module, !!checked)}
+                                />
+                                <Label htmlFor={`perm-${module}`} className="text-sm font-normal">{module}</Label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
              <DialogFooter>
                 <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={() => handleEditRole(selectedMember.email, newRole)}>Save Changes</Button>
+                <Button onClick={() => handleUpdateMember(selectedMember.email, currentRole, currentPermissions)}>Save Changes</Button>
             </DialogFooter>
          </DialogContent>
     );
@@ -291,6 +362,7 @@ export default function TeamsPage() {
             <TableRow>
               <TableHead>Member</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Permissions</TableHead>
               <TableHead>Status</TableHead>
               <TableHead></TableHead>
             </TableRow>
@@ -316,6 +388,9 @@ export default function TeamsPage() {
                 </TableCell>
                 <TableCell>{member.role}</TableCell>
                 <TableCell>
+                  <Badge variant="outline">{member.permissions.length} Modules</Badge>
+                </TableCell>
+                <TableCell>
                   <Badge variant={getStatusBadge(member.status)}>
                     {member.status}
                   </Badge>
@@ -328,7 +403,7 @@ export default function TeamsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => { setSelectedMember(member); setIsEditOpen(true); }}>Edit Role</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setSelectedMember(member); setIsManageOpen(true); }}>Manage Member</DropdownMenuItem>
                       {member.status === 'Invited' && <DropdownMenuItem onClick={() => handleResendInvitation(member.email)}>Resend Invitation</DropdownMenuItem>}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive" onClick={() => handleRemoveMember(member.email)}>
@@ -343,8 +418,8 @@ export default function TeamsPage() {
         </Table>
       </CardContent>
     </Card>
-     <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <EditRoleDialog />
+     <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
+        <ManageMemberDialog />
     </Dialog>
     </>
   );
