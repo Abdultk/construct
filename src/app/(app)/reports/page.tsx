@@ -98,9 +98,9 @@ export default function ReportsPage() {
     const getReviewLink = (type: string) => {
         switch (type) {
         case 'Progress Report':
-            return '/progress-entry';
+            return '#';
         case 'Site Photo':
-            return '/progress-entry'; // Or a dedicated gallery page if it exists
+            return '#';
         case 'Incident Report':
             return '/incident-reporting';
         default:
