@@ -189,7 +189,6 @@ function CostTrackingContent() {
     }
   };
 
-
   return (
     <div className="flex h-[calc(100vh-100px)] flex-col gap-4">
       <div className="flex items-center justify-between">
