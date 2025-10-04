@@ -22,6 +22,7 @@ import {
   Warehouse,
   CalendarDays,
   MoreVertical,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,6 +57,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const inventoryData = [
@@ -75,9 +80,9 @@ const wasteData = [
 ];
 
 const recentWasteItems = [
-    { name: 'Drywall Sheets', amount: '15 sheets', reason: 'Water Damage' },
-    { name: 'Portland Cement', amount: '20 bags', reason: 'Expired' },
-    { name: 'Structural Steel', amount: '0.5 Ton', reason: 'Cutting Error' },
+  { name: 'Drywall Sheets', amount: '15 sheets', reason: 'Water Damage' },
+  { name: 'Portland Cement', amount: '20 bags', reason: 'Expired' },
+  { name: 'Structural Steel', amount: '0.5 Ton', reason: 'Cutting Error' },
 ]
 
 
@@ -111,15 +116,137 @@ export default function MaterialManagementPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => handleActionClick('New Purchase Order')}>
-              <ShoppingBag className="mr-2 h-4 w-4" /> New P.O.
-            </Button>
-            <Button variant="outline" onClick={() => handleActionClick('Report Waste')}>
-              <Trash2 className="mr-2 h-4 w-4" /> Report Waste
-            </Button>
-            <Button onClick={() => handleActionClick('Material Check-in')}>
-              <Barcode className="mr-2 h-4 w-4" /> Check-in/out
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <ShoppingBag className="mr-2 h-4 w-4" /> New P.O.
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>New Purchase Order</DialogTitle>
+                  <DialogDescription>Create and send a new purchase order to a supplier.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="po-supplier">Supplier</Label>
+                    <Select>
+                      <SelectTrigger id="po-supplier"><SelectValue placeholder="Select a supplier..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dangote">Dangote Industries PLC</SelectItem>
+                        <SelectItem value="local-steel">Local Steel Mill</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Materials</Label>
+                    <div className="rounded-md border p-2 space-y-2">
+                        <p className="text-sm text-muted-foreground">Add materials to this order.</p>
+                        <Button variant="secondary" size="sm"><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                  <Button onClick={() => toast({title: "Purchase Order Sent"})}>Send P.O.</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Trash2 className="mr-2 h-4 w-4" /> Report Waste
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Report Material Waste</DialogTitle>
+                  <DialogDescription>Log wasted materials for tracking and analysis.</DialogDescription>
+                </DialogHeader>
+                 <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="waste-material">Material</Label>
+                    <Select>
+                      <SelectTrigger id="waste-material"><SelectValue placeholder="Select a material..." /></SelectTrigger>
+                      <SelectContent>
+                        {inventoryData.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="waste-qty">Quantity Wasted</Label>
+                      <Input id="waste-qty" type="number" />
+                    </div>
+                     <div className="space-y-2">
+                      <Label htmlFor="waste-reason">Reason</Label>
+                       <Select>
+                          <SelectTrigger id="waste-reason"><SelectValue placeholder="Select reason..." /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="damage">Damage</SelectItem>
+                            <SelectItem value="over-cutting">Over-cutting</SelectItem>
+                            <SelectItem value="expired">Expired</SelectItem>
+                            <SelectItem value="spillage">Spillage</SelectItem>
+                            <SelectItem value="theft">Theft/Loss</SelectItem>
+                          </SelectContent>
+                        </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Photo Evidence (Optional)</Label>
+                    <Input type="file" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                  <Button onClick={() => toast({title: "Waste Reported"})}>Log Waste</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Barcode className="mr-2 h-4 w-4" /> Check-in/out
+                </Button>
+              </DialogTrigger>
+               <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Material Check-in / Check-out</DialogTitle>
+                  <DialogDescription>Scan a barcode or manually enter material details.</DialogDescription>
+                </DialogHeader>
+                 <div className="space-y-4 py-4">
+                    <Button variant="outline" className="w-full h-24">
+                        <Barcode className="h-10 w-10 text-muted-foreground" />
+                    </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="check-material">Material</Label>
+                      <Input id="check-material" placeholder="Enter material ID or name..." />
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="check-qty">Quantity</Label>
+                          <Input id="check-qty" type="number" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="check-action">Action</Label>
+                          <Select>
+                              <SelectTrigger id="check-action"><SelectValue placeholder="Select action..." /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="check-in">Check-in (Add to stock)</SelectItem>
+                                <SelectItem value="check-out">Check-out (Deduct from stock)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                 </div>
+                 <DialogFooter>
+                    <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                    <Button onClick={() => toast({title: "Inventory Updated"})}>Confirm</Button>
+                 </DialogFooter>
+              </DialogContent>
+            </Dialog>
         </div>
       </div>
       
