@@ -41,6 +41,7 @@ import {
   Building,
   CheckCircle,
   HelpCircle,
+  BarChartIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -314,7 +315,7 @@ export default function PriceIntelligencePage() {
                   <TableCell className="text-center">
                     <Tooltip>
                       <TooltipTrigger>
-                        <span className={`font-semibold ${getConfidenceColor(item.confidence)}`}>{item.confidence}%</span>
+                        <span={`font-semibold ${getConfidenceColor(item.confidence)}`}>{item.confidence}%</span>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Confidence is based on source reputation, price verification, and recency.</p>
@@ -345,3 +346,5 @@ export default function PriceIntelligencePage() {
     </div>
   );
 }
+
+    
