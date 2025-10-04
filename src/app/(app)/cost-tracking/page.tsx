@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Suspense } from 'react';
@@ -385,7 +384,7 @@ function CostTrackingContent() {
 
 export default function CostTrackingPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading...</div>}>
       <CostTrackingContent />
     </Suspense>
   )
