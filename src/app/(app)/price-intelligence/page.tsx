@@ -255,8 +255,10 @@ export default function PriceIntelligencePage() {
                     <p className="font-semibold text-sm flex items-center gap-2">Anomaly Detected</p>
                     <p className="text-xs text-muted-foreground">Sharp sand price in Lagos has <strong>dropped by 10%</strong>, deviating from the national upward trend. This may be a temporary supplier discount.</p>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/budget-establishment">
                     <BarChartIcon className="mr-2 h-4 w-4" /> View Full Market Analysis
+                  </Link>
                 </Button>
             </CardContent>
         </Card>
