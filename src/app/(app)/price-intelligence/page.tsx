@@ -315,7 +315,7 @@ export default function PriceIntelligencePage() {
                   <TableCell className="text-center">
                     <Tooltip>
                       <TooltipTrigger>
-                        <span={`font-semibold ${getConfidenceColor(item.confidence)}`}>{item.confidence}%</span>
+                        <span className={`font-semibold ${getConfidenceColor(item.confidence)}`}>{item.confidence}%</span>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Confidence is based on source reputation, price verification, and recency.</p>
@@ -346,5 +346,3 @@ export default function PriceIntelligencePage() {
     </div>
   );
 }
-
-    
