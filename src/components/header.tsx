@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from "next/link"
@@ -37,6 +36,7 @@ import {
   Send,
   Archive,
   Package,
+  BarChartIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -152,6 +152,13 @@ export function Header() {
             >
               <Package className="h-5 w-5" />
               Material Management
+            </Link>
+            <Link
+              href="/price-intelligence"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
+              <BarChartIcon className="h-5 w-5" />
+              Price Intelligence
             </Link>
             <Link
               href="/safety-dashboard"

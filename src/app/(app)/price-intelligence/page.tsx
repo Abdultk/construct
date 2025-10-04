@@ -1,0 +1,252 @@
+
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  MoreVertical,
+  Search,
+  ChevronDown,
+  Download,
+  TrendingUp,
+  TrendingDown,
+  Lightbulb,
+  DollarSign,
+  MapPin,
+  Filter,
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+
+const materialPrices = [
+  { id: 'CEM-01', name: 'Dangote Cement (50kg)', category: 'Cement', location: 'Lagos (Island)', price: 10500, unit: 'bag', trend: 'up' },
+  { id: 'CEM-02', name: 'BUA Cement (50kg)', category: 'Cement', location: 'Abuja (Garki)', price: 9800, unit: 'bag', trend: 'stable' },
+  { id: 'STL-01', name: '12mm Iron Rod', category: 'Steel', location: 'Port Harcourt', price: 1200000, unit: 'ton', trend: 'up' },
+  { id: 'SND-01', name: 'Sharp Sand', category: 'Aggregates', location: 'Lagos (Mainland)', price: 45000, unit: 'trip', trend: 'down' },
+  { id: 'GRN-01', name: 'Granite (3/4 inch)', category: 'Aggregates', location: 'Abuja (Maitama)', price: 250000, unit: '20 tons', trend: 'stable' },
+  { id: 'BLK-01', name: '6-inch Sandcrete Block', category: 'Blocks', location: 'Kano', price: 550, unit: 'piece', trend: 'up' },
+];
+
+const priceHistoryData = [
+  { date: 'Jan', price: 8500 },
+  { date: 'Feb', price: 8700 },
+  { date: 'Mar', price: 9200 },
+  { date: 'Apr', price: 9100 },
+  { date: 'May', price: 9800 },
+  { date: 'Jun', price: 10200 },
+  { date: 'Jul', price: 10500 },
+];
+
+const chartConfig = {
+  price: {
+    label: "Price (NGN)",
+    color: "hsl(var(--primary))",
+  },
+};
+
+export default function PriceIntelligencePage() {
+  const [locationFilter, setLocationFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(value);
+  };
+  
+  const getTrend = (trend: string) => {
+    if (trend === 'up') return <TrendingUp className="h-4 w-4 text-destructive" />;
+    if (trend === 'down') return <TrendingDown className="h-4 w-4 text-green-600" />;
+    return <div className="w-4 h-0.5 bg-muted-foreground"></div>;
+  };
+
+  return (
+    <div className="flex flex-1 flex-col gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold font-headline">Price Intelligence</h1>
+          <p className="text-muted-foreground">
+            Dynamic local price feeds for construction materials.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+            <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Export Data</Button>
+        </div>
+      </div>
+
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Cement Price</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(10150)}</div>
+            <p className="text-xs text-muted-foreground">+2.5% from last week</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Steel Price Trend</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(1200000)}/ton</div>
+            <p className="text-xs text-muted-foreground">+5% from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Key Price Driver</CardTitle>
+            <Lightbulb className="h-4 w-4 text-muted-foreground text-ai-accent" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-base font-bold">Exchange Rate</div>
+            <p className="text-xs text-muted-foreground">USD/NGN correlation: 0.85</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Locations Tracked</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">5</div>
+            <p className="text-xs text-muted-foreground">Lagos, Abuja, PH, Kano, Onitsha</p>
+          </CardContent>
+        </Card>
+      </div>
+      
+       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+            <CardHeader>
+                <CardTitle>Historical Price Trend: Dangote Cement</CardTitle>
+                <CardDescription>Price per bag in Lagos (Island) over the last 6 months.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                    <LineChart data={priceHistoryData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis tickFormatter={(value) => formatCurrency(value)} domain={['dataMin - 500', 'dataMax + 500']} />
+                        <Tooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)}/>} />
+                        <Line dataKey="price" type="monotone" stroke={chartConfig.price.color} strokeWidth={2} dot={true} />
+                    </LineChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Lightbulb className="text-ai-accent" /> AI Insights & Forecast</CardTitle>
+            </CardHeader>
+             <CardContent className="space-y-4">
+                <div className="rounded-lg border bg-blue-500/10 p-4">
+                    <p className="font-semibold text-sm flex items-center gap-2"><TrendingUp className="text-blue-500" /> Price Forecast</p>
+                    <p className="text-xs text-muted-foreground">Cement prices are projected to <strong>increase by 3-5%</strong> in the next 30 days due to seasonal demand.</p>
+                </div>
+                 <div className="rounded-lg border bg-yellow-500/10 p-4">
+                    <p className="font-semibold text-sm flex items-center gap-2">Anomaly Detected</p>
+                    <p className="text-xs text-muted-foreground">Sharp sand price in Lagos has <strong>dropped by 10%</strong>, deviating from the national upward trend. This may be a temporary supplier discount.</p>
+                </div>
+                <Button variant="outline" className="w-full">
+                    <BarChartIcon className="mr-2 h-4 w-4" /> View Full Market Analysis
+                </Button>
+            </CardContent>
+        </Card>
+       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Live Material Prices</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardDescription>
+              Real-time price data aggregated from multiple sources.
+            </CardDescription>
+            <div className="flex items-center gap-2">
+                <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search materials..." className="pl-8" />
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Location <ChevronDown className="ml-2 h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>All</DropdownMenuItem>
+                        <DropdownMenuItem>Lagos (Island)</DropdownMenuItem>
+                        <DropdownMenuItem>Lagos (Mainland)</DropdownMenuItem>
+                        <DropdownMenuItem>Abuja (Garki)</DropdownMenuItem>
+                        <DropdownMenuItem>Port Harcourt</DropdownMenuItem>
+                        <DropdownMenuItem>Kano</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-center">Trend (7d)</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {materialPrices.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-xs text-muted-foreground font-code">{item.id}</p>
+                  </TableCell>
+                  <TableCell>{item.category}</TableCell>
+                  <TableCell>{item.location}</TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell className="text-right font-code font-semibold">{formatCurrency(item.price)}</TableCell>
+                  <TableCell className="flex justify-center items-center h-12">{getTrend(item.trend)}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View Price History</DropdownMenuItem>
+                        <DropdownMenuItem>Set Price Alert</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
