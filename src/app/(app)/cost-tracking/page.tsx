@@ -380,12 +380,12 @@ function CostTrackingContent() {
         </DrawerContent>
       </Drawer>
     </div>
-  )
+  );
 }
 
 export default function CostTrackingPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense>
       <CostTrackingContent />
     </Suspense>
   )
