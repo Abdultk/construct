@@ -22,6 +22,7 @@ export function DashboardNav() {
     { href: "/payment-certificate", label: "Payments", icon: FileCheck },
     { href: "/material-management", label: "Material Management", icon: Package },
     { href: "/price-intelligence", label: "Price Intelligence", icon: BarChartIcon },
+    { href: "/suppliers", label: "Supplier Hub", icon: Briefcase },
     { href: "/safety-dashboard", label: "Safety", icon: Shield },
     { href: "/quality-control", label: "Quality", icon: ClipboardCheck },
     { href: "/digital-twin", label: "Digital Twin", icon: Orbit },

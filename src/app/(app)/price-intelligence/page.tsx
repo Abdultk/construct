@@ -42,6 +42,7 @@ import {
   CheckCircle,
   HelpCircle,
   BarChartIcon,
+  Briefcase,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -52,6 +53,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import Link from 'next/link';
 
 const materialPrices = [
   { id: 'CEM-01', name: 'Dangote Cement (50kg)', category: 'Cement', location: 'Lagos (Island)', price: 10500, unit: 'bag', trend: 'up', source: 'Verified Supplier', confidence: 98 },
@@ -118,7 +120,11 @@ export default function PriceIntelligencePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline">For Suppliers</Button>
+            <Button variant="outline" asChild>
+                <Link href="/suppliers">
+                    <Briefcase className="mr-2 h-4 w-4" /> For Suppliers
+                </Link>
+            </Button>
             <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="secondary"><PlusCircle className="mr-2 h-4 w-4" /> Submit Price</Button>
