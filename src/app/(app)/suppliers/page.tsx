@@ -51,6 +51,7 @@ import { useState } from 'react';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
 
 const productListings = [
   { id: 'CEM-01', name: 'Dangote Cement (50kg)', price: 10500, unit: 'bag', stock: 'In Stock', status: 'Published' },
@@ -380,7 +381,11 @@ export default function SupplierDashboardPage() {
                     </div>
                 </CardContent>
                  <CardFooter>
-                    <Button variant="secondary">View Full Analytics Report</Button>
+                    <Button variant="secondary" asChild>
+                        <Link href="/reports/supplier-analytics">
+                            View Full Analytics Report
+                        </Link>
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
