@@ -112,7 +112,8 @@ function CostTrackingContent() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    setShowAnomalies(anomaliesParam === 'true');
+  }, [anomaliesParam]);
 
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(t => {
@@ -379,7 +380,7 @@ function CostTrackingContent() {
         </DrawerContent>
       </Drawer>
     </div>
-  );
+  )
 }
 
 export default function CostTrackingPage() {
