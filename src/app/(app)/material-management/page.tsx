@@ -23,6 +23,8 @@ import {
   CalendarDays,
   MoreVertical,
   Upload,
+  BarChart2,
+  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +49,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Pie, PieChart, Cell } from 'recharts';
+import { Pie, PieChart, Cell, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -61,14 +63,26 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Separator } from '@/components/ui/separator';
 
+type InventoryItem = {
+    id: string;
+    name: string;
+    category: 'Structural' | 'Concrete' | 'Electrical' | 'Finishes' | 'Plumbing';
+    stock: string;
+    location: string;
+    status: 'In Stock' | 'Low Stock' | 'Ordered';
+    expiry: string | null;
+    value: number;
+};
 
-const inventoryData = [
-    { id: 'STL-001', name: 'Structural Steel Beams', category: 'Structural', stock: '25 Tons', location: 'Yard A', status: 'In Stock', expiry: null },
-    { id: 'CEM-003', name: 'Portland Cement (Type II)', category: 'Concrete', stock: '500 bags', location: 'Silo 2', status: 'In Stock', expiry: '2024-09-15' },
-    { id: 'WIR-007', name: '12-Gauge Electrical Wire', category: 'Electrical', stock: '5 rolls', location: 'Warehouse 1, Bay 3', status: 'Low Stock', expiry: null },
-    { id: 'DRY-002', name: '1/2" Drywall Sheets', category: 'Finishes', stock: '150 sheets', location: 'Floor 5', status: 'Ordered', expiry: null },
-    { id: 'PIPE-015', name: '4" PVC Pipe', category: 'Plumbing', stock: '80 lengths', location: 'Yard B', status: 'In Stock', expiry: null },
+const inventoryData: InventoryItem[] = [
+    { id: 'STL-001', name: 'Structural Steel Beams', category: 'Structural', stock: '25 Tons', location: 'Yard A', status: 'In Stock', expiry: null, value: 75000 },
+    { id: 'CEM-003', name: 'Portland Cement (Type II)', category: 'Concrete', stock: '500 bags', location: 'Silo 2', status: 'In Stock', expiry: '2024-09-15', value: 25000 },
+    { id: 'WIR-007', name: '12-Gauge Electrical Wire', category: 'Electrical', stock: '5 rolls', location: 'Warehouse 1, Bay 3', status: 'Low Stock', expiry: null, value: 5000 },
+    { id: 'DRY-002', name: '1/2" Drywall Sheets', category: 'Finishes', stock: '150 sheets', location: 'Floor 5', status: 'Ordered', expiry: null, value: 7500 },
+    { id: 'PIPE-015', name: '4" PVC Pipe', category: 'Plumbing', stock: '80 lengths', location: 'Yard B', status: 'In Stock', expiry: null, value: 4000 },
 ];
 
 const wasteData = [
@@ -85,9 +99,19 @@ const recentWasteItems = [
   { name: 'Structural Steel', amount: '0.5 Ton', reason: 'Cutting Error' },
 ]
 
+const usageData = [
+    { month: 'Jan', usage: 30 },
+    { month: 'Feb', usage: 45 },
+    { month: 'Mar', usage: 40 },
+    { month: 'Apr', usage: 50 },
+    { month: 'May', usage: 48 },
+    { month: 'Jun', usage: 55 },
+];
+
 
 export default function MaterialManagementPage() {
     const { toast } = useToast();
+    const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
     const handleActionClick = (action: string) => {
         toast({
@@ -325,7 +349,7 @@ export default function MaterialManagementPage() {
                     </TableHeader>
                     <TableBody>
                         {inventoryData.map(item => (
-                             <TableRow key={item.id}>
+                             <TableRow key={item.id} className="cursor-pointer" onClick={() => setSelectedItem(item)}>
                                 <TableCell>
                                     <p className="font-medium">{item.name}</p>
                                     <p className="text-xs text-muted-foreground font-code">{item.id}</p>
@@ -338,12 +362,12 @@ export default function MaterialManagementPage() {
                                 <TableCell>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setSelectedItem(item);}}>
                                                 <MoreVertical className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setSelectedItem(item)}>View Details</DropdownMenuItem>
                                             <DropdownMenuItem>Adjust Stock</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -446,6 +470,102 @@ export default function MaterialManagementPage() {
                  </div>
             </CardContent>
        </Card>
+        <Drawer open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
+            <DrawerContent>
+                <div className="mx-auto w-full max-w-4xl">
+                <DrawerHeader>
+                    <DrawerTitle>{selectedItem?.name} ({selectedItem?.id})</DrawerTitle>
+                    <DrawerDescription>Detailed view of inventory item.</DrawerDescription>
+                </DrawerHeader>
+                <div className="p-4 pb-0">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Current Stock</CardTitle>
+                                <Package className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{selectedItem?.stock}</div>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Stock Value</CardTitle>
+                                <Boxes className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">${selectedItem?.value.toLocaleString()}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Location</CardTitle>
+                                <Warehouse className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-lg font-bold">{selectedItem?.location}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Expiry</CardTitle>
+                                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-lg font-bold">{selectedItem?.expiry || 'N/A'}</div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 mt-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><BarChart2 className="h-5 w-5" /> Usage Analytics</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ChartContainer config={{ usage: { label: 'Usage', color: 'hsl(var(--primary))' } }} className="h-40 w-full">
+                                    <LineChart data={usageData} margin={{ left: -20, right: 20}}>
+                                        <CartesianGrid vertical={false} />
+                                        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                                        <YAxis />
+                                        <Tooltip content={<ChartTooltipContent />} />
+                                        <Line dataKey="usage" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                                    </LineChart>
+                                </ChartContainer>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                             <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" /> Procurement History</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>P.O. #</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Qty</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>PO-0567</TableCell>
+                                            <TableCell>2024-06-15</TableCell>
+                                            <TableCell>100 bags</TableCell>
+                                        </TableRow>
+                                         <TableRow>
+                                            <TableCell>PO-0412</TableCell>
+                                            <TableCell>2024-05-12</TableCell>
+                                            <TableCell>200 bags</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+                </div>
+            </DrawerContent>
+        </Drawer>
     </div>
   );
 }
