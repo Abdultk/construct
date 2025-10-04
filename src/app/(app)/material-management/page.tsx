@@ -65,6 +65,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Separator } from '@/components/ui/separator';
+import { projects } from '@/lib/data';
 
 type InventoryItem = {
     id: string;
@@ -112,6 +113,7 @@ const usageData = [
 export default function MaterialManagementPage() {
     const { toast } = useToast();
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+    const [selectedProject, setSelectedProject] = useState(projects[0]);
 
     const handleActionClick = (action: string) => {
         toast({
@@ -135,9 +137,21 @@ export default function MaterialManagementPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-headline">Material & Waste Management</h1>
-          <p className="text-muted-foreground">
-            Track inventory, analyze waste, and optimize material flow.
-          </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 p-0 h-auto text-muted-foreground hover:text-foreground">
+                   <span>Project: {selectedProject.name}</span>
+                   <ChevronDown className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                {projects.map(project => (
+                    <DropdownMenuItem key={project.id} onSelect={() => setSelectedProject(project)}>
+                        {project.name}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="flex items-center gap-2">
             <Dialog>
@@ -323,7 +337,7 @@ export default function MaterialManagementPage() {
                  <div className="flex items-center justify-between">
                     <div>
                         <CardTitle>Digital Inventory Dashboard</CardTitle>
-                        <CardDescription>Real-time stock levels for Downtown Skyscraper.</CardDescription>
+                        <CardDescription>Real-time stock levels for {selectedProject.name}.</CardDescription>
                     </div>
                      <div className="flex items-center gap-2">
                         <div className="relative">
