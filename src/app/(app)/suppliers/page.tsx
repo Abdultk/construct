@@ -47,6 +47,10 @@ import {
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useState } from 'react';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const productListings = [
   { id: 'CEM-01', name: 'Dangote Cement (50kg)', price: 10500, unit: 'bag', stock: 'In Stock', status: 'Published' },
@@ -79,9 +83,27 @@ const chartConfig = {
 
 export default function SupplierDashboardPage() {
     const { toast } = useToast();
+    const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(value);
+    };
+    
+    const handleAddProduct = () => {
+        toast({
+            title: "Product Added",
+            description: "Your new product has been added to your catalog and is now visible to buyers.",
+        });
+        setIsAddProductOpen(false);
+    };
+
+    const handleBulkUpload = () => {
+        toast({
+            title: "Upload Processing",
+            description: "Your file is being processed. You will be notified upon completion.",
+        });
+        setIsBulkUploadOpen(false);
     };
 
     return (
@@ -94,8 +116,102 @@ export default function SupplierDashboardPage() {
                 </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Bulk Upload</Button>
-                    <Button><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
+                    <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Bulk Upload</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Bulk Upload Products</DialogTitle>
+                                <DialogDescription>
+                                    Upload a CSV or Excel file to add or update multiple products at once.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="flex items-center justify-center w-full">
+                                    <Label htmlFor="bulk-upload-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p className="text-xs text-muted-foreground">CSV, XLSX (MAX. 5MB)</p>
+                                        </div>
+                                        <Input id="bulk-upload-file" type="file" className="hidden" />
+                                    </Label>
+                                </div>
+                                <Button variant="link" className="w-full">
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Download CSV Template
+                                </Button>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={handleBulkUpload}>Upload & Process</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+                        <DialogTrigger asChild>
+                            <Button><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add New Product</DialogTitle>
+                                <DialogDescription>Enter the details for your new product listing.</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="product-name">Product Name</Label>
+                                    <Input id="product-name" placeholder="e.g., Dangote Cement (50kg)" />
+                                </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="product-category">Category</Label>
+                                    <Select>
+                                        <SelectTrigger id="product-category">
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="cement">Cement</SelectItem>
+                                            <SelectItem value="steel">Steel</SelectItem>
+                                            <SelectItem value="aggregates">Aggregates</SelectItem>
+                                            <SelectItem value="blocks">Blocks</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="product-price">Price (NGN)</Label>
+                                        <Input id="product-price" type="number" placeholder="10500" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="product-unit">Unit</Label>
+                                        <Input id="product-unit" placeholder="bag" />
+                                    </div>
+                                </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="product-stock">Stock Status</Label>
+                                    <Select>
+                                        <SelectTrigger id="product-stock">
+                                            <SelectValue placeholder="Select stock status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="in-stock">In Stock</SelectItem>
+                                            <SelectItem value="low-stock">Low Stock</SelectItem>
+                                            <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                                            <SelectItem value="pre-order">Pre-Order</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={handleAddProduct}>Add Product</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
