@@ -23,8 +23,6 @@ import {
   CalendarDays,
   MoreVertical,
   Upload,
-  BarChart2,
-  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,10 +60,10 @@ import {
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Separator } from '@/components/ui/separator';
 import { projects } from '@/lib/data';
+import Link from 'next/link';
 
 type InventoryItem = {
     id: string;
@@ -136,7 +134,7 @@ export default function MaterialManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-headline">Material & Waste Management</h1>
+          <h1 className="text-2xl font-bold font-headline">Material &amp; Waste Management</h1>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 p-0 h-auto text-muted-foreground hover:text-foreground">
@@ -406,8 +404,10 @@ export default function MaterialManagementPage() {
                         <p className="font-semibold text-sm flex items-center gap-2"><AlertTriangle className="text-yellow-500" /> Over-ordering Alert</p>
                         <p className="text-xs text-muted-foreground">P.O. #582 for <strong>300 rolls of electrical wire</strong> exceeds forecast by 40%. Recommend reducing order to 180 rolls.</p>
                     </div>
-                    <Button variant="outline" className="w-full">
-                        <BarChart className="mr-2 h-4 w-4" /> View Full Forecast
+                    <Button variant="outline" className="w-full" asChild>
+                        <Link href="/budget-establishment">
+                           <BarChart className="mr-2 h-4 w-4" /> View Full Forecast
+                        </Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -533,7 +533,7 @@ export default function MaterialManagementPage() {
                     <div className="grid gap-4 md:grid-cols-2 mt-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><BarChart2 className="h-5 w-5" /> Usage Analytics</CardTitle>
+                                <CardTitle className="flex items-center gap-2"><BarChart className="h-5 w-5" /> Usage Analytics</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ChartContainer config={{ usage: { label: 'Usage', color: 'hsl(var(--primary))' } }} className="h-40 w-full">
@@ -583,5 +583,3 @@ export default function MaterialManagementPage() {
     </div>
   );
 }
-
-    
