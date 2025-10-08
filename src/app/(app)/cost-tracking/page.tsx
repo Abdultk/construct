@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Suspense } from 'react';
@@ -168,7 +169,7 @@ function CostTrackingContent() {
     } else {
       setSelectedRows(new Set());
     }
-  };
+  }
 
   const handleRowSelect = (id: string, checked: boolean) => {
     const newSelectedRows = new Set(selectedRows);
