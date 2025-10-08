@@ -159,7 +159,7 @@ function CostTrackingContent() {
         averageTransactionValue,
         anomalyCount,
         categoryBreakdown,
-    }
+    };
   }, [filteredTransactions]);
   
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
@@ -390,3 +390,5 @@ export default function CostTrackingPage() {
     </Suspense>
   )
 }
+
+    
